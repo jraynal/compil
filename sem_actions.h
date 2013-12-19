@@ -12,6 +12,14 @@ struct _variable *add(struct _variable *,struct _variable *);
 struct _variable *sub(struct _variable *,struct _variable *);
 
 
+struct _variable *incr(struct _variable *);
+struct _variable *decr(struct _variable *);
+struct _variable *neg(struct _variable *);
+
+
+
+
+
 
 
 #endif //FUNCTIONS_H

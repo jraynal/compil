@@ -1,8 +1,12 @@
 %{
-    #include <stdio.h>
-    extern int yylineno;
-    int yylex ();
-    int yyerror ();
+	#include <stdio.h>
+	#include "sem_actions.h"
+	#include "structs.h"
+	extern int yylineno;
+	int yylex ();
+	int yyerror ();
+
+
 
 %}
 
@@ -12,14 +16,27 @@
 %token TYPE_NAME
 %token INT FLOAT VOID
 %token IF ELSE WHILE RETURN FOR
-%start program
+
+%union{
+	void * obj;
+	struct _affectation affect;
+	enum _type typeName;
+	void * (*)(void*) unaryOp;
+}
+
+%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression
+%type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
+%type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
+%type<typeName> type_name 
+%type<unaryOp> unary_operator
+
 %%
 
 primary_expression
 : IDENTIFIER
 | CONSTANTI
 | CONSTANTF
-| '(' expression ')'
+| '(' expression ')'    {$$=$2;}
 | IDENTIFIER '(' ')'
 | IDENTIFIER '(' argument_expression_list ')'
 | IDENTIFIER INC_OP
@@ -32,19 +49,19 @@ postfix_expression
 ;
 
 argument_expression_list
-: expression
+: expression 				
 | argument_expression_list ',' expression
 ;
 
 unary_expression
-: postfix_expression
-| INC_OP unary_expression
-| DEC_OP unary_expression
-| unary_operator unary_expression
+: postfix_expression				{$$=$1;}
+| INC_OP unary_expression			{$$=incr($2);}
+| DEC_OP unary_expression			{$$=decr($2);}
+| unary_operator unary_expression   {$$=$1($2);}
 ;
 
 unary_operator
-: '-'
+: '-'	{$$ = neg;}
 ;
 
 multiplicative_expression
@@ -54,7 +71,7 @@ multiplicative_expression
 ;
 
 additive_expression
-: multiplicative_expression                                 {$$=$2;}
+: multiplicative_expression                                 {$$=$1;}
 | additive_expression '+' multiplicative_expression         {$$=add($1,$3)}
 | additive_expression '-' multiplicative_expression         {$$=sub($1,$3)}
 ;
@@ -75,10 +92,10 @@ expression
 ;
 
 assignment_operator
-: '='
-| MUL_ASSIGN
-| ADD_ASSIGN
-| SUB_ASSIGN
+: '='                  {$$=AFF;}      
+| MUL_ASSIGN           {$$=MUL;}    
+| ADD_ASSIGN           {$$=ADD;}
+| SUB_ASSIGN           {$$=SUB;} 
 ;
 
 declaration
@@ -91,16 +108,16 @@ declarator_list
 ;
 
 type_name
-: VOID  
-| INT   
-| FLOAT
+: VOID 			{$$=VOID_TYPE;}
+| INT   		{$$=INT_TYPE;}
+| FLOAT			{$$=FLOAT_TYPE;}
 ;
 
 declarator
 : IDENTIFIER  
-| '(' declarator ')'
-| declarator '[' CONSTANTI ']'
-| declarator '[' ']'
+| '(' declarator ')'                      
+| declarator '[' CONSTANTI ']'             
+| declarator '[' ']'                        
 | declarator '(' parameter_list ')'
 | declarator '(' ')'
 ;
@@ -123,7 +140,7 @@ statement
 ;
 
 compound_statement
-: '{' '}'
+: '{' '}'   
 | '{' statement_list '}'
 | '{' declaration_list statement_list '}'
 ;
@@ -183,30 +200,30 @@ extern FILE *yyin;
 char *file_name = NULL;
 
 int yyerror (char *s) {
-    fflush (stdout);
-    fprintf (stderr, "%s:%d:%d: %s\n", file_name, yylineno, column, s);
-    return 0;
+	fflush (stdout);
+	fprintf (stderr, "%s:%d:%d: %s\n", file_name, yylineno, column, s);
+	return 0;
 }
 
 
 int main (int argc, char *argv[]) {
-    FILE *input = NULL;
-    if (argc==2) {
+	FILE *input = NULL;
+	if (argc==2) {
 	input = fopen (argv[1], "r");
 	file_name = strdup (argv[1]);
 	if (input) {
-	    yyin = input;
+		yyin = input;
 	}
 	else {
 	  fprintf (stderr, "%s: Could not open %s\n", *argv, argv[1]);
-	    return 1;
+		return 1;
 	}
-    }
-    else {
+	}
+	else {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
-    }
-    yyparse ();
-    free (file_name);
-    return 0;
+	}
+	yyparse ();
+	free (file_name);
+	return 0;
 }

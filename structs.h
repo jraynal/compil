@@ -1,6 +1,13 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+enum _affectation{
+	AFF,
+	ADD,
+	MUL,
+	SUB
+};
+
 // Union des types de valeurs possible
 union _value {
 	int ival;
@@ -9,9 +16,9 @@ union _value {
 
 // Type de variables possible
 enum _type {
-	INT=0,
-	FLOAT,
-	VOID
+	INT_TYPE=0,
+	FLOAT_TYPE,
+	VOID_TYPE
 };
 
 // Structure manipulée par les actions sémantiques
