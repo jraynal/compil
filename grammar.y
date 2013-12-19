@@ -48,25 +48,25 @@ unary_operator
 ;
 
 multiplicative_expression
-: unary_expression
-| multiplicative_expression '*' unary_expression
-| multiplicative_expression '/' unary_expression
+: unary_expression                                          {$$=$1;}
+| multiplicative_expression '*' unary_expression            {$$=mul($1,$3);}
+| multiplicative_expression '/' unary_expression            {$$=div($1,$3);}
 ;
 
 additive_expression
-: multiplicative_expression
-| additive_expression '+' multiplicative_expression
-| additive_expression '-' multiplicative_expression
+: multiplicative_expression                                 {$$=$2;}
+| additive_expression '+' multiplicative_expression         {$$=add($1,$3)}
+| additive_expression '-' multiplicative_expression         {$$=sub($1,$3)}
 ;
 
 comparison_expression
-: additive_expression
-| additive_expression '<' additive_expression
-| additive_expression '>' additive_expression
-| additive_expression LE_OP additive_expression
-| additive_expression GE_OP additive_expression
-| additive_expression EQ_OP additive_expression
-| additive_expression NE_OP additive_expression
+: additive_expression                                       {$$=$1;}
+| additive_expression '<' additive_expression               {$$=l_op($1,$3);}
+| additive_expression '>' additive_expression               {$$=g_opG($1,$3);}
+| additive_expression LE_OP additive_expression             {$$=le_op($1,$3);}
+| additive_expression GE_OP additive_expression             {$$=ge_op($1,$3);}
+| additive_expression EQ_OP additive_expression             {$$=eq_op($1,$3);}
+| additive_expression NE_OP additive_expression             {$$=ne_op($1,$3);}
 ;
 
 expression
