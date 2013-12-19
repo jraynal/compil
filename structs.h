@@ -1,12 +1,12 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-enum _affectation{
-	AFF,
-	ADD,
-	MUL,
-	SUB
-};
+// enum _affectation{
+// 	AFF,
+// 	ADD,
+// 	MUL,
+// 	SUB
+// };
 
 // Union des types de valeurs possible
 union _value {

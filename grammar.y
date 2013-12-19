@@ -1,12 +1,12 @@
 %{
+	#include "structs.h"
 	#include <stdio.h>
 	#include "sem_actions.h"
-	#include "structs.h"
 	extern int yylineno;
 	int yylex ();
 	int yyerror ();
 
-
+	typedef void*(*fPointer)(void*);
 
 %}
 
@@ -19,9 +19,9 @@
 
 %union{
 	void * obj;
-	struct _affectation affect;
-	enum _type typeName;
-	void * (*)(void*) unaryOp;
+	int affect;
+	 // _type typeName;
+	void*(*unaryOp)(void*);
 }
 
 %type<obj> IDENTIFIER CONSTANTF CONSTANTI expression
@@ -57,29 +57,29 @@ unary_expression
 : postfix_expression				{$$=$1;}
 | INC_OP unary_expression			{$$=incr($2);}
 | DEC_OP unary_expression			{$$=decr($2);}
-| unary_operator unary_expression   {$$=$1($2);}
+| unary_operator unary_expression   {$$=neg($2);}
 ;
 
 unary_operator
-: '-'	{$$ = neg;}
+: '-'	
 ;
 
 multiplicative_expression
 : unary_expression                                          {$$=$1;}
 | multiplicative_expression '*' unary_expression            {$$=mul($1,$3);}
-| multiplicative_expression '/' unary_expression            {$$=div($1,$3);}
+| multiplicative_expression '/' unary_expression            {$$=divide($1,$3);}//div is already in lib std
 ;
 
 additive_expression
 : multiplicative_expression                                 {$$=$1;}
-| additive_expression '+' multiplicative_expression         {$$=add($1,$3)}
-| additive_expression '-' multiplicative_expression         {$$=sub($1,$3)}
+| additive_expression '+' multiplicative_expression         {$$=add($1,$3);}
+| additive_expression '-' multiplicative_expression         {$$=sub($1,$3);}
 ;
 
 comparison_expression
 : additive_expression                                       {$$=$1;}
 | additive_expression '<' additive_expression               {$$=l_op($1,$3);}
-| additive_expression '>' additive_expression               {$$=g_opG($1,$3);}
+| additive_expression '>' additive_expression               {$$=g_op($1,$3);}
 | additive_expression LE_OP additive_expression             {$$=le_op($1,$3);}
 | additive_expression GE_OP additive_expression             {$$=ge_op($1,$3);}
 | additive_expression EQ_OP additive_expression             {$$=eq_op($1,$3);}
@@ -92,10 +92,10 @@ expression
 ;
 
 assignment_operator
-: '='                  {$$=AFF;}      
-| MUL_ASSIGN           {$$=MUL;}    
-| ADD_ASSIGN           {$$=ADD;}
-| SUB_ASSIGN           {$$=SUB;} 
+: '='        			{$$=0;}   
+| MUL_ASSIGN 			{$$=1;}               
+| ADD_ASSIGN 			{$$=2;}
+| SUB_ASSIGN            {$$=3;}
 ;
 
 declaration
