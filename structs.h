@@ -27,6 +27,7 @@ struct _variable {
 	union _value *value;
 };
 
+
 /***************************   Arbre de recherche   ***************************/
 
 // Noeud de l'arbre de recherche, la racine n'aura jamais de variable
@@ -43,5 +44,7 @@ struct _layer {
 	struct _node *root;
 	struct _layer *previous;
 };
+
+
 
 #endif //STRUCTS_H

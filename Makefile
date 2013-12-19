@@ -5,7 +5,7 @@ CC=gcc
 
 all:parse
 
-parse:y.tab.c lex.yy.c
+parse:y.tab.c lex.yy.c sem_actions.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 y.tab.c:grammar.y
