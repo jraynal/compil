@@ -1,5 +1,5 @@
 %{
-	#include "structs.h"
+	#include "includes/structs.h"
 	#include <stdio.h>
 	#include "sem_actions.h"
 	extern int yylineno;
