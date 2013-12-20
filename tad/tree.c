@@ -16,6 +16,7 @@ struct _node *init_tree(){
 
 int del_tree(struct _node *root){
 	int exit =1;
+	struct _node *first = root;
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
@@ -28,10 +29,10 @@ int del_tree(struct _node *root){
 	/* Si on n'est pas sur une feuille, faut lancer sur tout les fils */
 	else {
 		/* On sauvegarde les fils */
-		struct _node *tmp=root->first_son;
+		struct _node *tmp=root;
 		do{	
 			if(!is_last_son(tmp)){
-				tmp=root->brother;
+				tmp=tmp->brother;
 			}
 			else
 				exit=0;
@@ -117,7 +118,7 @@ struct _variable *get_node(struct _node *root, char *path){
 static int is_leaf(struct _node *node){
 	if(node==NULL)
 		return EXIT_FAILURE;
-	else if(node->first_son==NULL)
+	else if(node->first_son==NULL&&node->last_son==NULL)
 		return 1;
 	else
 		return 0;

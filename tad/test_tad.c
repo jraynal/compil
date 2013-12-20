@@ -20,6 +20,13 @@ void print_var(struct _variable *data){
 	}
 }
 
+void test_var(struct _variable *data, int val){
+	if(data!=NULL) {
+		DB(Testing returned values)
+		assert(data->value.ival==val);
+	}
+}
+
 void test_init_tree(){
 	struct _node *tree = init_tree();
 	assert(tree!=NULL);
@@ -31,6 +38,8 @@ void test_set(){
 	char *b="/b";
 	char *bo="/bo";
 	char *bob="/bob";
+	char *victoria="/victoria";
+	char *vob="/vob";
 	DB(set node)
 	set_node(root,bob,init_data(42));
 	DB(get node without value)
@@ -39,13 +48,19 @@ void test_set(){
 	assert(get_node(root,bo)==NULL);
 	DB(get good variable)
 	assert(get_node(root,bob)!=NULL);
-	print_var(get_node(root,bob));
+	test_var(get_node(root,bob),42);
 	set_node(root,bo,init_data(23));
-	print_var(get_node(root,bo));
-	print_var(get_node(root,bob));
+	test_var(get_node(root,bo),23);
+	test_var(get_node(root,bob),42);
 	set_node(root,bob,init_data(12));
-	print_var(get_node(root,bo));
-	print_var(get_node(root,bob));
+	test_var(get_node(root,bo),23);
+	test_var(get_node(root,bob),12);
+	set_node(root,victoria,init_data(1));
+	test_var(get_node(root,victoria),1);
+	assert(get_node(root,vob)==NULL);
+	set_node(root,vob,init_data(123));
+	test_var(get_node(root,vob),123);
+	test_var(get_node(root,bob),12);
 	DB(free)
 	assert(EXIT_SUCCESS==del_tree(root));
 }
