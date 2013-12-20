@@ -47,6 +47,18 @@ struct _layer {
 	struct _layer *previous;
 };
 
+/************************/
+struct _list
+{
+	int size;
+	struct _nodeList* head ;
+	struct _nodeList* tail;
+};
 
-
+struct _nodeList
+{
+	void* value;
+	struct _nodeList * prev;
+	struct _nodeList * next ;
+};
 #endif //STRUCTS_H

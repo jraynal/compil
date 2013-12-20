@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include <string.h>
+#include "includes/structs.h"
 #include "y.tab.h"
 void count();
 int comment ();

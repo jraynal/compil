@@ -21,12 +21,17 @@
 %union{
 	void * obj;
 	int affect;
+	// int type;
 	struct _variable *(*unaryOp)(struct _variable *);
+	struct _list * list;
+	enum _type type;
 }
 
-%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression type_name
+%type<list> declarator_list
+%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression 
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
+%type<type> type_name 
 %type<unaryOp> unary_operator
 
 %%
@@ -99,18 +104,18 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';'
+: type_name declarator_list ';' {setType($2,$1);}
 ;
 
 declarator_list
-: declarator
-| declarator_list ',' declarator
+: declarator 					{$$=createList();/*addElmtList()*/}
+| declarator_list ',' declarator 	{/*addElmtList()*/}
 ;
 
 type_name
-: VOID 			{union _value val; $$=varCreate(VOID_TYPE,val);}
-| INT   		{union _value val; $$=varCreate(INT_TYPE,val);}
-| FLOAT			{union _value val; $$=varCreate(FLOAT_TYPE,val);}
+: VOID 			{$$=VOID_TYPE;}
+| INT   		{$$=1;}//{union _value val; $$=varCreate(INT_TYPE,val);}
+| FLOAT			{$$=2;}//{union _value val; $$=varCreate(FLOAT_TYPE,val);}
 ;
 
 declarator

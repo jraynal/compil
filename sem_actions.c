@@ -1,5 +1,6 @@
 #include "sem_actions.h"
 #include <stdlib.h>
+#include <stdio.h>
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
@@ -219,6 +220,52 @@ struct _variable * eq_op (struct _variable * a,struct _variable * b){
 
 
 void affectValue (struct _variable * toModify,int how,struct _variable * withWhat ){
+	if(!toModify || !withWhat){
+		fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if (toModify->type != withWhat->type && withWhat->type != UNKNOWN){
+		fprintf(stderr,"Invalid type %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if (toModify->type == INT_TYPE){
+		switch(how){
+			case 1:
+			toModify->value.ival *= withWhat->value.ival;
+			break;
+			case 2:
+			toModify->value.ival += withWhat->value.ival;
+			break;
+			case 3:
+			toModify->value.ival -= withWhat->value.ival;
+			break;
+			default:
+			toModify->value.ival = withWhat->value.ival;
+			break;
+		}
+	}else if (toModify->type == FLOAT_TYPE){
+		switch(how){
+			case 1:
+			toModify->value.fval *= withWhat->value.fval;
+			break;
+			case 2:
+			toModify->value.fval += withWhat->value.fval;
+			break;
+			case 3:
+			toModify->value.fval -= withWhat->value.fval;
+			break;
+			default:
+			toModify->value.fval = withWhat->value.fval;
+			break;
+		}
+	}
+}
 
-	
+void setType(struct _list * list , enum _type type){
+
+}
+
+struct _list * createList(){
+	struct _list* list = malloc(sizeof(struct _list));
+	return list;
 }
