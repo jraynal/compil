@@ -1,12 +1,12 @@
 LEX=lex
 YACC=yacc
-CFLAGS=-Wall
+CFLAGS=-Wall -g
 CC=gcc
 
 all:parse
 
-parse:y.tab.c lex.yy.c sem_actions.c
-	$(CC) $(CFLAGS) -o $@ $^
+parse:y.tab.c lex.yy.c sem_actions.c tad/tree.c
+	$(CC) $(CFLAGS) -o $@ $^ 
 
 y.tab.c:grammar.y
 	$(YACC) -d $^

@@ -9,6 +9,8 @@
  //for dynamic allocation
 
 struct _variable * varCreate(enum _type type,	union _value value);
+struct _variable * varCreateInt(int );
+struct _variable * varCreateFloat(int );
 int varFree(struct _variable *); 
 
 //affiche la ligne d'operation en llvm
@@ -37,5 +39,8 @@ void affectValue (struct _variable *,int ,struct _variable *  );
 
 void setType(struct _list * , enum _type);
 struct _list * createList();
+
+void insertNode(struct _node* ,const char * nom);
+
 
 #endif //FUNCTIONS_H

@@ -1,4 +1,5 @@
 #include "sem_actions.h"
+#include "includes/tree.h"
 #include <stdlib.h>
 #include <stdio.h>
 struct _variable * varCreate(enum _type type,	union _value value){
@@ -10,6 +11,30 @@ struct _variable * varCreate(enum _type type,	union _value value){
 	}
 	return var;
 }
+
+struct _variable * varCreateInt(int i){
+
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = INT_TYPE;
+		var->value.ival = i;
+		var->isFree =1;
+	}
+	return var;
+}
+
+struct _variable * varCreateFloat(int i){
+
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = FLOAT_TYPE;
+		var->value.fval = i;
+		var->isFree =1;
+	}
+	return var;
+}
+
+
 int varFree(struct _variable * a){
 	if(!a)
 		free(a);
@@ -220,7 +245,11 @@ struct _variable * eq_op (struct _variable * a,struct _variable * b){
 
 
 void affectValue (struct _variable * toModify,int how,struct _variable * withWhat ){
-	if(!toModify || !withWhat){
+	if(!toModify){
+		fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if(!withWhat){
 		fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
 		return;
 	}
@@ -241,6 +270,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 			break;
 			default:
 			toModify->value.ival = withWhat->value.ival;
+			printf("int value (%d) affected\n",toModify->value.ival );
 			break;
 		}
 	}else if (toModify->type == FLOAT_TYPE){
@@ -269,3 +299,11 @@ struct _list * createList(){
 	struct _list* list = malloc(sizeof(struct _list));
 	return list;
 }
+
+void insertNode(struct _node* htab,const char * nom){
+	printf("Insert %s",nom);
+	union _value val;
+	struct _variable * var = varCreate(UNKNOWN,val);
+	set_node(htab,nom,var);
+}
+

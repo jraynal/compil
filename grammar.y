@@ -1,7 +1,10 @@
 %{
 	#include "includes/structs.h"
+	#include "includes/tree.h"
+	
 	#include <stdio.h>
 	#include "sem_actions.h"
+
 	extern int yylineno;
 	int yylex ();
 	int yyerror ();
@@ -19,16 +22,19 @@
 %start program
 
 %union{
+	int integer;
 	void * obj;
 	int affect;
-	// int type;
+	char * text;
 	struct _variable *(*unaryOp)(struct _variable *);
 	struct _list * list;
 	enum _type type;
 }
 
+%type<text> IDENTIFIER
 %type<list> declarator_list
-%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression 
+%type<integer> CONSTANTI
+%type<obj>  CONSTANTF  expression 
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
 %type<type> type_name 
@@ -37,14 +43,14 @@
 %%
 
 primary_expression
-: IDENTIFIER
-| CONSTANTI
+: IDENTIFIER 									{printf("id lu : %s\n", $1); insertNode(htable,$1);$$=get_node(htable,$1);printf("<fin>\n");}
+| CONSTANTI										{$$=varCreateInt($1);}
 | CONSTANTF
-| '(' expression ')'    {$$=$2;}
-| IDENTIFIER '(' ')'
-| IDENTIFIER '(' argument_expression_list ')'
-| IDENTIFIER INC_OP
-| IDENTIFIER DEC_OP
+| '(' expression ')'    						{$$=$2;}
+| IDENTIFIER '(' ')'							{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 	{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER INC_OP 							{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER DEC_OP								{ insertNode(htable,$1);$$=get_node(htable,$1);}
 ;
 
 postfix_expression
@@ -145,9 +151,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   
-| '{' statement_list '}'
-| '{' declaration_list statement_list '}'
+: '{' '}'   								{htable=init_tree();}
+| '{' statement_list '}'					{htable=init_tree();}
+| '{' declaration_list statement_list '}'	{htable=init_tree();}
 ;
 
 declaration_list
@@ -162,7 +168,7 @@ statement_list
 
 expression_statement
 : ';'
-| expression ';'
+| expression ';' 
 ;
 
 selection_statement
