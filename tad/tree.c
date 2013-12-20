@@ -8,7 +8,7 @@ struct _node *init_tree(){
 	struct _node *root =(struct _node *)malloc(sizeof(struct _node));
 	root->c='/';
 	root->variable=NULL;
-	root->sons=NULL;
+	root->first_son=NULL;
 	root->brother=NULL;
 	return root;	
 }
