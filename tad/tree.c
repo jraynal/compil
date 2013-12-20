@@ -10,24 +10,37 @@ struct _node *init_tree(){
 	root->variable=NULL;
 	root->first_son=NULL;
 	root->brother=NULL;
+	root->last_son=NULL;
 	return root;	
 }
 
 int del_tree(struct _node *root){
+	int exit =1;
+	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
+	/* Si on est sur un feuille c'est facile! */
 	else if(is_leaf(root)){
-		free(root->variable);
+		if(root->variable!=NULL)
+			free(root->variable);
 		free(root);
 	}
+	/* Si on n'est pas sur une feuille, faut lancer sur tout les fils */
 	else {
-		struct _node *tmp=root->sons;
-		while(!is_last_son(tmp)){
-			del_tree(root->sons);
-			tmp=root->brother;
-			free(root->variable);
+		/* On sauvegarde les fils */
+		struct _node *tmp=root->first_son;
+		do{	
+			if(!is_last_son(tmp)){
+				tmp=root->brother;
+			}
+			else
+				exit=0;
+			del_tree(root->first_son);
+			if(root->variable!=NULL)
+				free(root->variable);
 			free(root);
-		}
+			root=tmp;
+		}while(exit);
 	}
 	return EXIT_SUCCESS;
 }
@@ -63,14 +76,14 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 		/* On ajoute le suivant si on est sur une feuille*/
 		if(is_leaf(current))
 			add_node(current,path[i]);
-		current=current->sons;
+		current=current->first_son;
 	}
 	return EXIT_SUCCESS;
 }
 
 struct _variable *get_node(struct _node *root, char *path){
 	struct _node *father = root;
-	struct _node *current = root->sons;
+	struct _node *current = root->first_son;
 	int i=1,exit=0; // i commence à 1 pour éviter le "/"
 	while(path[i]!='\0'){
 		if(current==NULL)
@@ -95,7 +108,7 @@ struct _variable *get_node(struct _node *root, char *path){
 			if(path[i]=='\0')
 				return current->variable;
 		}while(exit);
-		current=father->sons;
+		current=father->first_son;
 	}
 	return NULL;
 }
@@ -104,7 +117,7 @@ struct _variable *get_node(struct _node *root, char *path){
 static int is_leaf(struct _node *node){
 	if(node==NULL)
 		return EXIT_FAILURE;
-	else if(node->sons==NULL)
+	else if(node->first_son==NULL)
 		return 1;
 	else
 		return 0;
@@ -126,7 +139,7 @@ static int add_node(struct _node* father, char letter){
 	struct _node *penultimate = father->last_son;
 	node->c=letter;
 	if(penultimate==NULL)
-		father->sons=node;
+		father->first_son=node;
 	else
 		penultimate->brother=node;
 	father->last_son=node;

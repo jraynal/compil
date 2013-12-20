@@ -107,9 +107,9 @@ declarator_list
 ;
 
 type_name
-: VOID 			{$$=varCreate(VOID_TYPE,NULL);}
-| INT   		{$$=varCreate(INT_TYPE,NULL);}
-| FLOAT			{$$=varCreate(FLOAT_TYPE,NULL);}
+: VOID 			{union _value val; $$=varCreate(VOID_TYPE,val);}
+| INT   		{union _value val; $$=varCreate(INT_TYPE,val);}
+| FLOAT			{union _value val; $$=varCreate(FLOAT_TYPE,val);}
 ;
 
 declarator

@@ -8,7 +8,7 @@
 
  //for dynamic allocation
 
-struct _variable * varCreate(enum _type type,	union _value *value);
+struct _variable * varCreate(enum _type type,	union _value value);
 int varFree(struct _variable *); 
 
 //affiche la ligne d'operation en llvm

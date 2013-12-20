@@ -10,7 +10,7 @@
 
 struct _variable *init_data(int val){
 	struct _variable *var = (struct _variable*)malloc(sizeof(struct _variable));
-	var->type=INT;
+	var->type=INT_TYPE;
 	var->value.ival=val;
 	return var;
 }
