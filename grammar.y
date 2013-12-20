@@ -56,7 +56,7 @@ unary_expression
 : postfix_expression				{$$=$1;}
 | INC_OP unary_expression			{$$=incr($2);}
 | DEC_OP unary_expression			{$$=decr($2);}
-| unary_operator unary_expression   {$$=neg($2);}
+| unary_operator unary_expression   {$$=$1($2);}
 ;
 
 unary_operator
@@ -86,7 +86,8 @@ comparison_expression
 ;
 
 expression
-: unary_expression assignment_operator comparison_expression
+// on suppose que $1 est uniquement un identifiant
+: unary_expression assignment_operator comparison_expression {affectValue($1,$2,$3);}
 | comparison_expression
 ;
 

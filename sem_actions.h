@@ -32,8 +32,7 @@ struct _variable * ge_op (struct _variable *,struct _variable *);
 struct _variable * ne_op (struct _variable *,struct _variable *);
 struct _variable * eq_op (struct _variable *,struct _variable *);
 
-int initLayer();
-int initNode();
+void affectValue (struct _variable *,int ,struct _variable *  );
 
 
 

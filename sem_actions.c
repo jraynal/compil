@@ -1,9 +1,20 @@
 #include "sem_actions.h"
+#include <stdlib.h>
 struct _variable * varCreate(enum _type type,	union _value value){
-	return 0;
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = type;
+		var->value = value;
+		var->isFree =1;
+	}
+	return var;
 }
 int varFree(struct _variable * a){
-	return 0;
+	if(!a)
+		free(a);
+	else
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 struct _variable *mul(struct _variable * a,struct _variable * b){
 	if (!a || !b)
@@ -204,4 +215,10 @@ struct _variable * eq_op (struct _variable * a,struct _variable * b){
 	varFree(a);
 	varFree(b);
 	return var;
+}
+
+
+void affectValue (struct _variable * toModify,int how,struct _variable * withWhat ){
+
+	
 }
