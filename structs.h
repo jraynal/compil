@@ -24,7 +24,7 @@ enum _type {
 
 // Structure manipulée par les actions sémantiques
 struct _variable {
-	enum _type *type;
+	enum _type type;
 	union _value *value;
 };
 

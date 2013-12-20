@@ -11,6 +11,10 @@
 struct _variable * varCreate(enum _type type,	union _value *value);
 int varFree(struct _variable *); 
 
+//affiche la ligne d'operation en llvm
+void binOp(struct _variable*,struct _variable* , char* iOp, char* fOp, char* vOp);
+
+//calcule le resultat de l'operation sur les variables
 struct _variable *mul(struct _variable *,struct _variable *);
 struct _variable *divide(struct _variable *,struct _variable *);
 struct _variable *add(struct _variable *,struct _variable *);
