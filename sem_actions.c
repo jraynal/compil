@@ -2,7 +2,7 @@
 #include "structs.h"
 
 
-int varCreate(){
+struct _variable * varCreate(enum _type type,	union _value *value){
 
 return 0;
 }

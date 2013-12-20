@@ -18,11 +18,21 @@ int (fonction3(int arg1))
 
 		++ ++ -- var ;
 		- - - var2 = - var3 ++;
-		
+		var3 = 1.2;
 
 
 		for (i ++ [1.5];var(1,5.7,2.3< 0);va4); //de meme avec les if et if else
 
+		if(a<3) i++;
+		if(i<=1)
+		{
+			float var4;
+			var4= 1.8;
+			var4+= var3+2.6;
+		}else{
+			-var3-=var3;
+
+		}
 	}
 }
 

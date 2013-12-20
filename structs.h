@@ -18,7 +18,8 @@ union _value {
 enum _type {
 	INT_TYPE=0,
 	FLOAT_TYPE,
-	VOID_TYPE
+	VOID_TYPE,
+	UNKNOWN
 };
 
 // Structure manipulée par les actions sémantiques

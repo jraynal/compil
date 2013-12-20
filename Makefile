@@ -15,4 +15,4 @@ lex.yy.c:scanner.l
 	$(LEX) -o $@ $^
 
 clean:
-	rm -f grammar.c scanner.c
+	rm -f y.tab.c lex.yy.c parse

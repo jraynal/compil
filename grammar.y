@@ -16,18 +16,17 @@
 %token TYPE_NAME
 %token INT FLOAT VOID
 %token IF ELSE WHILE RETURN FOR
+%start program
 
 %union{
 	void * obj;
 	int affect;
-	 // _type typeName;
-	void*(*unaryOp)(void*);
+	struct _variable *(*unaryOp)(struct _variable *);
 }
 
-%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression
+%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression type_name
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
-%type<typeName> type_name 
 %type<unaryOp> unary_operator
 
 %%
@@ -61,7 +60,7 @@ unary_expression
 ;
 
 unary_operator
-: '-'	
+: '-' 								{$$=neg;}	
 ;
 
 multiplicative_expression
@@ -108,9 +107,9 @@ declarator_list
 ;
 
 type_name
-: VOID 			{$$=VOID_TYPE;}
-| INT   		{$$=INT_TYPE;}
-| FLOAT			{$$=FLOAT_TYPE;}
+: VOID 			{$$=varCreate(VOID_TYPE,NULL);}
+| INT   		{$$=varCreate(INT_TYPE,NULL);}
+| FLOAT			{$$=varCreate(FLOAT_TYPE,NULL);}
 ;
 
 declarator

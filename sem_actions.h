@@ -7,7 +7,8 @@
 #include "structs.h"
 
  //for dynamic allocation
-int varCreate();
+
+struct _variable * varCreate(enum _type type,	union _value *value);
 int varFree(struct _variable *); 
 
 struct _variable *mul(struct _variable *,struct _variable *);
