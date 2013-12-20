@@ -1,4 +1,5 @@
 #include "sem_actions.h"
+
 struct _variable * varCreate(enum _type type,	union _value value){
 	return 0;
 }

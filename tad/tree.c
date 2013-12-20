@@ -16,7 +16,6 @@ struct _node *init_tree(){
 
 int del_tree(struct _node *root){
 	int exit =1;
-	struct _node *first = root;
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
@@ -28,18 +27,24 @@ int del_tree(struct _node *root){
 	}
 	/* Si on n'est pas sur une feuille, faut lancer sur tout les fils */
 	else {
-		/* On sauvegarde les fils */
+		/* On sauvegarde le noeud actuel */
 		struct _node *tmp=root;
+		/* On supprime ses frères */
 		do{	
-			if(!is_last_son(tmp)){
+			/* Verificateur de boucle */
+			if(!is_last_son(tmp))
 				tmp=tmp->brother;
-			}
 			else
 				exit=0;
-			del_tree(root->first_son);
+			/* suppression des fils de chaque frêre */
+			del_tree(tmp->first_son);
+			
+			/* suppression du père courant */
 			if(root->variable!=NULL)
 				free(root->variable);
-			free(root);
+			if(root!=NULL)
+			 free(root);
+			/* On passe au frêre */
 			root=tmp;
 		}while(exit);
 	}
@@ -65,9 +70,12 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 				add_node(current,path[i]);
 				i++;
 			}
-			if(path[i]=='\0')
+			if(path[i]=='\0'){
 				/* On est à la fin du mot, on remplace les données */
+				if(current->variable!=NULL)
+					free(current->variable);
 				current->variable=data;
+			}
 		/* controleur de boucle */
 		if(is_last_son(current))
 			exit=0;
@@ -118,7 +126,7 @@ struct _variable *get_node(struct _node *root, char *path){
 static int is_leaf(struct _node *node){
 	if(node==NULL)
 		return EXIT_FAILURE;
-	else if(node->first_son==NULL&&node->last_son==NULL)
+	else if((node->first_son==NULL)&&(node->last_son==NULL))
 		return 1;
 	else
 		return 0;

@@ -34,35 +34,35 @@
 %%
 
 primary_expression
-: IDENTIFIER
-| CONSTANTI
-| CONSTANTF
-| '(' expression ')'    {$$=$2;}
-| IDENTIFIER '(' ')'
-| IDENTIFIER '(' argument_expression_list ')'
-| IDENTIFIER INC_OP
-| IDENTIFIER DEC_OP
+: IDENTIFIER									{add_idntifier($1);}
+| CONSTANTI										{$$=$1;}
+| CONSTANTF										{$$=$2;}
+| '(' expression ')'    						{$$=$2;}
+| IDENTIFIER '(' ')'							{add_function_identifier($1,NULL);}
+| IDENTIFIER '(' argument_expression_list ')'	{add_function_identifier($1,$2);}
+| IDENTIFIER INC_OP								{inc_identifier($1);}
+| IDENTIFIER DEC_OP								{dec_identifier($1);}
 ;
 
 postfix_expression
-: primary_expression
-| postfix_expression '[' expression ']'
+: primary_expression							{$$=$1}
+| postfix_expression '[' expression ']'			{}
 ;
 
 argument_expression_list
-: expression 				
-| argument_expression_list ',' expression
+: expression 									{}
+| argument_expression_list ',' expression		{}
 ;
 
 unary_expression
-: postfix_expression				{$$=$1;}
-| INC_OP unary_expression			{$$=incr($2);}
-| DEC_OP unary_expression			{$$=decr($2);}
-| unary_operator unary_expression   {$$=neg($2);}
+: postfix_expression							{$$=$1;}
+| INC_OP unary_expression						{$$=incr($2);}
+| DEC_OP unary_expression						{$$=decr($2);}
+| unary_operator unary_expression   			{$$=neg($2);}
 ;
 
 unary_operator
-: '-' 								{$$=neg;}	
+: '-' 											{$$=neg;}	
 ;
 
 multiplicative_expression
@@ -93,19 +93,19 @@ expression
 ;
 
 assignment_operator
-: '='        			{$$=0;}   
-| MUL_ASSIGN 			{$$=1;}               
-| ADD_ASSIGN 			{$$=2;}
-| SUB_ASSIGN            {$$=3;}
+: '='        												{$$=0;}   
+| MUL_ASSIGN 												{$$=1;}               
+| ADD_ASSIGN 												{$$=2;}
+| SUB_ASSIGN            									{$$=3;}
 ;
 
 declaration
-: type_name declarator_list ';'
+: type_name declarator_list ';'								{}
 ;
 
 declarator_list
-: declarator
-| declarator_list ',' declarator
+: declarator												{}
+| declarator_list ',' declarator							{}
 ;
 
 type_name
@@ -115,21 +115,21 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  
-| '(' declarator ')'                      
-| declarator '[' CONSTANTI ']'             
-| declarator '[' ']'                        
-| declarator '(' parameter_list ')'
-| declarator '(' ')'
+: IDENTIFIER  												{add_identifier();}
+| '(' declarator ')'                      					{}
+| declarator '[' CONSTANTI ']'             					{}
+| declarator '[' ']'                        				{}
+| declarator '(' parameter_list ')'							{}
+| declarator '(' ')'										{}
 ;
 
 parameter_list
-: parameter_declaration
-| parameter_list ',' parameter_declaration
+: parameter_declaration										{}
+| parameter_list ',' parameter_declaration					{}
 ;
 
 parameter_declaration
-: type_name declarator
+: type_name declarator										{}
 ;
 
 statement

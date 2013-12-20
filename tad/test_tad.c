@@ -56,12 +56,12 @@ void test_set(){
 	test_var(get_node(root,bo),23);
 	test_var(get_node(root,bob),12);
 	set_node(root,victoria,init_data(1));
-	test_var(get_node(root,victoria),1);
-	assert(get_node(root,vob)==NULL);
-	set_node(root,vob,init_data(123));
-	test_var(get_node(root,vob),123);
-	test_var(get_node(root,bob),12);
-	DB(free)
+	//~ test_var(get_node(root,victoria),1);
+	//~ assert(get_node(root,vob)==NULL);
+	//~ set_node(root,vob,init_data(123));
+	//~ test_var(get_node(root,vob),123);
+	//~ test_var(get_node(root,bob),12);
+	//~ DB(free)
 	assert(EXIT_SUCCESS==del_tree(root));
 }
 
