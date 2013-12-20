@@ -1,10 +1,47 @@
 #include "sem_actions.h"
+#include "includes/tree.h"
+#include <stdlib.h>
+#include <stdio.h>
 
 struct _variable * varCreate(enum _type type,	union _value value){
-	return 0;
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = type;
+		var->value = value;
+		var->isFree =1;
+	}
+	return var;
 }
+
+struct _variable * varCreateInt(int i){
+
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = INT_TYPE;
+		var->value.ival = i;
+		var->isFree =1;
+	}
+	return var;
+}
+
+struct _variable * varCreateFloat(int i){
+
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = FLOAT_TYPE;
+		var->value.fval = i;
+		var->isFree =1;
+	}
+	return var;
+}
+
+
 int varFree(struct _variable * a){
-	return 0;
+	if(!a)
+		free(a);
+	else
+		return EXIT_FAILURE;
+	return EXIT_SUCCESS;
 }
 struct _variable *mul(struct _variable * a,struct _variable * b){
 	if (!a || !b)
@@ -206,3 +243,68 @@ struct _variable * eq_op (struct _variable * a,struct _variable * b){
 	varFree(b);
 	return var;
 }
+
+
+void affectValue (struct _variable * toModify,int how,struct _variable * withWhat ){
+	if(!toModify){
+		fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if(!withWhat){
+		fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if (toModify->type != withWhat->type && withWhat->type != UNKNOWN){
+		fprintf(stderr,"Invalid type %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		return;
+	}
+	if (toModify->type == INT_TYPE){
+		switch(how){
+			case 1:
+			toModify->value.ival *= withWhat->value.ival;
+			break;
+			case 2:
+			toModify->value.ival += withWhat->value.ival;
+			break;
+			case 3:
+			toModify->value.ival -= withWhat->value.ival;
+			break;
+			default:
+			toModify->value.ival = withWhat->value.ival;
+			printf("int value (%d) affected\n",toModify->value.ival );
+			break;
+		}
+	}else if (toModify->type == FLOAT_TYPE){
+		switch(how){
+			case 1:
+			toModify->value.fval *= withWhat->value.fval;
+			break;
+			case 2:
+			toModify->value.fval += withWhat->value.fval;
+			break;
+			case 3:
+			toModify->value.fval -= withWhat->value.fval;
+			break;
+			default:
+			toModify->value.fval = withWhat->value.fval;
+			break;
+		}
+	}
+}
+
+void setType(struct _list * list , enum _type type){
+
+}
+
+struct _list * createList(){
+	struct _list* list = malloc(sizeof(struct _list));
+	return list;
+}
+
+void insertNode(struct _node* htab,const char * nom){
+	printf("Insert %s",nom);
+	union _value val;
+	struct _variable * var = varCreate(UNKNOWN,val);
+	set_node(htab,nom,var);
+}
+

@@ -1,12 +1,16 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+
+/******Enum and struct ****/
 // enum _affectation{
 // 	AFF,
 // 	ADD,
 // 	MUL,
 // 	SUB
 // };
+
+
 
 // Union des types de valeurs possible
 union _value {
@@ -25,8 +29,8 @@ enum _type {
 // Structure manipulée par les actions sémantiques
 struct _variable {
 	enum _type type;
-
 	union _value value;
+	int isFree;
 };
 
 
@@ -47,6 +51,22 @@ struct _layer {
 	struct _layer *previous;
 };
 
+/************List************/
+struct _list
+{
+	int size;
+	struct _nodeList* head ;
+	struct _nodeList* tail;
+};
 
+struct _nodeList
+{
+	void* value;
+	struct _nodeList * prev;
+	struct _nodeList * next ;
+};
+
+/*******Global Variables ****/
+struct _node* htable;
 
 #endif //STRUCTS_H

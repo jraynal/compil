@@ -31,7 +31,7 @@ int (fonction3(int arg1))
 			var4+= var3+2.6;
 		}else{
 			-var3-=var3;
-
+			++5*=2;
 		}
 	}
 }

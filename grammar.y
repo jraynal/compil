@@ -1,5 +1,7 @@
 %{
 	#include "includes/structs.h"
+	#include "includes/tree.h"
+	
 	#include <stdio.h>
 	#include "sem_actions.h"
 	char *footer();
@@ -21,27 +23,35 @@
 %start program
 
 %union{
+	int integer;
 	void * obj;
 	int affect;
+	char * text;
 	struct _variable *(*unaryOp)(struct _variable *);
+	struct _list * list;
+	enum _type type;
 }
 
-%type<obj> IDENTIFIER CONSTANTF CONSTANTI expression type_name
+%type<text> IDENTIFIER
+%type<list> declarator_list
+%type<integer> CONSTANTI
+%type<obj>  CONSTANTF  expression 
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
+%type<type> type_name 
 %type<unaryOp> unary_operator
 
 %%
 
 primary_expression
-: IDENTIFIER									{add_idntifier($1);}
-| CONSTANTI										{$$=$1;}
-| CONSTANTF										{$$=$2;}
+: IDENTIFIER 									{printf("id lu : %s\n", $1); insertNode(htable,$1);$$=get_node(htable,$1);printf("<fin>\n");}
+| CONSTANTI										{$$=varCreateInt($1);}
+| CONSTANTF
 | '(' expression ')'    						{$$=$2;}
-| IDENTIFIER '(' ')'							{add_function_identifier($1,NULL);}
-| IDENTIFIER '(' argument_expression_list ')'	{add_function_identifier($1,$2);}
-| IDENTIFIER INC_OP								{inc_identifier($1);}
-| IDENTIFIER DEC_OP								{dec_identifier($1);}
+| IDENTIFIER '(' ')'							{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 	{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER INC_OP 							{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER DEC_OP								{ insertNode(htable,$1);$$=get_node(htable,$1);}
 ;
 
 postfix_expression
@@ -55,10 +65,10 @@ argument_expression_list
 ;
 
 unary_expression
-: postfix_expression							{$$=$1;}
-| INC_OP unary_expression						{$$=incr($2);}
-| DEC_OP unary_expression						{$$=decr($2);}
-| unary_operator unary_expression   			{$$=neg($2);}
+: postfix_expression				{$$=$1;}
+| INC_OP unary_expression			{$$=incr($2);}
+| DEC_OP unary_expression			{$$=decr($2);}
+| unary_operator unary_expression   {$$=$1($2);}
 ;
 
 unary_operator
@@ -88,7 +98,8 @@ comparison_expression
 ;
 
 expression
-: unary_expression assignment_operator comparison_expression
+// on suppose que $1 est uniquement un identifiant
+: unary_expression assignment_operator comparison_expression {affectValue($1,$2,$3);}
 | comparison_expression
 ;
 
@@ -100,18 +111,18 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';'								{}
+: type_name declarator_list ';' {setType($2,$1);}
 ;
 
 declarator_list
-: declarator												{}
-| declarator_list ',' declarator							{}
+: declarator 					{$$=createList();/*addElmtList()*/}
+| declarator_list ',' declarator 	{/*addElmtList()*/}
 ;
 
 type_name
-: VOID 			{union _value val; $$=varCreate(VOID_TYPE,val);}
-| INT   		{union _value val; $$=varCreate(INT_TYPE,val);}
-| FLOAT			{union _value val; $$=varCreate(FLOAT_TYPE,val);}
+: VOID 			{$$=VOID_TYPE;}
+| INT   		{$$=1;}//{union _value val; $$=varCreate(INT_TYPE,val);}
+| FLOAT			{$$=2;}//{union _value val; $$=varCreate(FLOAT_TYPE,val);}
 ;
 
 declarator
@@ -141,9 +152,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   
-| '{' statement_list '}'
-| '{' declaration_list statement_list '}'
+: '{' '}'   								{htable=init_tree();}
+| '{' statement_list '}'					{htable=init_tree();}
+| '{' declaration_list statement_list '}'	{htable=init_tree();}
 ;
 
 declaration_list
@@ -158,7 +169,7 @@ statement_list
 
 expression_statement
 : ';'
-| expression ';'
+| expression ';' 
 ;
 
 selection_statement
