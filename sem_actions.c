@@ -5,6 +5,12 @@
 
 #define LLVM( string ) fprintf(stdout,#string); fprintf(stdout,"\n");
 
+	int new_reg(){
+	static int i =0;
+	i++;
+	return i;
+}
+
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
@@ -268,7 +274,10 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 		fprintf(stderr,"Invalid type %s:%d(%s)\n",__FILE__,__LINE__,__func__);
 		return;
 	}
+	LLVM("store ")
+	int i = new_reg();
 	if (toModify->type == INT_TYPE){
+		// LLVM("i32 %%%d i32 %%%d",i)
 		switch(how){
 			case 1:
 			toModify->value.ival *= withWhat->value.ival;
@@ -281,7 +290,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 			break;
 			default:
 			toModify->value.ival = withWhat->value.ival;
-			printf("int value (%d) affected\n",toModify->value.ival );
+			fprintf(stderr,"int value (%d) affected\n",toModify->value.ival );
 			break;
 		}
 	}else if (toModify->type == FLOAT_TYPE){
