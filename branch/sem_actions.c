@@ -16,7 +16,6 @@ struct _variable * varCreate(enum _type type,	union _value value){
 	if(var){
 		var->type = type;
 		var->value = value;
-		var->isFree =1;
 	}
 	else
 		fprintf(stderr, "No created variable\n");
@@ -29,7 +28,6 @@ struct _variable * varCreateInt(int i){
 	if(var){
 		var->type = INT_TYPE;
 		var->value.ival = i;
-		var->isFree =1;
 	}else
 	fprintf(stderr, "No created variable\n");
 
@@ -42,7 +40,6 @@ struct _variable* var = malloc(sizeof(struct _variable));
 if(var){
 	var->type = FLOAT_TYPE;
 	var->value.fval = i;
-	var->isFree =1;
 }else 
 fprintf(stderr, "No created variable\n");
 
@@ -278,7 +275,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 	// LLVM(store )
 	if (toModify->type == INT_TYPE){
 		int i = new_reg	();
-		fprintf(stdout, " store i32 %d,i32 %%%d\n",i,withWhat->value.ival);
+		fprintf(stdout, " store i32 %d,i32 %s\n",withWhat->value.ival,toModify->name);
 		switch(how){
 			case 1:
 			toModify->value.ival *= withWhat->value.ival;
@@ -295,7 +292,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 			break;
 		}
 	}else if (toModify->type == FLOAT_TYPE){
-		fprintf(stdout, " store i32 %d,i32 %%%d\n",i,withWhat->value.ival);
+		fprintf(stdout, " store float %f, float %s\n",withWhat->value.fval,toModify->name);
 		switch(how){
 			case 1:
 			toModify->value.fval *= withWhat->value.fval;
@@ -332,7 +329,12 @@ struct _variable * declareVar(char* nom,struct _node* htab){
 	val.ival =0;
 	struct _variable * var = varCreate(UNKNOWN,val);
 	set_node(htab,dest,var);
-	if(get_node(htab,dest)==NULL)
+	var = get_node(htab,dest);
+	// if(strcmp(nom,"$accel"))
+		var->name = "%accelCmd";
+	// if(strcmp(nom,"f"))
+	// 	var->name = "f";
+	if(var==NULL)
 		fprintf(stderr, "Variable non set : %s\n",dest);
 	return var;
 }

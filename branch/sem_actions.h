@@ -10,7 +10,7 @@
 
 struct _variable * varCreate(enum _type type,	union _value value);
 struct _variable * varCreateInt(int );
-struct _variable * varCreateFloat(int );
+struct _variable * varCreateFloat(float );
 int varFree(struct _variable *); 
 
 //affiche la ligne d'operation en llvm
