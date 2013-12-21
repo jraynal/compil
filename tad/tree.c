@@ -1,4 +1,5 @@
 #include "tree.h"
+#include <stdio.h>
 
 static int is_leaf(struct _node* node);
 static int is_last_son(struct _node* node);
@@ -13,51 +14,25 @@ struct _node *init_tree(){
 	root->last_son=NULL;
 	return root;	
 }
-
+int del_bro(struct _node *node) {
+	if(node==NULL)
+		return EXIT_FAILURE;
+	fprintf(stderr,"%c\n",node->c);
+	if(!is_last_son(node))
+		del_bro(node->brother);
+	if(node->variable!=NULL)
+		free(node->variable);
+	free(node);
+	return EXIT_SUCCESS;
+}
 int del_tree(struct _node *root){
-	int exit =1,done =1;
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
 	/* Si on est sur un feuille c'est facile! */
-	else if(is_leaf(root)){
-		if(root->variable!=NULL)
-			free(root->variable);
-		free(root);
-	}
-	/* Si on n'est pas sur une feuille, faut lancer sur tout les fils */
-	else {
-		/* On sauvegarde le noeud suivant*/
-		struct _node *tmp=root->first_son;
-		struct _node *tmp2 = root;
-			/* Pour Chaque fils */
-			do{
-			done=1;
-			/* On supprime ses frères */
-			exit=1;
-				do{
-					/* Verificateur de boucle */
-					if(is_last_son(tmp2))
-						exit=0;
-					else
-						tmp2=tmp2->brother;
-					/* suppression des fils de chaque frêre */
-					//del_tree(tmp->first_son);
-					
-					/* suppression du père courant */
-					if(root->variable!=NULL)
-						free(root->variable);
-					if(root!=NULL)
-						free(root);
-					/* On passe au frêre */
-					root=tmp;
-				}while(exit);
-			if(is_leaf(tmp))
-				done=0;
-			else
-				tmp=root->first_son;
-		}while(done);
-	}
+	if(!is_leaf(root))
+		del_tree(root->first_son);
+	del_bro(root);
 	return EXIT_SUCCESS;
 }
 
