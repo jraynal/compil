@@ -304,8 +304,8 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 
 struct _variable * declareVar(char* nom,struct _node* htab){
 	if(!htab)
-		printf("No htab\n"); 
-	printf("declaration de %s\n",nom);
+		fprintf(stderr, "No htab\n"); 
+	fprintf(stderr, "declaration de %s\n",nom);
 	char dest[100];
 	sprintf(dest,"/%s",nom);
 
@@ -314,7 +314,7 @@ struct _variable * declareVar(char* nom,struct _node* htab){
 	struct _variable * var = varCreate(UNKNOWN,val);
 	set_node(htab,dest,var);
 	if(get_node(htab,dest)==NULL)
-		printf("Variable non set : %s\n",dest);
+		fprintf(stderr, "Variable non set : %s\n",dest);
 	return var;
 	
 }

@@ -116,7 +116,7 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';' {setType($2,$1);printf("type : %d\n",((struct _variable*)$2)->type);}
+: type_name declarator_list ';' {setType($2,$1);fprintf(stderr, "type : %d\n",((struct _variable*)$2)->type);}
 ;
 
 declarator_list
@@ -240,7 +240,9 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 	htable=init_tree();
+	fprintf(stdout, "%s\n",header() );
 	yyparse ();
+	fprintf(stdout, "%s\n",footer() );
 	free (file_name);
 	return 0;
 }
