@@ -76,6 +76,12 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 }
 
 struct _variable *get_node(struct _node *root, char *path){
+	if(root == NULL){
+		fprintf(stderr,"ERROR (%s:%d): Not valid tree ",__FILE__,__LINE__);
+		return NULL;
+
+	}
+
 	if(root==NULL||path==NULL){
 		return NULL;
 	}
