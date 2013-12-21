@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define NotNull(val) do{if(!val){fprintf(stderr, "%s is NULL %s(%d)\n",#val,__FILE__,__LINE__);}}while(0)
-
 
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));

@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS= -W -Wall -Wextra
-DBFLAGS= -g -O0 -DDEBUG
+DBFLAGS= -g -O0
 
 SRC=test_tad.c tree.c
 OBJ=$(SRC:.c=.o)
