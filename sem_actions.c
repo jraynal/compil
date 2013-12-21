@@ -5,7 +5,7 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-	int new_reg(){
+int new_reg(){
 	static int i =0;
 	i++;
 	return i;
@@ -36,7 +36,7 @@ struct _variable * varCreateInt(int i){
 	return var;
 }
 
-struct _variable * varCreateFloat(int i){ // LOL tu crée un float à partir d'un int?
+struct _variable * varCreateFloat(float i){
 
 struct _variable* var = malloc(sizeof(struct _variable));
 if(var){
@@ -49,7 +49,6 @@ fprintf(stderr, "No created variable\n");
 return var;
 }
 
-
 int varFree(struct _variable * a){
 	if(a)
 		free(a);
@@ -59,6 +58,7 @@ int varFree(struct _variable * a){
 	}
 	return EXIT_SUCCESS;
 }
+
 struct _variable *mul(struct _variable * a,struct _variable * b){
 	if (!a || !b)
 		return NULL;
@@ -75,6 +75,7 @@ struct _variable *mul(struct _variable * a,struct _variable * b){
 	varFree(b);
 	return a;
 }
+
 struct _variable *divide(struct _variable * a,struct _variable * b){
 	if (!a || !b)
 		return NULL;
@@ -294,6 +295,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 			break;
 		}
 	}else if (toModify->type == FLOAT_TYPE){
+		fprintf(stdout, " store i32 %d,i32 %%%d\n",i,withWhat->value.ival);
 		switch(how){
 			case 1:
 			toModify->value.fval *= withWhat->value.fval;
