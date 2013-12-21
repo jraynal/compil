@@ -40,7 +40,7 @@ void affectValue (struct _variable *,int ,struct _variable *  );
 void setType(struct _list * , enum _type);
 struct _list * createList();
 
-void insertNode(struct _node* ,const char * nom);
+void insertNode(struct _node* , char * nom);
 
 
 #endif //FUNCTIONS_H

@@ -2,6 +2,10 @@
 #include "includes/tree.h"
 #include <stdlib.h>
 #include <stdio.h>
+
+#define NotNull(val) do{if(!val){fprintf(stderr, "%s is NULL %s(%d)\n",#val,__FILE__,__LINE__);}}while(0)
+
+
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
@@ -9,6 +13,8 @@ struct _variable * varCreate(enum _type type,	union _value value){
 		var->value = value;
 		var->isFree =1;
 	}
+	else
+		fprintf(stderr, "No created variable\n");
 	return var;
 }
 
@@ -19,7 +25,9 @@ struct _variable * varCreateInt(int i){
 		var->type = INT_TYPE;
 		var->value.ival = i;
 		var->isFree =1;
-	}
+	}else
+		fprintf(stderr, "No created variable\n");
+
 	return var;
 }
 
@@ -30,16 +38,20 @@ struct _variable * varCreateFloat(int i){
 		var->type = FLOAT_TYPE;
 		var->value.fval = i;
 		var->isFree =1;
-	}
+	}else 
+		fprintf(stderr, "No created variable\n");
+
 	return var;
 }
 
 
 int varFree(struct _variable * a){
-	if(!a)
+	if(a)
 		free(a);
-	else
+	else{
+		fprintf(stderr, "Variable already freed\n");
 		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 struct _variable *mul(struct _variable * a,struct _variable * b){
@@ -300,9 +312,10 @@ struct _list * createList(){
 	return list;
 }
 
-void insertNode(struct _node* htab,const char * nom){
+void insertNode(struct _node* htab,char * nom){
 	printf("Insert %s",nom);
 	union _value val;
+	val.ival =0;
 	struct _variable * var = varCreate(UNKNOWN,val);
 	set_node(htab,nom,var);
 }

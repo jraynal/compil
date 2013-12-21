@@ -16,7 +16,7 @@ struct _node *init_tree(){
 
 int del_tree(struct _node *root){
 	int exit =1;
-	struct _node *first = root; //UNUSED
+	struct _node *first = root;
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
@@ -46,7 +46,7 @@ int del_tree(struct _node *root){
 	return EXIT_SUCCESS;
 }
 
-int set_node(struct _node *root, const char *path, struct _variable *data){
+int set_node(struct _node *root, char *path, struct _variable *data){
 	struct _node *current = root;
 	int i=0,exit;
 	if(root==NULL||path==NULL)
@@ -83,9 +83,6 @@ int set_node(struct _node *root, const char *path, struct _variable *data){
 }
 
 struct _variable *get_node(struct _node *root, char *path){
-	if(!root || ! path){
-		return NULL;
-	}
 	struct _node *father = root;
 	struct _node *current = root->first_son;
 	int i=1,exit=0; // i commence à 1 pour éviter le "/"
