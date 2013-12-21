@@ -12,6 +12,8 @@ struct _variable * varCreate(enum _type type,	union _value value){
 		var->value = value;
 		var->isFree =1;
 	}
+	else
+		fprintf(stderr, "No created variable\n");
 	return var;
 }
 
@@ -22,27 +24,33 @@ struct _variable * varCreateInt(int i){
 		var->type = INT_TYPE;
 		var->value.ival = i;
 		var->isFree =1;
-	}
+	}else
+		fprintf(stderr, "No created variable\n");
+
 	return var;
 }
 
-struct _variable * varCreateFloat(int i){
+struct _variable * varCreateFloat(int i){ // LOL tu crée un float à partir d'un int?
 
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
 		var->type = FLOAT_TYPE;
 		var->value.fval = i;
 		var->isFree =1;
-	}
+	}else 
+		fprintf(stderr, "No created variable\n");
+
 	return var;
 }
 
 
 int varFree(struct _variable * a){
-	if(!a)
+	if(a)
 		free(a);
-	else
+	else{
+		fprintf(stderr, "Variable already freed\n");
 		return EXIT_FAILURE;
+	}
 	return EXIT_SUCCESS;
 }
 struct _variable *mul(struct _variable * a,struct _variable * b){
@@ -303,9 +311,10 @@ struct _list * createList(){
 	return list;
 }
 
-void insertNode(struct _node* htab,const char * nom){
+void insertNode(struct _node* htab,char * nom){
 	printf("Insert %s",nom);
 	union _value val;
+	val.ival =0;
 	struct _variable * var = varCreate(UNKNOWN,val);
 	set_node(htab,nom,var);
 }

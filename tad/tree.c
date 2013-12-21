@@ -55,7 +55,7 @@ int del_tree(struct _node *root){
 	return EXIT_SUCCESS;
 }
 
-int set_node(struct _node *root, const char *path, struct _variable *data){
+int set_node(struct _node *root, char *path, struct _variable *data){
 	struct _node *current = root;
 	int i=0,exit;
 	if(root==NULL||path==NULL)

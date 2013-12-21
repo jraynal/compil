@@ -21,10 +21,9 @@ L[a-zA-Z_]
 "void"		{ count(); return(VOID); }
 "while"		{ count(); return(WHILE); }
 "for"		{ count(); return(FOR); }
-"="		{ count(); return('='); }
-[$]?{L}({L}|{D})*	{ count();yylval.text=yytext; return(IDENTIFIER); }
-{D}+    	{ count(); return(CONSTANTI); }
-{D}+"."{D}*     { count(); return(CONSTANTF); }
+[$]?{L}({L}|{D})*	{ count();yylval.text=strdup(yytext); return(IDENTIFIER); }
+{D}+    	{ count(); yylval.integer = atoi(yytext);return(CONSTANTI); }
+{D}+"."{D}*     { count(); yylval.Float = atof(yytext);return(CONSTANTF); }
 "+="		{ count(); return(ADD_ASSIGN); }
 "-="		{ count(); return(SUB_ASSIGN); }
 "*="		{ count(); return(MUL_ASSIGN); }
@@ -39,6 +38,7 @@ L[a-zA-Z_]
 "}"      	{ count(); return('}'); }
 ","		{ count(); return(','); }
 "/"		{ count(); return('/'); }
+"="		{ count(); return('='); }
 "("		{ count(); return('('); }
 ")"		{ count(); return(')'); }
 "["     	{ count(); return('['); }

@@ -10,7 +10,11 @@
 	int yylex ();
 	int yyerror ();
 
-	typedef void*(*fPointer)(void*);
+	int new_reg(){
+	static i =0;
+	i++;
+	return i;
+}
 
 %}
 
@@ -24,6 +28,7 @@
 
 %union{
 	int integer;
+	float Float;
 	void * obj;
 	int affect;
 	char * text;
@@ -35,7 +40,8 @@
 %type<text> IDENTIFIER
 %type<list> declarator_list
 %type<integer> CONSTANTI
-%type<obj>  CONSTANTF  expression 
+%type<Float> CONSTANTF
+%type<obj>    expression 
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
 %type<type> type_name 
@@ -44,11 +50,11 @@
 %%
 
 primary_expression
-: IDENTIFIER 									{printf("id lu : %s\n", $1); insertNode(htable,$1);$$=get_node(htable,$1);printf("<fin>\n");}
+: IDENTIFIER 									{ insertNode(htable,$1);$$=get_node(htable,$1);}
 | CONSTANTI										{$$=varCreateInt($1);}
-| CONSTANTF
+| CONSTANTF 									{$$=varCreateFloat($1);}
 | '(' expression ')'    						{$$=$2;}
-| IDENTIFIER '(' ')'							{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' ')'							{printf("fct_id lu %s\n",$1 ); insertNode(htable,$1);$$=get_node(htable,$1);}
 | IDENTIFIER '(' argument_expression_list ')' 	{ insertNode(htable,$1);$$=get_node(htable,$1);}
 | IDENTIFIER INC_OP 							{ insertNode(htable,$1);$$=get_node(htable,$1);}
 | IDENTIFIER DEC_OP								{ insertNode(htable,$1);$$=get_node(htable,$1);}
@@ -121,8 +127,8 @@ declarator_list
 
 type_name
 : VOID 			{$$=VOID_TYPE;}
-| INT   		{$$=1;}//{union _value val; $$=varCreate(INT_TYPE,val);}
-| FLOAT			{$$=2;}//{union _value val; $$=varCreate(FLOAT_TYPE,val);}
+| INT   		{$$=INT_TYPE;}//{union _value val; $$=varCreate(INT_TYPE,val);}
+| FLOAT			{$$=FLOAT_TYPE;}//{union _value val; $$=varCreate(FLOAT_TYPE,val);}
 ;
 
 declarator
@@ -234,6 +240,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
+	htable=init_tree();
 	yyparse ();
 	free (file_name);
 	return 0;
