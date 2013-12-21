@@ -49,7 +49,7 @@
 %%
 
 primary_expression
-: IDENTIFIER 									{$$=get_node(htable,$1);}
+: IDENTIFIER 									{$$=getVar($1,htable);}
 | CONSTANTI										{$$=varCreateInt($1);}
 | CONSTANTF 									{$$=varCreateFloat($1);}
 | '(' expression ')'    						{$$=$2;}

@@ -316,9 +316,17 @@ struct _variable * declareVar(char* nom,struct _node* htab){
 	if(get_node(htab,dest)==NULL)
 		fprintf(stderr, "Variable non set : %s\n",dest);
 	return var;
-	
 }
 
+struct _variable * getVar(char* nom,struct _node* htab){
+	char dest [100];
+	sprintf(dest,"/%s",nom);
+	struct _variable * var =NULL;
+	var = get_node(htab,dest);
+	if (!var)
+		fprintf(stderr, "%s (%d) Unreachable variable : %s\n",__FILE__,__LINE__,dest );
+	return var;
+}
 
 void setType(struct _variable *var, enum _type t){
 	if(! var){
