@@ -302,6 +302,14 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 	}
 }
 
+void print_debug(char *data) {
+	int i;
+	fprintf(stderr,">>>>>>>>>>>>>>>>>>>>");
+	for(i=0;data[i]!='\0';i++)
+		fprintf(stderr,"%c",data[i]);
+	fprintf(stderr,"\n");
+}
+
 struct _variable * declareVar(char* nom){
 if(!htable)
 	printf("No htab\n"); 
@@ -309,7 +317,7 @@ printf("declaration de %s\n",nom);
 char dest[100];
 sprintf(dest,"/%s",nom);
 insertNode(htable,dest);
-
+print_debug(dest);
 struct _variable * var = get_node(htable,dest);
 if(!var)
 	printf("No return\n");

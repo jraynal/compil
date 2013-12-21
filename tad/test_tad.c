@@ -25,6 +25,8 @@ void test_var(struct _variable *data, int val){
 		DB(Testing returned values)
 		assert(data->value.ival==val);
 	}
+	else
+		assert(1==0);
 }
 
 void test_init_tree(){
@@ -40,8 +42,10 @@ void test_set(){
 	char *bob="/bob";
 	char *victoria="/victoria";
 	char *vob="/vob";
+	char *accel="/$accel";
 	DB(set node)
-	
+	set_node(root,accel,init_data(111));
+	test_var(get_node(root,accel),111);
 	set_node(root,bob,init_data(42));
 	DB(get node without value)
 	assert(get_node(root,b)==NULL);
@@ -65,7 +69,7 @@ void test_set(){
 	//~ set_node(root,vob,init_data(123));
 	//~ test_var(get_node(root,vob),123);
 	//~ test_var(get_node(root,bob),12);
-	//~ DB(free)
+	DB(free)
 	assert(EXIT_SUCCESS==del_tree(root));
 }
 
