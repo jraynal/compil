@@ -41,6 +41,7 @@ void test_set(){
 	char *victoria="/victoria";
 	char *vob="/vob";
 	DB(set node)
+	
 	set_node(root,bob,init_data(42));
 	DB(get node without value)
 	assert(get_node(root,b)==NULL);
@@ -49,12 +50,15 @@ void test_set(){
 	DB(get good variable)
 	assert(get_node(root,bob)!=NULL);
 	test_var(get_node(root,bob),42);
+	
 	set_node(root,bo,init_data(23));
 	test_var(get_node(root,bo),23);
 	test_var(get_node(root,bob),42);
+	
 	set_node(root,bob,init_data(12));
 	test_var(get_node(root,bo),23);
 	test_var(get_node(root,bob),12);
+	
 	set_node(root,victoria,init_data(1));
 	//~ test_var(get_node(root,victoria),1);
 	//~ assert(get_node(root,vob)==NULL);

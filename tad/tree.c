@@ -15,7 +15,7 @@ struct _node *init_tree(){
 }
 
 int del_tree(struct _node *root){
-	int exit =1;
+	int exit =1,done =1;
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
@@ -27,26 +27,36 @@ int del_tree(struct _node *root){
 	}
 	/* Si on n'est pas sur une feuille, faut lancer sur tout les fils */
 	else {
-		/* On sauvegarde le noeud actuel */
-		struct _node *tmp=root;
-		/* On supprime ses frères */
-		do{	
-			/* Verificateur de boucle */
-			if(!is_last_son(tmp))
-				tmp=tmp->brother;
+		/* On sauvegarde le noeud suivant*/
+		struct _node *tmp=root->first_son;
+		struct _node *tmp2 = root;
+			/* Pour Chaque fils */
+			do{
+			done=1;
+			/* On supprime ses frères */
+			exit=1;
+				do{
+					/* Verificateur de boucle */
+					if(is_last_son(tmp2))
+						exit=0;
+					else
+						tmp2=tmp2->brother;
+					/* suppression des fils de chaque frêre */
+					//del_tree(tmp->first_son);
+					
+					/* suppression du père courant */
+					if(root->variable!=NULL)
+						free(root->variable);
+					if(root!=NULL)
+						free(root);
+					/* On passe au frêre */
+					root=tmp;
+				}while(exit);
+			if(is_leaf(tmp))
+				done=0;
 			else
-				exit=0;
-			/* suppression des fils de chaque frêre */
-			del_tree(tmp->first_son);
-			
-			/* suppression du père courant */
-			if(root->variable!=NULL)
-				free(root->variable);
-			if(root!=NULL)
-			 free(root);
-			/* On passe au frêre */
-			root=tmp;
-		}while(exit);
+				tmp=root->first_son;
+		}while(done);
 	}
 	return EXIT_SUCCESS;
 }
@@ -72,8 +82,8 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 			}
 			if(path[i]=='\0'){
 				/* On est à la fin du mot, on remplace les données */
-				if(current->variable!=NULL)
-					free(current->variable);
+				//if(current->variable!=NULL)
+				//	free(current->variable);
 				current->variable=data;
 			}
 		/* controleur de boucle */
@@ -97,6 +107,9 @@ struct _variable *get_node(struct _node *root, char *path){
 
 	}
 
+	if(root==NULL||path==NULL){
+		return NULL;
+	}
 	struct _node *father = root;
 	struct _node *current = root->first_son;
 	int i=1,exit=0; // i commence à 1 pour éviter le "/"
