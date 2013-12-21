@@ -302,9 +302,34 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 	}
 }
 
-void setType(struct _list * list , enum _type type){
+struct _variable * declareVar(char* nom){
+if(!htable)
+	printf("No htab\n"); 
+printf("declaration de %s\n",nom);
+char dest[100];
+sprintf(dest,"/%s",nom);
+insertNode(htable,dest);
 
+struct _variable * var = get_node(htable,dest);
+if(!var)
+	printf("No return\n");
+return var;
+	
 }
+
+
+void setType(struct _variable *var, enum _type t){
+	if(! var){
+		fprintf(stderr, "No value given : %s(%d)\n",__FILE__,__LINE__);
+		return;
+	}
+	var->type = t;
+	return;
+}
+
+// void setType(struct _list * list , enum _type type){
+
+// }
 
 struct _list * createList(){
 	struct _list* list = malloc(sizeof(struct _list));

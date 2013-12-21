@@ -131,7 +131,7 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  												{printf("declaration de %s\n",$1);insertNode(htable,$1);$$=get_node(htable,$1);}
+: IDENTIFIER  												{$$=declareVar($1);}
 | '(' declarator ')'                      					{$$=NULL;}
 | declarator '[' CONSTANTI ']'             					{$$=NULL;}
 | declarator '[' ']'                        				{$$=NULL;}
