@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define LLVM( string ) fprintf(stdout,#string); fprintf(stdout,"\n");
+#define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));
