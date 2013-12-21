@@ -10,11 +10,7 @@
 	int yylex ();
 	int yyerror ();
 
-	int new_reg(){
-	static int i =0;
-	i++;
-	return i;
-}
+
 
 %}
 
