@@ -30,7 +30,7 @@ enum _type {
 struct _variable {
 	enum _type type;
 	union _value value;
-	int isFree;
+	char* name;
 };
 
 
