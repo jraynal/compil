@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#define LLVM( string ) fprintf(stdout,#string); fprintf(stdout,"\n");
+
 struct _variable * varCreate(enum _type type,	union _value value){
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
@@ -94,12 +96,12 @@ struct _variable *add(struct _variable * a,struct _variable * b){
 struct _variable *sub(struct _variable * a,struct _variable * b){
 	if (!a || !b)
 		return NULL;
-	if (a->type == UNKNOWN)
-		a->type = b->type;
+	if (a->type == UNKNOWN)     // b ne peut jamais être UNKNOW?
+		a->type = b->type;		//faut donc caster la valeur de a avant de calculer
 	else if (b->type != a->type && b->type != UNKNOWN)
 		return NULL;
 	if (a->type == INT_TYPE)
-		a->value.ival -= b->value.ival;
+		a->value.ival -= b->value.ival; //  LLVM("sub i32 %%d, %%d",,)
 	else if(a->type == FLOAT_TYPE)
 		a->value.fval -= b->value.fval;
 	else
@@ -222,7 +224,7 @@ struct _variable * ne_op (struct _variable * a,struct _variable * b){
 	if(b->type == INT_TYPE) 
 		valB = (float)b->value.ival;
 	union _value val;
-	val.ival= valA != valB;
+	val.ival= valA != valB; // ?? c'est quoi cette ligne?
 	struct _variable * var = varCreate(INT_TYPE,val);
 	varFree(a);
 	varFree(b);

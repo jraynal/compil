@@ -29,24 +29,28 @@ int del_tree(struct _node *root){
 	else {
 		/* On sauvegarde le noeud actuel */
 		struct _node *tmp=root;
+		/* Pour Chaque fils */
+		do{
 		/* On supprime ses frères */
-		do{	
-			/* Verificateur de boucle */
-			if(!is_last_son(tmp))
-				tmp=tmp->brother;
-			else
-				exit=0;
-			/* suppression des fils de chaque frêre */
-			del_tree(tmp->first_son);
-			
-			/* suppression du père courant */
-			if(root->variable!=NULL)
-				free(root->variable);
-			if(root!=NULL)
-			 free(root);
-			/* On passe au frêre */
-			root=tmp;
-		}while(exit);
+		exit=1;
+			do{	
+				/* Verificateur de boucle */
+				if(!is_last_son(tmp))
+					tmp=tmp->brother;
+				else
+					exit=0;
+				/* suppression des fils de chaque frêre */
+				//del_tree(tmp->first_son);
+				
+				/* suppression du père courant */
+				if(root->variable!=NULL)
+					free(root->variable);
+				if(root!=NULL)
+					free(root);
+				/* On passe au frêre */
+				root=tmp;
+			}while(exit);
+		
 	}
 	return EXIT_SUCCESS;
 }
@@ -72,8 +76,8 @@ int set_node(struct _node *root, const char *path, struct _variable *data){
 			}
 			if(path[i]=='\0'){
 				/* On est à la fin du mot, on remplace les données */
-				if(current->variable!=NULL)
-					free(current->variable);
+				//if(current->variable!=NULL)
+				//	free(current->variable);
 				current->variable=data;
 			}
 		/* controleur de boucle */
@@ -91,7 +95,7 @@ int set_node(struct _node *root, const char *path, struct _variable *data){
 }
 
 struct _variable *get_node(struct _node *root, char *path){
-	if(!root || ! path){
+	if(root==NULL||path==NULL){
 		return NULL;
 	}
 	struct _node *father = root;
