@@ -17,9 +17,9 @@ struct _node *init_tree(){
 int del_bro(struct _node *node) {
 	if(node==NULL)
 		return EXIT_FAILURE;
-	fprintf(stderr,"%c\n",node->c);
+	fprintf(stderr,"%c",node->c);
 	if(!is_last_son(node))
-		del_bro(node->brother);
+		del_tree(node->brother);
 	if(node->variable!=NULL)
 		free(node->variable);
 	free(node);
@@ -38,7 +38,7 @@ int del_tree(struct _node *root){
 
 int set_node(struct _node *root, char *path, struct _variable *data){
 	struct _node *current = root;
-	struct _node *sons = root;
+	struct _node *brothers = root;
 	int i=0,exit;
 	if(root==NULL||path==NULL)
 		return EXIT_FAILURE;
@@ -54,7 +54,7 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 			else{
 				if(is_last_son(current)){
 				/* Si la lettre n'est pas dans la liste des fils, il faut rajouter un fils!! */
-				add_node(sons,path[i]);
+				add_node(brothers,path[i]);
 				exit=0;
 				i++;
 				}
@@ -63,16 +63,17 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 			}
 			if(path[i]=='\0'){
 				/* On est à la fin du mot, on remplace les données */
-				//if(current->variable!=NULL)
-				//	free(current->variable);
+				if(current->variable!=NULL)
+					free(current->variable);
 				current->variable=data;
+				return EXIT_SUCCESS;
 			}
 		}while(exit);
 		/* On ajoute le suivant si on est sur une feuille*/
 		if(is_leaf(current))
 			add_node(current,path[i]);
 		/* On descend d'un rang */
-		current=current->first_son;
+		brothers=current=current->first_son;
 	}
 	return EXIT_SUCCESS;
 }
