@@ -38,7 +38,7 @@ int del_tree(struct _node *root){
 
 int set_node(struct _node *root, char *path, struct _variable *data){
 	struct _node *current = root;
-	struct _node *brothers = root;
+	struct _node *father = root;
 	int i=0,exit;
 	if(root==NULL||path==NULL)
 		return EXIT_FAILURE;
@@ -54,7 +54,7 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 			else{
 				if(is_last_son(current)){
 				/* Si la lettre n'est pas dans la liste des fils, il faut rajouter un fils!! */
-				add_node(brothers,path[i]);
+				add_node(father,path[i]);
 				exit=0;
 				i++;
 				}
@@ -73,7 +73,8 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 		if(is_leaf(current))
 			add_node(current,path[i]);
 		/* On descend d'un rang */
-		brothers=current=current->first_son;
+		father=current;
+		current=current->first_son;
 	}
 	return EXIT_SUCCESS;
 }
