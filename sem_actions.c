@@ -277,7 +277,7 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 	// LLVM(store )
 	if (toModify->type == INT_TYPE){
 		int i = new_reg	();
-		fprintf(stdout, " store i32 %%%d, i32 %d \n",i,withWhat->value.ival);
+		fprintf(stdout, " store i32 %d,i32 %%%d\n",i,withWhat->value.ival);
 		switch(how){
 			case 1:
 			toModify->value.ival *= withWhat->value.ival;
