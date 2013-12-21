@@ -273,7 +273,7 @@ char *footer(){
 char *header(){
 	return
 	"
-			target triple = "x86_64-unknown-linux-gnu"
+			target triple = \"x86_64-unknown-linux-gnu\"
 		
 		%struct.CarElt = type {
 			i32,

@@ -110,8 +110,8 @@ struct _variable *sub(struct _variable * a,struct _variable * b){
 		return NULL;
 	if (a->type == INT_TYPE)
 		a->value.ival -= b->value.ival; //  LLVM("%%d = sub i32 %%d, %%d",registre de sortie, a->value.ival, b->value.ival)
-	else if(a->type == FLOAT_TYPE)
-		a->value.fval -= b->value.fval;
+	else if(a->type == FLOAT_TYPE)		//  
+		a->value.fval -= b->value.fval;	// LLVM("%%d = fsub float %%d, %%d",registre de sortie, a->value.fval, b->value.fval)
 	else
 		return NULL;
 	varFree(b);
