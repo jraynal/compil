@@ -1,7 +1,8 @@
 #ifndef TREE_H
 #define TREE_H
 
-#include "stdlib.h"
+#include <stdlib.h>
+#include <stdio.h>
 #include "structs.h"
 
 struct _node * init_tree();

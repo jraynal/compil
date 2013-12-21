@@ -11,7 +11,7 @@
 	int yyerror ();
 
 	int new_reg(){
-	static i =0;
+	static int i =0;
 	i++;
 	return i;
 }
@@ -38,10 +38,9 @@
 }
 
 %type<text> IDENTIFIER
-%type<list> declarator_list
 %type<integer> CONSTANTI
 %type<Float> CONSTANTF
-%type<obj>    expression 
+%type<obj>    expression  declarator_list declarator
 %type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
 %type<type> type_name 
@@ -50,18 +49,18 @@
 %%
 
 primary_expression
-: IDENTIFIER 									{ insertNode(htable,$1);$$=get_node(htable,$1);}
+: IDENTIFIER 									{$$=get_node(htable,$1);}
 | CONSTANTI										{$$=varCreateInt($1);}
 | CONSTANTF 									{$$=varCreateFloat($1);}
 | '(' expression ')'    						{$$=$2;}
-| IDENTIFIER '(' ')'							{printf("fct_id lu %s\n",$1 ); insertNode(htable,$1);$$=get_node(htable,$1);}
-| IDENTIFIER '(' argument_expression_list ')' 	{ insertNode(htable,$1);$$=get_node(htable,$1);}
-| IDENTIFIER INC_OP 							{ insertNode(htable,$1);$$=get_node(htable,$1);}
-| IDENTIFIER DEC_OP								{ insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' ')'							{insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 	{ $$=NULL;}
+| IDENTIFIER INC_OP 							{ $$=NULL;}
+| IDENTIFIER DEC_OP								{ $$=NULL;}
 ;
 
 postfix_expression
-: primary_expression							{$$=$1}
+: primary_expression							{$$=$1;}
 | postfix_expression '[' expression ']'			{}
 ;
 
@@ -121,7 +120,7 @@ declaration
 ;
 
 declarator_list
-: declarator 					{$$=createList();/*addElmtList()*/}
+: declarator 					{$$=$1;}//$$=createList();/*addElmtList()*/}
 | declarator_list ',' declarator 	{/*addElmtList()*/}
 ;
 
@@ -132,12 +131,12 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  												{add_identifier();}
-| '(' declarator ')'                      					{}
-| declarator '[' CONSTANTI ']'             					{}
-| declarator '[' ']'                        				{}
-| declarator '(' parameter_list ')'							{}
-| declarator '(' ')'										{}
+: IDENTIFIER  												{printf("declaration de %s\n",$1);insertNode(htable,$1);$$=get_node(htable,$1);}
+| '(' declarator ')'                      					{$$=NULL;}
+| declarator '[' CONSTANTI ']'             					{$$=NULL;}
+| declarator '[' ']'                        				{$$=NULL;}
+| declarator '(' parameter_list ')'							{$$=NULL;}
+| declarator '(' ')'										{$$=NULL;}
 ;
 
 parameter_list
@@ -248,445 +247,9 @@ int main (int argc, char *argv[]) {
 
 
 char *footer(){
-	return "
-			ret void
-		}
-		
-		declare float @norm_pi_pi(float %a)
-		declare float @get_track_angle(%struct.tTrkLocPos*)
-		declare float @get_pos_to_right(%struct.tTrkLocPos*)
-		declare float @get_pos_to_middle(%struct.tTrkLocPos*)
-		declare float @get_pos_to_left(%struct.tTrkLocPos*)
-		declare float @get_pos_to_start(%struct.tTrkLocPos*)
-		declare float @get_track_seg_length(%struct.trackSeg*)
-		declare float @get_track_seg_width(%struct.trackSeg*)
-		declare float @get_track_seg_start_width(%struct.trackSeg*)
-		declare float @get_track_seg_end_width(%struct.trackSeg*)
-		declare float @get_track_seg_radius(%struct.trackSeg*)
-		declare float @get_track_seg_right_radius(%struct.trackSeg*)
-		declare float @get_track_seg_left_radius(%struct.trackSeg*)
-		declare float @get_track_seg_arc(%struct.trackSeg*)
-		declare %struct.trackSeg* @get_track_seg_next(%struct.trackSeg*)
-		declare float @get_car_yaw(%struct.CarElt*)
-	";
+	return "ret void\n		}\n		\n		declare float @norm_pi_pi(float %a)\n		declare float @get_track_angle(%struct.tTrkLocPos*)\n		declare float @get_pos_to_right(%struct.tTrkLocPos*)\n		declare float @get_pos_to_middle(%struct.tTrkLocPos*)\n		declare float @get_pos_to_left(%struct.tTrkLocPos*)\n		declare float @get_pos_to_start(%struct.tTrkLocPos*)\n		declare float @get_track_seg_length(%struct.trackSeg*)\n		declare float @get_track_seg_width(%struct.trackSeg*)\n		declare float @get_track_seg_start_width(%struct.trackSeg*)\n		declare float @get_track_seg_end_width(%struct.trackSeg*)\n		declare float @get_track_seg_radius(%struct.trackSeg*)\n		declare float @get_track_seg_right_radius(%struct.trackSeg*)\n		declare float @get_track_seg_left_radius(%struct.trackSeg*)\n		declare float @get_track_seg_arc(%struct.trackSeg*)\n		declare %struct.trackSeg* @get_track_seg_next(%struct.trackSeg*)\n		declare float @get_car_yaw(%struct.CarElt*)\n	";
 }
 char *header(){
-	return
-	"
-			target triple = "x86_64-unknown-linux-gnu"
-		
-		%struct.CarElt = type {
-			i32,
-			%struct.tInitCar,
-			%struct.tPublicCar,
-			%struct.tCarRaceInfo,
-			%struct.tPrivCar,
-			%struct.tCarCtrl,
-			%struct.tCarPitCmd,
-			%struct.RobotItf*,
-			%struct.CarElt*
-		}
-		
-		%struct.tInitCar = type {
-			[32 x i8],
-			[32 x i8],
-			[32 x i8],
-			[32 x i8],
-			i32,
-			i32,
-			i32,
-			i32,
-			[3 x float],
-			%struct.t3Dd,
-			%struct.t3Dd,
-			%struct.t3Dd,
-			float,
-			float,
-			%struct.t3Dd,
-			[4 x %struct.tWheelSpec],
-			%struct.tVisualAttributes
-		}
-		
-		%struct.t3Dd = type {
-			float,
-			float,
-			float
-		}
-		
-		%struct.tWheelSpec = type {
-			float,
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.tVisualAttributes = type {
-			i32,
-			[2 x %struct.t3Dd],
-			float
-		}
-		
-		%struct.tPublicCar = type {
-			%struct.tDynPt,
-			%struct.tDynPt,
-			[4 x [4 x float]],
-			%struct.tTrkLocPos,
-			i32,
-			[4 x %struct.tPosd]
-		}
-		
-		%struct.tDynPt = type {
-			%struct.tPosd,
-			%struct.tPosd,
-			%struct.tPosd
-		}
-		
-		%struct.tPosd = type {
-			float,
-			float,
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.tTrkLocPos = type {
-			%struct.trackSeg*,
-			i32,
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.trackSeg = type {
-			i8*,
-			i32,
-			i32,
-			i32,
-			i32,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			%struct.t3Dd,
-			[4 x %struct.t3Dd],
-			[7 x float],
-			float,
-			float,
-			float,
-			%struct.t3Dd,
-			i32,
-			float,
-			i32,
-			float,
-			%struct.SegExt*,
-			%struct.trackSurface*,
-			[2 x %struct.trackBarrier*],
-			%struct.RoadCam*,
-			%struct.trackSeg*,
-			%struct.trackSeg*,
-			%union.anon.0
-		}
-		
-		%struct.SegExt = type {
-			i32,
-			i32*
-		}
-		
-		%struct.trackSurface = type {
-			%struct.trackSurface*,
-			i8*,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.trackBarrier = type {
-			i32,
-			float,
-			float,
-			%struct.trackSurface*,
-			%class.v2t
-		}
-		
-		%class.v2t = type {
-			%union.anon
-		}
-		
-		%union.anon = type {
-			%struct.anon
-		}
-		
-		%struct.anon = type {
-			float,
-			float
-		}
-		
-		%struct.RoadCam = type {
-			i8*,
-			%struct.t3Dd,
-			%struct.RoadCam*
-		}
-		
-		%union.anon.0 = type {
-			%struct.anon.1
-		}
-		
-		%struct.anon.1 = type {
-			%struct.trackSeg*,
-			%struct.trackSeg*
-		}
-		
-		%struct.tCarRaceInfo = type {
-			double,
-			i8,
-			double,
-			double,
-			double,
-			double,
-			float,
-			float,
-			i32,
-			i32,
-			i32,
-			i32,
-			double,
-			i32,
-			double,
-			double,
-			float,
-			float,
-			double,
-			%struct.TrackOwnPit*,
-			i32,
-			%struct.CarPenaltyHead
-		}
-		
-		%struct.TrackOwnPit = type {
-			%struct.tTrkLocPos,
-			i32,
-			float,
-			float,
-			i32,
-			[4 x %struct.CarElt*]
-		}
-		
-		%struct.CarPenaltyHead = type {
-			%struct.CarPenalty*,
-			%struct.CarPenalty**
-		}
-		
-		%struct.CarPenalty = type {
-			i32,
-			i32,
-			%struct.anon.2
-		}
-		
-		%struct.anon.2 = type {
-			%struct.CarPenalty*,
-			%struct.CarPenalty**
-		}
-		
-		%struct.tPrivCar = type {
-			i8*,
-			i8*,
-			i32,
-			[32 x i8],
-			[4 x %struct.tWheelState],
-			[4 x %struct.tPosd],
-			i32,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			[10 x float],
-			i32,
-			i32,
-			[4 x float],
-			[4 x float],
-			i32,
-			i32,
-			float,
-			%struct.t3Dd,
-			%struct.t3Dd,
-			i32,
-			i32,
-			%struct.tCollisionState_
-		}
-		
-		%struct.tWheelState = type {
-			%struct.tPosd,
-			float,
-			float,
-			i32,
-			%struct.trackSeg*,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.tCollisionState_ = type {
-			i32,
-			[3 x float],
-			[3 x float]
-		}
-		
-		%struct.tCarCtrl = type {
-			float,
-			float,
-			float,
-			float,
-			i32,
-			i32,
-			[4 x [32 x i8]],
-			[4 x float],
-			i32
-		}
-		
-		%struct.tCarPitCmd = type {
-			float,
-			i32,
-			i32,
-			%struct.tCarPitSetup
-		}
-		
-		%struct.tCarPitSetup = type {
-			%struct.tCarPitSetupValue,
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			%struct.tCarPitSetupValue,
-			%struct.tCarPitSetupValue,
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[4 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[8 x %struct.tCarPitSetupValue],
-			[2 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x %struct.tCarPitSetupValue],
-			[3 x i32]
-		}
-		
-		%struct.tCarPitSetupValue = type {
-			float,
-			float,
-			float
-		}
-		
-		%struct.RobotItf = type {
-			void (i32, %struct.tTrack*, i8*, i8**, %struct.Situation*)*,
-			 {}*,
-			 {}*,
-			 {}*,
-			 i32 (i32, %struct.CarElt*, %struct.Situation*)*,
-			 void (i32)*,
-			 i32
-		}
-		
-		%struct.tTrack = type {
-			i8*,
-			i8*,
-			i8*,
-			i8*,
-			i8*,
-			i8*,
-			i32,
-			i32,
-			float,
-			float,
-			%struct.tTrackPitInfo,
-			%struct.trackSeg*,
-			%struct.trackSurface*,
-			%struct.t3Dd,
-			%struct.t3Dd,
-			%struct.tTrackGraphicInfo
-		}
-		
-		%struct.tTrackPitInfo = type {
-			i32,
-			i32,
-			i32,
-			i32,
-			float,
-			float,
-			float,
-			%struct.trackSeg*,
-			%struct.trackSeg*,
-			%struct.trackSeg*,
-			%struct.trackSeg*,
-			%struct.TrackOwnPit*,
-			i32,
-			i32
-		}
-		
-		%struct.tTrackGraphicInfo = type {
-			i8*,
-			i8*,
-			i32,
-			[3 x float],
-			i32,
-			i8**,
-			%struct.tTurnMarksInfo
-		}
-		
-		%struct.tTurnMarksInfo = type {
-			float,
-			float,
-			float,
-			float
-		}
-		
-		%struct.Situation = type {
-			%struct.tRaceAdmInfo,
-			double,
-			double,
-			i32,
-			%struct.CarElt**
-		}
-		
-		%struct.tRaceAdmInfo = type {
-			i32,
-			i32,
-			i32,
-			i32,
-			i32,
-			i64
-		}
-		
-		define void @drive(i32 %index, %struct.CarElt* %car, %struct.Situation* %s) {
-	";
+	return	"\n			target triple = \"x86_64-unknown-linux-gnu\"\n		\n		%struct.CarElt = type {\n			i32,\n			%struct.tInitCar,\n			%struct.tPublicCar,\n			%struct.tCarRaceInfo,\n			%struct.tPrivCar,\n			%struct.tCarCtrl,\n			%struct.tCarPitCmd,\n			%struct.RobotItf*,\n			%struct.CarElt*\n		}\n		\n		%struct.tInitCar = type {\n			[32 x i8],\n			[32 x i8],\n			[32 x i8],\n			[32 x i8],\n			i32,\n			i32,\n			i32,\n			i32,\n			[3 x float],\n			%struct.t3Dd,\n			%struct.t3Dd,\n			%struct.t3Dd,\n			float,\n			float,\n			%struct.t3Dd,\n			[4 x %struct.tWheelSpec],\n			%struct.tVisualAttributes\n		}\n		\n		%struct.t3Dd = type {\n			float,\n			float,\n			float\n		}\n		\n		%struct.tWheelSpec = type {\n			float,\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.tVisualAttributes = type {\n			i32,\n			[2 x %struct.t3Dd],\n			float\n		}\n		\n		%struct.tPublicCar = type {\n			%struct.tDynPt,\n			%struct.tDynPt,\n			[4 x [4 x float]],\n			%struct.tTrkLocPos,\n			i32,\n			[4 x %struct.tPosd]\n		}\n		\n		%struct.tDynPt = type {\n			%struct.tPosd,\n			%struct.tPosd,\n			%struct.tPosd\n		}\n		\n		%struct.tPosd = type {\n			float,\n			float,\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.tTrkLocPos = type {\n			%struct.trackSeg*,\n			i32,\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.trackSeg = type {\n			i8*,\n			i32,\n			i32,\n			i32,\n			i32,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			%struct.t3Dd,\n			[4 x %struct.t3Dd],\n			[7 x float],\n			float,\n			float,\n			float,\n			%struct.t3Dd,\n			i32,\n			float,\n			i32,\n			float,\n			%struct.SegExt*,\n			%struct.trackSurface*,\n			[2 x %struct.trackBarrier*],\n			%struct.RoadCam*,\n			%struct.trackSeg*,\n			%struct.trackSeg*,\n			%union.anon.0\n		}\n		\n		%struct.SegExt = type {\n			i32,\n			i32*\n		}\n		\n		%struct.trackSurface = type {\n			%struct.trackSurface*,\n			i8*,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.trackBarrier = type {\n			i32,\n			float,\n			float,\n			%struct.trackSurface*,\n			%class.v2t\n		}\n		\n		%class.v2t = type {\n			%union.anon\n		}\n		\n		%union.anon = type {\n			%struct.anon\n		}\n		\n		%struct.anon = type {\n			float,\n			float\n		}\n		\n		%struct.RoadCam = type {\n			i8*,\n			%struct.t3Dd,\n			%struct.RoadCam*\n		}\n		\n		%union.anon.0 = type {\n			%struct.anon.1\n		}\n		\n		%struct.anon.1 = type {\n			%struct.trackSeg*,\n			%struct.trackSeg*\n		}\n		\n		%struct.tCarRaceInfo = type {\n			double,\n			i8,\n			double,\n			double,\n			double,\n			double,\n			float,\n			float,\n			i32,\n			i32,\n			i32,\n			i32,\n			double,\n			i32,\n			double,\n			double,\n			float,\n			float,\n			double,\n			%struct.TrackOwnPit*,\n			i32,\n			%struct.CarPenaltyHead\n		}\n		\n		%struct.TrackOwnPit = type {\n			%struct.tTrkLocPos,\n			i32,\n			float,\n			float,\n			i32,\n			[4 x %struct.CarElt*]\n		}\n		\n		%struct.CarPenaltyHead = type {\n			%struct.CarPenalty*,\n			%struct.CarPenalty**\n		}\n		\n		%struct.CarPenalty = type {\n			i32,\n			i32,\n			%struct.anon.2\n		}\n		\n		%struct.anon.2 = type {\n			%struct.CarPenalty*,\n			%struct.CarPenalty**\n		}\n		\n		%struct.tPrivCar = type {\n			i8*,\n			i8*,\n			i32,\n			[32 x i8],\n			[4 x %struct.tWheelState],\n			[4 x %struct.tPosd],\n			i32,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			[10 x float],\n			i32,\n			i32,\n			[4 x float],\n			[4 x float],\n			i32,\n			i32,\n			float,\n			%struct.t3Dd,\n			%struct.t3Dd,\n			i32,\n			i32,\n			%struct.tCollisionState_\n		}\n		\n		%struct.tWheelState = type {\n			%struct.tPosd,\n			float,\n			float,\n			i32,\n			%struct.trackSeg*,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.tCollisionState_ = type {\n			i32,\n			[3 x float],\n			[3 x float]\n		}\n		\n		%struct.tCarCtrl = type {\n			float,\n			float,\n			float,\n			float,\n			i32,\n			i32,\n			[4 x [32 x i8]],\n			[4 x float],\n			i32\n		}\n		\n		%struct.tCarPitCmd = type {\n			float,\n			i32,\n			i32,\n			%struct.tCarPitSetup\n		}\n		\n		%struct.tCarPitSetup = type {\n			%struct.tCarPitSetupValue,\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			%struct.tCarPitSetupValue,\n			%struct.tCarPitSetupValue,\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[4 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[8 x %struct.tCarPitSetupValue],\n			[2 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x %struct.tCarPitSetupValue],\n			[3 x i32]\n		}\n		\n		%struct.tCarPitSetupValue = type {\n			float,\n			float,\n			float\n		}\n		\n		%struct.RobotItf = type {\n			void (i32, %struct.tTrack*, i8*, i8**, %struct.Situation*)*,\n			 {}*,\n			 {}*,\n			 {}*,\n			 i32 (i32, %struct.CarElt*, %struct.Situation*)*,\n			 void (i32)*,\n			 i32\n		}\n		\n		%struct.tTrack = type {\n			i8*,\n			i8*,\n			i8*,\n			i8*,\n			i8*,\n			i8*,\n			i32,\n			i32,\n			float,\n			float,\n			%struct.tTrackPitInfo,\n			%struct.trackSeg*,\n			%struct.trackSurface*,\n			%struct.t3Dd,\n			%struct.t3Dd,\n			%struct.tTrackGraphicInfo\n		}\n		\n		%struct.tTrackPitInfo = type {\n			i32,\n			i32,\n			i32,\n			i32,\n			float,\n			float,\n			float,\n			%struct.trackSeg*,\n			%struct.trackSeg*,\n			%struct.trackSeg*,\n			%struct.trackSeg*,\n			%struct.TrackOwnPit*,\n			i32,\n			i32\n		}\n		\n		%struct.tTrackGraphicInfo = type {\n			i8*,\n			i8*,\n			i32,\n			[3 x float],\n			i32,\n			i8**,\n			%struct.tTurnMarksInfo\n		}\n		\n		%struct.tTurnMarksInfo = type {\n			float,\n			float,\n			float,\n			float\n		}\n		\n		%struct.Situation = type {\n			%struct.tRaceAdmInfo,\n			double,\n			double,\n			i32,\n			%struct.CarElt**\n		}\n		\n		%struct.tRaceAdmInfo = type {\n			i32,\n			i32,\n			i32,\n			i32,\n			i32,\n			i64\n		}\n		\n		define void @drive(i32 %index, %struct.CarElt* %car, %struct.Situation* %s) {\n	";
 }
 

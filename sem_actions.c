@@ -311,7 +311,6 @@ struct _list * createList(){
 }
 
 void insertNode(struct _node* htab,char * nom){
-	printf("Insert %s",nom);
 	union _value val;
 	val.ival =0;
 	struct _variable * var = varCreate(UNKNOWN,val);

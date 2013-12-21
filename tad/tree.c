@@ -91,6 +91,12 @@ int set_node(struct _node *root, char *path, struct _variable *data){
 }
 
 struct _variable *get_node(struct _node *root, char *path){
+	if(root == NULL){
+		fprintf(stderr,"ERROR (%s:%d): Not valid tree ",__FILE__,__LINE__);
+		return NULL;
+
+	}
+
 	struct _node *father = root;
 	struct _node *current = root->first_son;
 	int i=1,exit=0; // i commence à 1 pour éviter le "/"
