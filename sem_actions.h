@@ -35,12 +35,14 @@ struct _variable * ne_op (struct _variable *,struct _variable *);
 struct _variable * eq_op (struct _variable *,struct _variable *);
 
 void affectValue (struct _variable *,int ,struct _variable *  );
-struct _variable * declareVar(char* nom);
+struct _variable * declareVar(char* nom, struct _node* htab);
+struct _variable * getVar(char* nom,struct _node* htab);
+
+
 void setType(struct _variable *var, enum _type t);
 // void setType(struct _list * , enum _type);
 struct _list * createList();
 
-void insertNode(struct _node* , char * nom);
 
 
 #endif //FUNCTIONS_H

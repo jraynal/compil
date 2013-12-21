@@ -25,22 +25,22 @@ struct _variable * varCreateInt(int i){
 		var->value.ival = i;
 		var->isFree =1;
 	}else
-		fprintf(stderr, "No created variable\n");
+	fprintf(stderr, "No created variable\n");
 
 	return var;
 }
 
 struct _variable * varCreateFloat(int i){ // LOL tu crée un float à partir d'un int?
 
-	struct _variable* var = malloc(sizeof(struct _variable));
-	if(var){
-		var->type = FLOAT_TYPE;
-		var->value.fval = i;
-		var->isFree =1;
-	}else 
-		fprintf(stderr, "No created variable\n");
+struct _variable* var = malloc(sizeof(struct _variable));
+if(var){
+	var->type = FLOAT_TYPE;
+	var->value.fval = i;
+	var->isFree =1;
+}else 
+fprintf(stderr, "No created variable\n");
 
-	return var;
+return var;
 }
 
 
@@ -310,21 +310,31 @@ void print_debug(char *data) {
 	fprintf(stderr,"\n");
 }
 
-struct _variable * declareVar(char* nom){
-if(!htable)
-	printf("No htab\n"); 
-printf("declaration de %s\n",nom);
-char dest[100];
-sprintf(dest,"/%s",nom);
-insertNode(htable,dest);
-print_debug(dest);
-struct _variable * var = get_node(htable,dest);
-if(!var)
-	printf("No return\n");
-return var;
-	
+struct _variable * declareVar(char* nom,struct _node* htab){
+	if(!htab)
+		fprintf(stderr, "No htab\n"); 
+	fprintf(stderr, "declaration de %s\n",nom);
+	char dest[100];
+	sprintf(dest,"/%s",nom);
+
+	union _value val;
+	val.ival =0;
+	struct _variable * var = varCreate(UNKNOWN,val);
+	set_node(htab,dest,var);
+	if(get_node(htab,dest)==NULL)
+		fprintf(stderr, "Variable non set : %s\n",dest);
+	return var;
 }
 
+struct _variable * getVar(char* nom,struct _node* htab){
+	char dest [100];
+	sprintf(dest,"/%s",nom);
+	struct _variable * var =NULL;
+	var = get_node(htab,dest);
+	if (!var)
+		fprintf(stderr, "%s (%d) Unreachable variable : %s\n",__FILE__,__LINE__,dest );
+	return var;
+}
 
 void setType(struct _variable *var, enum _type t){
 	if(! var){
@@ -344,10 +354,4 @@ struct _list * createList(){
 	return list;
 }
 
-void insertNode(struct _node* htab,char * nom){
-	union _value val;
-	val.ival =0;
-	struct _variable * var = varCreate(UNKNOWN,val);
-	set_node(htab,nom,var);
-}
 

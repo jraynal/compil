@@ -49,11 +49,11 @@
 %%
 
 primary_expression
-: IDENTIFIER 									{$$=get_node(htable,$1);}
+: IDENTIFIER 									{$$=getVar($1,htable);}
 | CONSTANTI										{$$=varCreateInt($1);}
 | CONSTANTF 									{$$=varCreateFloat($1);}
 | '(' expression ')'    						{$$=$2;}
-| IDENTIFIER '(' ')'							{insertNode(htable,$1);$$=get_node(htable,$1);}
+| IDENTIFIER '(' ')'							{ $$=NULL;}
 | IDENTIFIER '(' argument_expression_list ')' 	{ $$=NULL;}
 | IDENTIFIER INC_OP 							{ $$=NULL;}
 | IDENTIFIER DEC_OP								{ $$=NULL;}
@@ -116,7 +116,7 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';' {setType($2,$1);}
+: type_name declarator_list ';' {setType($2,$1);fprintf(stderr, "type : %d\n",((struct _variable*)$2)->type);}
 ;
 
 declarator_list
@@ -131,7 +131,7 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  												{$$=declareVar($1);}
+: IDENTIFIER  												{$$=declareVar($1,htable);if(!$$)printf("No return\n");}
 | '(' declarator ')'                      					{$$=NULL;}
 | declarator '[' CONSTANTI ']'             					{$$=NULL;}
 | declarator '[' ']'                        				{$$=NULL;}
@@ -240,7 +240,9 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 	htable=init_tree();
+	fprintf(stdout, "%s\n",header() );
 	yyparse ();
+	fprintf(stdout, "%s\n",footer() );
 	free (file_name);
 	return 0;
 }
