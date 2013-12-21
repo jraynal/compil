@@ -274,10 +274,10 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 		fprintf(stderr,"Invalid type %s:%d(%s)\n",__FILE__,__LINE__,__func__);
 		return;
 	}
-	LLVM("store ")
-	int i = new_reg();
+	// LLVM(store )
 	if (toModify->type == INT_TYPE){
-		// LLVM("i32 %%%d i32 %%%d",i)
+		int i = new_reg	();
+		fprintf(stdout, " store i32 %%%d, i32 %d \n",i,withWhat->value.ival);
 		switch(how){
 			case 1:
 			toModify->value.ival *= withWhat->value.ival;
