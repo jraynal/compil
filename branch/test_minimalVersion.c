@@ -1,6 +1,6 @@
 
 
 void f(){
-float $accel;
-$accel = 0.8;
+int $accel;
+$accel = 8;
 }

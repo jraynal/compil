@@ -45,7 +45,7 @@
 %%
 
 primary_expression
-: IDENTIFIER 									{$$=getVar($1,htable);}
+: IDENTIFIER 									{$$=getVar($1,htable);if($$==NULL) fprintf(stderr, "undefined value %s\n",$1 );}
 | CONSTANTI										{$$=varCreateInt($1);}
 | CONSTANTF 									{$$=varCreateFloat($1);}
 | '(' expression ')'    						{$$=$2;}
@@ -112,7 +112,7 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';' {setType($2,$1);fprintf(stderr, "type : %d\n",((struct _variable*)$2)->type);}
+: type_name declarator_list ';' {setType($2,$1);fprintf(stderr, "%s : type= %d\n",((struct _variable*)$2)->name,((struct _variable*)$2)->type);}
 ;
 
 declarator_list
@@ -131,8 +131,8 @@ declarator
 | '(' declarator ')'                      					{$$=NULL;}
 | declarator '[' CONSTANTI ']'             					{$$=NULL;}
 | declarator '[' ']'                        				{$$=NULL;}
-| declarator '(' parameter_list ')'							{$$=NULL;}
-| declarator '(' ')'										{$$=NULL;}
+| declarator '(' parameter_list ')'							{$$=$1;}
+| declarator '(' ')'										{$$=$1;fprintf(stderr, "function detected : %s \n",((struct _variable*)$1)->name );}
 ;
 
 parameter_list
@@ -199,7 +199,7 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement
+: type_name declarator compound_statement {setType($2,$1);fprintf(stderr,"end of %s (type=%d)\n",((struct _variable*)$2)->name,(int)$1);}
 ;
 
 %%

@@ -269,12 +269,12 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 		return;
 	}
 	if (toModify->type != withWhat->type && withWhat->type != UNKNOWN){
-		fprintf(stderr,"Invalid type %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+		fprintf(stderr,"(%s:%d,%s)ERROR Invalid type : %d and %d are not the same type\n",__FILE__,__LINE__,__func__,toModify->type,withWhat->type);
 		return;
 	}
 	// LLVM(store )
 	if (toModify->type == INT_TYPE){
-		int i = new_reg	();
+		// int i = new_reg	();
 		fprintf(stdout, " store i32 %d,i32 %s\n",withWhat->value.ival,toModify->name);
 		switch(how){
 			case 1:
@@ -308,6 +308,8 @@ void affectValue (struct _variable * toModify,int how,struct _variable * withWha
 			break;
 		}
 	}
+	else
+		fprintf(stderr, "unmatched type : %d\n", (int)toModify->type);
 }
 
 void print_debug(char *data) {
@@ -321,7 +323,6 @@ void print_debug(char *data) {
 struct _variable * declareVar(char* nom,struct _node* htab){
 	if(!htab)
 		fprintf(stderr, "No htab\n"); 
-	fprintf(stderr, "declaration de %s\n",nom);
 	char dest[100];
 	sprintf(dest,"/%s",nom);
 
@@ -330,16 +331,22 @@ struct _variable * declareVar(char* nom,struct _node* htab){
 	struct _variable * var = varCreate(UNKNOWN,val);
 	set_node(htab,dest,var);
 	var = get_node(htab,dest);
-	// if(strcmp(nom,"$accel"))
-		var->name = "%accelCmd";
-	// if(strcmp(nom,"f"))
-	// 	var->name = "f";
 	if(var==NULL)
 		fprintf(stderr, "Variable non set : %s\n",dest);
+	if(strcmp(nom,"$accel")==0){
+		var->name = "%accelCmd";
+		// fprintf(stderr, "%s found \n",nom );
+	}
+	else {
+		fprintf(stderr, "Unchanged name : %s(size:%d)\n",nom,(int)strlen(nom) );
+		var->name = nom;
+	}
+	fprintf(stderr, "declaration de %s as %s\n",nom,var->name);
 	return var;
 }
 
 struct _variable * getVar(char* nom,struct _node* htab){
+	fprintf(stderr, "research of %s\n",nom );
 	char dest [100];
 	sprintf(dest,"/%s",nom);
 	struct _variable * var =NULL;

@@ -31,6 +31,7 @@ struct _variable {
 	enum _type type;
 	union _value value;
 	char* name;
+	// int registre;
 };
 
 
