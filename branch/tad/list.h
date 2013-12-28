@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include "structs.h"
 
+
+int is_empty(struct _list * l);
 struct _list * init_list();
 int del_list(struct _list * l);
 

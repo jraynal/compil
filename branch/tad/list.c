@@ -52,7 +52,13 @@ int insertElmnt(void* val,struct _list * l){
 		return EXIT_FAILURE;
 	node->value = val;
 	node->next= l->head;
+
+	if(! is_empty(l))
+		l->head->prev = node;
+
 	l->head =node;
+	if (l->tail == NULL)
+		l->tail = node;
 	l->size ++;
 	return EXIT_SUCCESS;
 }
@@ -92,14 +98,12 @@ int removeElmnt(void* elem,struct _list * l){
 		return EXIT_SUCCESS;
 	else if (l->size <=1){
 		//l'unique element est celui recherché
-		free (result);
 		l->head = NULL;
 		l->tail = NULL;
 	}else if(result->prev ==NULL){
 		//si en tete de liste
 		result->next->prev=NULL;
 		l->head = result->next;
-		free(result);
 	}else if (result->next==NULL){
 		//si en queue de liste
 		result->prev->next=NULL;
@@ -109,7 +113,9 @@ int removeElmnt(void* elem,struct _list * l){
 		result->prev->next=result->next;
 		result->next->prev=result->prev;
 	}
-	l->size --;
+	free(result);
+	if (l->size > 0)
+		l->size --;
 	return EXIT_SUCCESS;
 }
 
