@@ -3,12 +3,12 @@
 
 
 /******Enum and struct ****/
-// enum _affectation{
-// 	AFF,
-// 	ADD,
-// 	MUL,
-// 	SUB
-// };
+enum _affectation{
+	AFF,
+	ADD,
+	MUL,
+	SUB
+};
 
 
 
@@ -69,5 +69,6 @@ struct _nodeList
 
 /*******Global Variables ****/
 struct _node* htable;
+struct _list * garbageCollector;
 
 #endif //STRUCTS_H

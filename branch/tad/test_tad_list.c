@@ -72,6 +72,11 @@ void test_set(){
 	print_list(l);
 	assert(is_empty(l));
 
+	assert(EXIT_SUCCESS==del_list(l));
+	free(data[4]);
+
+	l = init_list();
+
 	printf("insert : 42\n");
 	insertElmnt(data[0],l);
 	assert(!is_empty(l));
@@ -97,22 +102,10 @@ void test_set(){
 	removeElmnt(data[1],l);
 	print_list(l);
 	assert(l->size==2);
-	
-	printf("remove : 43\n");
-	removeElmnt(data[2],l);
-	print_list(l);
-	assert(l->size==1);
 
-	printf("remove : 42\n");
-	removeElmnt(data[0],l);
-	print_list(l);
-	assert(l->size==0);
-	int i=0;
-	for(i=0;i<5;i++){
-		if (data[i] != NULL)
-			free(data[i]);
-	}
-	assert(EXIT_SUCCESS==del_list(l));
+	assert(EXIT_SUCCESS==del_list_and_content(l));
+	free(data[3]);
+	free(data[1]);
 }
 
 int main(){

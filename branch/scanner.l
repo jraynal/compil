@@ -22,7 +22,7 @@ L[a-zA-Z_]
 "while"		{ count(); return(WHILE); }
 "for"		{ count(); return(FOR); }
 [$]?{L}({L}|{D})*	{ count();yylval.text=strdup(yytext); return(IDENTIFIER); }
-{D}+    	{ count(); yylval.integer = atoi(yytext);return(CONSTANTI); }
+{D}+    	{ count(); yylval.Int = atoi(yytext);return(CONSTANTI); }
 {D}+"."{D}*     { count(); yylval.Float = atof(yytext);return(CONSTANTF); }
 "+="		{ count(); return(ADD_ASSIGN); }
 "-="		{ count(); return(SUB_ASSIGN); }

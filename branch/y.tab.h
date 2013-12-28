@@ -98,20 +98,21 @@ extern int yydebug;
 typedef union YYSTYPE
 {
 /* Line 2053 of yacc.c  */
-#line 25 "grammar.y"
+#line 26 "grammar.y"
 
-	int integer;
+	int Int;
 	float Float;
-	void * obj;
 	int affect;
 	char * text;
 	struct _variable *(*unaryOp)(struct _variable *);
 	struct _list * list;
+	struct _variable * var;
 	enum _type type;
+	void * obj;
 
 
 /* Line 2053 of yacc.c  */
-#line 115 "y.tab.h"
+#line 116 "y.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

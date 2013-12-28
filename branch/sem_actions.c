@@ -1,5 +1,6 @@
 #include "sem_actions.h"
 #include "includes/tree.h"
+#include "includes/list.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -16,6 +17,7 @@ struct _variable * varCreate(enum _type type,	union _value value){
 	if(var){
 		var->type = type;
 		var->value = value;
+		insertElmnt(var,garbageCollector);
 	}
 	else
 		fprintf(stderr, "No created variable\n");
@@ -28,6 +30,7 @@ struct _variable * varCreateInt(int i){
 	if(var){
 		var->type = INT_TYPE;
 		var->value.ival = i;
+		insertElmnt(var,garbageCollector);
 	}else
 	fprintf(stderr, "No created variable\n");
 
@@ -36,14 +39,15 @@ struct _variable * varCreateInt(int i){
 
 struct _variable * varCreateFloat(float i){
 
-struct _variable* var = malloc(sizeof(struct _variable));
-if(var){
-	var->type = FLOAT_TYPE;
-	var->value.fval = i;
-}else 
-fprintf(stderr, "No created variable\n");
+	struct _variable* var = malloc(sizeof(struct _variable));
+	if(var){
+		var->type = FLOAT_TYPE;
+		var->value.fval = i;
+		insertElmnt(var,garbageCollector);
+	}else 
+	fprintf(stderr, "No created variable\n");
 
-return var;
+	return var;
 }
 
 int varFree(struct _variable * a){
@@ -323,7 +327,7 @@ void print_debug(char *data) {
 struct _variable * declareVar(char* nom,struct _node* htab){
 	if(!htab)
 		fprintf(stderr, "No htab\n"); 
-	char dest[100];
+	char dest[strlen(nom)+2];
 	sprintf(dest,"/%s",nom);
 
 	union _value val;
@@ -365,13 +369,15 @@ void setType(struct _variable *var, enum _type t){
 	return;
 }
 
-// void setType(struct _list * list , enum _type type){
-
-// }
-
-struct _list * createList(){
-	struct _list* list = malloc(sizeof(struct _list));
-	return list;
+void setTypeList(struct _list * list, enum _type t){
+	if (is_empty(list)){
+		fprintf(stderr, "(%s:%d)ERROR No variable for this type declaration\n",__FILE__,__LINE__);
+		return;
+	}else{
+		while(! is_empty(list)){
+			setType(list->head->value,t);
+			removeElmnt(list->head->value,list);
+		}
+	}
+	del_list(list);
 }
-
-

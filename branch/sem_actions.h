@@ -40,8 +40,7 @@ struct _variable * getVar(char* nom,struct _node* htab);
 
 
 void setType(struct _variable *var, enum _type t);
-// void setType(struct _list * , enum _type);
-struct _list * createList();
+void setTypeList(struct _list * list, enum _type t);
 
 
 

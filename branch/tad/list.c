@@ -5,7 +5,7 @@ int is_empty(struct _list * l){
 }
 
 struct _nodeList * createnode(){
-	struct _nodeList * node = malloc(sizeof(struct _nodeList *));
+	struct _nodeList * node = malloc(sizeof(struct _nodeList));
 	if (node ==NULL){
 		fprintf(stderr, "Allocation failed (%s:%d)\n",__FILE__,__LINE__);
 		return NULL;
@@ -17,7 +17,7 @@ struct _nodeList * createnode(){
 }
 
 struct _list * init_list(){
-	struct _list * list = malloc(sizeof(struct _list *));
+	struct _list * list = malloc(sizeof(struct _list));
 	if (list ==NULL){
 		fprintf(stderr, "Allocation failed (%s:%d)\n",__FILE__,__LINE__);
 		return NULL;
@@ -35,6 +35,21 @@ int del_list(struct _list * l){
 	}
 	while(! is_empty (l)){
 		removeElmnt(l->head->value,l);
+	}
+	free(l);
+	return EXIT_SUCCESS;
+}
+
+
+int del_list_and_content(struct _list * l){
+	if (l ==NULL){
+		fprintf(stderr, "ERROR No list passed in arguments\n" );
+		return EXIT_FAILURE;
+	}
+	while(! is_empty (l)){
+		struct _variable * var = l->head->value;
+		removeElmnt(var,l);
+		free(var);
 	}
 	free(l);
 	return EXIT_SUCCESS;

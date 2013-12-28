@@ -1,6 +1,7 @@
 %{
 	#include "includes/structs.h"
 	#include "includes/tree.h"
+	#include "includes/list.h"
 	
 	#include <stdio.h>
 	#include "sem_actions.h"
@@ -23,53 +24,56 @@
 %start program
 
 %union{
-	int integer;
+	int Int;
 	float Float;
-	void * obj;
 	int affect;
 	char * text;
 	struct _variable *(*unaryOp)(struct _variable *);
 	struct _list * list;
+	struct _variable * var;
 	enum _type type;
+	void * obj;
 }
 
 %type<text> IDENTIFIER
-%type<integer> CONSTANTI
+%type<Int> CONSTANTI
 %type<Float> CONSTANTF
-%type<obj>    expression  declarator_list declarator
-%type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression 
+%type<list> declarator_list
+%type<var> declarator
+%type<obj> expression
+%type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
-%type<type> type_name 
+%type<type> type_name
 %type<unaryOp> unary_operator
 
 %%
 
 primary_expression
-: IDENTIFIER 									{$$=getVar($1,htable);if($$==NULL) fprintf(stderr, "undefined value %s\n",$1 );}
-| CONSTANTI										{$$=varCreateInt($1);}
-| CONSTANTF 									{$$=varCreateFloat($1);}
-| '(' expression ')'    						{$$=$2;}
-| IDENTIFIER '(' ')'							{ $$=NULL;}
-| IDENTIFIER '(' argument_expression_list ')' 	{ $$=NULL;}
-| IDENTIFIER INC_OP 							{ $$=NULL;}
-| IDENTIFIER DEC_OP								{ $$=NULL;}
+: IDENTIFIER 										{$$=getVar($1,htable);if($$==NULL) fprintf(stderr, "undefined value %s\n",$1 );free($1);}
+| CONSTANTI											{$$=varCreateInt($1);}
+| CONSTANTF 										{$$=varCreateFloat($1);}
+| '(' expression ')'    							{$$=$2;}
+| IDENTIFIER '(' ')'								{ $$=NULL;}
+| IDENTIFIER '(' argument_expression_list ')' 		{ $$=NULL;}
+| IDENTIFIER INC_OP 								{ $$=NULL;}
+| IDENTIFIER DEC_OP									{ $$=NULL;}
 ;
 
 postfix_expression
-: primary_expression							{$$=$1;}
-| postfix_expression '[' expression ']'			{}
+: primary_expression								{$$=$1;}
+| postfix_expression '[' expression ']'				{}
 ;
 
 argument_expression_list
-: expression 									{}
-| argument_expression_list ',' expression		{}
+: expression 										{}
+| argument_expression_list ',' expression			{}
 ;
 
 unary_expression
-: postfix_expression				{$$=$1;}
-| INC_OP unary_expression			{$$=incr($2);}
-| DEC_OP unary_expression			{$$=decr($2);}
-| unary_operator unary_expression   {$$=$1($2);}
+: postfix_expression								{$$=$1;}
+| INC_OP unary_expression							{$$=incr($2);}
+| DEC_OP unary_expression							{$$=decr($2);}
+| unary_operator unary_expression   				{$$=$1($2);}
 ;
 
 unary_operator
@@ -77,25 +81,25 @@ unary_operator
 ;
 
 multiplicative_expression
-: unary_expression                                          {$$=$1;}
-| multiplicative_expression '*' unary_expression            {$$=mul($1,$3);}
-| multiplicative_expression '/' unary_expression            {$$=divide($1,$3);}//div is already in lib std
+: unary_expression                               	{$$=$1;}
+| multiplicative_expression '*' unary_expression 	{$$=mul($1,$3);}
+| multiplicative_expression '/' unary_expression 	{$$=divide($1,$3);}//div is already in lib std
 ;
 
 additive_expression
-: multiplicative_expression                                 {$$=$1;}
-| additive_expression '+' multiplicative_expression         {$$=add($1,$3);}
-| additive_expression '-' multiplicative_expression         {$$=sub($1,$3);}
+: multiplicative_expression                        	{$$=$1;}
+| additive_expression '+' multiplicative_expression	{$$=add($1,$3);}
+| additive_expression '-' multiplicative_expression	{$$=sub($1,$3);}
 ;
 
 comparison_expression
-: additive_expression                                       {$$=$1;}
-| additive_expression '<' additive_expression               {$$=l_op($1,$3);}
-| additive_expression '>' additive_expression               {$$=g_op($1,$3);}
-| additive_expression LE_OP additive_expression             {$$=le_op($1,$3);}
-| additive_expression GE_OP additive_expression             {$$=ge_op($1,$3);}
-| additive_expression EQ_OP additive_expression             {$$=eq_op($1,$3);}
-| additive_expression NE_OP additive_expression             {$$=ne_op($1,$3);}
+: additive_expression                           	{$$=$1;}
+| additive_expression '<' additive_expression   	{$$=l_op($1,$3);}
+| additive_expression '>' additive_expression   	{$$=g_op($1,$3);}
+| additive_expression LE_OP additive_expression 	{$$=le_op($1,$3);}
+| additive_expression GE_OP additive_expression 	{$$=ge_op($1,$3);}
+| additive_expression EQ_OP additive_expression 	{$$=eq_op($1,$3);}
+| additive_expression NE_OP additive_expression 	{$$=ne_op($1,$3);}
 ;
 
 expression
@@ -105,19 +109,19 @@ expression
 ;
 
 assignment_operator
-: '='        												{$$=0;}   
-| MUL_ASSIGN 												{$$=1;}               
-| ADD_ASSIGN 												{$$=2;}
-| SUB_ASSIGN            									{$$=3;}
+: '='        									{$$=0;}   
+| MUL_ASSIGN 									{$$=1;}               
+| ADD_ASSIGN 									{$$=2;}
+| SUB_ASSIGN            						{$$=3;}
 ;
 
 declaration
-: type_name declarator_list ';' {setType($2,$1);fprintf(stderr, "%s : type= %d\n",((struct _variable*)$2)->name,((struct _variable*)$2)->type);}
+: type_name declarator_list ';' 				{setTypeList($2,$1);}
 ;
 
 declarator_list
-: declarator 					{$$=$1;}//$$=createList();/*addElmtList()*/}
-| declarator_list ',' declarator 	{/*addElmtList()*/}
+: declarator 									{$$=init_list();insertElmnt($1,$$);}
+| declarator_list ',' declarator 				{insertElmnt($3,$1);$$=$1;}
 ;
 
 type_name
@@ -127,21 +131,21 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  												{$$=declareVar($1,htable);if(!$$)printf("No return\n");}
-| '(' declarator ')'                      					{$$=NULL;}
-| declarator '[' CONSTANTI ']'             					{$$=NULL;}
-| declarator '[' ']'                        				{$$=NULL;}
-| declarator '(' parameter_list ')'							{$$=$1;}
-| declarator '(' ')'										{$$=$1;fprintf(stderr, "function detected : %s \n",((struct _variable*)$1)->name );}
+: IDENTIFIER  									{$$=declareVar($1,htable);if(!$$)printf("No return\n");}
+| '(' declarator ')'                      		{$$=NULL;}
+| declarator '[' CONSTANTI ']'             		{$$=NULL;}
+| declarator '[' ']'                        	{$$=NULL;}
+| declarator '(' parameter_list ')'				{$$=$1;}
+| declarator '(' ')'							{$$=$1;fprintf(stderr, "function detected : %s \n",((struct _variable*)$1)->name );}
 ;
 
 parameter_list
-: parameter_declaration										{}
-| parameter_list ',' parameter_declaration					{}
+: parameter_declaration							{}
+| parameter_list ',' parameter_declaration		{}
 ;
 
 parameter_declaration
-: type_name declarator										{}
+: type_name declarator							{}
 ;
 
 statement
@@ -153,9 +157,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   								{htable=init_tree();}
-| '{' statement_list '}'					{htable=init_tree();}
-| '{' declaration_list statement_list '}'	{htable=init_tree();}
+: '{' '}'   								//{htable=init_tree();}
+| '{' statement_list '}'					//{htable=init_tree();}
+| '{' declaration_list statement_list '}'	//{htable=init_tree();}
 ;
 
 declaration_list
@@ -236,10 +240,15 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 	htable=init_tree();
+	garbageCollector = init_list();
 	fprintf(stdout, "%s\n",header() );
 	yyparse ();
 	fprintf(stdout, "%s\n",footer() );
+	
+	del_tree(htable);
+	del_list_and_content(garbageCollector);
 	free (file_name);
+	fclose(input);
 	return 0;
 }
 
