@@ -26,63 +26,66 @@
 %union{
 	int Int;
 	float Float;
-	int affect;
 	char * text;
-	struct _variable *(*unaryOp)(struct _variable *);
+	struct _attribute attr;
 	struct _list * list;
+	struct _attribute(*unaryOp)(struct _attribute);
+	enum _affectation affect;
+
 	struct _variable * var;
 	enum _type type;
 	void * obj;
 }
 
-%type<text> IDENTIFIER
+%type<text> IDENTIFIER 
 %type<Int> CONSTANTI
 %type<Float> CONSTANTF
-%type<list> declarator_list
-%type<var> declarator
-%type<obj> expression
-%type<obj> multiplicative_expression additive_expression comparison_expression unary_expression primary_expression postfix_expression
-%type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
-%type<type> type_name
+%type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression comparison_expression expression 
+%type<list> declarator_list argument_expression_list
 %type<unaryOp> unary_operator
+%type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
+
+
+%type<var> declarator
+%type<type> type_name
 
 %%
 
 primary_expression
-: IDENTIFIER 										{$$=getVar($1,htable);if($$==NULL) fprintf(stderr, "undefined value %s\n",$1 );free($1);}
-| CONSTANTI											{$$=varCreateInt($1);}
-| CONSTANTF 										{$$=varCreateFloat($1);}
+: IDENTIFIER 										{$$=getVar($1,htable);}
+| CONSTANTI											{$$=newInt($1);}
+| CONSTANTF 										{$$=newFloat($1);}
 | '(' expression ')'    							{$$=$2;}
-| IDENTIFIER '(' ')'								{ $$=NULL;}
-| IDENTIFIER '(' argument_expression_list ')' 		{ $$=NULL;}
-| IDENTIFIER INC_OP 								{ $$=NULL;}
-| IDENTIFIER DEC_OP									{ $$=NULL;}
+| IDENTIFIER '(' ')'								{$$=simpleFuncall($1);}
+| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall($1,$3);}
+| IDENTIFIER INC_OP 								{$$=getVar($1,htable);varIncr($1);}
+| IDENTIFIER DEC_OP									{$$=getVar($1,htable);varDecr($1);}
 ;
 
 postfix_expression
 : primary_expression								{$$=$1;}
-| postfix_expression '[' expression ']'				{}
+| postfix_expression '[' expression ']'				{$$=getValArray($1,$3);}
 ;
 
 argument_expression_list
-: expression 										{}
-| argument_expression_list ',' expression			{}
+: expression 										{$$=expressionList($1);}
+| argument_expression_list ',' expression			{$$=insertExpr($3,$1);}
 ;
 
 unary_expression
 : postfix_expression								{$$=$1;}
-| INC_OP unary_expression							{$$=incr($2);}
-| DEC_OP unary_expression							{$$=decr($2);}
+| INC_OP unary_expression							{$$=prefixedVarIncr($2);}
+| DEC_OP unary_expression							{$$=prefixedVarDecr($2);}
 | unary_operator unary_expression   				{$$=$1($2);}
 ;
 
 unary_operator
-: '-' 											{$$=neg;}	
+: '-' 												{$$=neg;}	
 ;
 
 multiplicative_expression
 : unary_expression                               	{$$=$1;}
-| multiplicative_expression '*' unary_expression 	{$$=mul($1,$3);}
+| multiplicative_expression '*' unary_expression 	{$$=multiply($1,$3);}
 | multiplicative_expression '/' unary_expression 	{$$=divide($1,$3);}//div is already in lib std
 ;
 
@@ -136,7 +139,7 @@ declarator
 | declarator '[' CONSTANTI ']'             		{$$=NULL;}
 | declarator '[' ']'                        	{$$=NULL;}
 | declarator '(' parameter_list ')'				{$$=$1;}
-| declarator '(' ')'							{$$=$1;fprintf(stderr, "function detected : %s \n",((struct _variable*)$1)->name );}
+| declarator '(' ')'							{$$=$1;}
 ;
 
 parameter_list
@@ -203,7 +206,7 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement {setType($2,$1);fprintf(stderr,"end of %s (type=%d)\n",((struct _variable*)$2)->name,(int)$1);}
+: type_name declarator compound_statement {setType($2,$1);}
 ;
 
 %%
@@ -242,11 +245,17 @@ int main (int argc, char *argv[]) {
 	htable=init_tree();
 	garbageCollector = init_list();
 	fprintf(stdout, "%s\n",header() );
+	fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
 	fprintf(stdout, "%s\n",footer() );
-	
-	del_tree(htable);
+
+
+	fprintf(stderr,"true: %d\n", 1==1);
+	fprintf(stderr, "size:%d\n",garbageCollector->size);
+	fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	del_list_and_content(garbageCollector);
+
+	del_tree(htable);
 	free (file_name);
 	fclose(input);
 	return 0;

@@ -2,22 +2,6 @@
 #define STRUCTS_H
 
 
-/******Enum and struct ****/
-enum _affectation{
-	AFF,
-	ADD,
-	MUL,
-	SUB
-};
-
-
-
-// Union des types de valeurs possible
-union _value {
-	int ival;
-	float fval;
-};
-
 // Type de variables possible
 enum _type {
 	INT_TYPE=0,
@@ -26,12 +10,41 @@ enum _type {
 	UNKNOWN
 };
 
+/******Enum and struct ****/
+enum _affectation{
+	AFF=0,
+	ADD,
+	MUL,
+	SUB
+};
+
+
+struct _code
+{
+	char* text;
+	int length;
+};
+
+struct _attribute {
+	int regNum;
+	enum _type type;
+	struct _code code;
+	char * identifier;
+};
+
+/******************* Storage unit in the tree *********************/
+
+// Union des types de valeurs possible
+union _value {
+	int ival;
+	float fval;
+};
+
+
 // Structure manipulée par les actions sémantiques
 struct _variable {
 	enum _type type;
 	union _value value;
-	char* name;
-	// int registre;
 };
 
 
