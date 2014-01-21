@@ -6,6 +6,8 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
+#define CHK(truc) do{if(truc == NULL) perror(#truc); exit(1);}while(0)
+
 int new_reg(){
 	static int i =0;
 	i++;
@@ -34,65 +36,91 @@ struct _variable * varCreate(enum _type type,	union _value value){
 	return var;
 }
 
+struct _attribute getVar(char* nom,struct _node* htab){
+	CHK(htab);
+	char dest [100];
+	sprintf(dest,"/%s",nom);
+	struct _variable * var =NULL;
+	var = get_node(htab,dest);
+	CHK (var);
+	struct _attribute a = newAttribute((char*)dest);
+	a.type = var->type;
+	a.code = "%%%d =load %s %s ";
+
+	return a;
+}
 
 struct _attribute newInt(int i){
-
-
-
+	struct _attribute a = newAttribute("/");
+	a.type = INT_TYPE;
+	a.code = "%%%d  = add i32 %d, 0;\n";
+	return a;
 }
 
 
 struct _attribute newFloat(float f){
-
-
+	struct _attribute a = newAttribute("/");
+	a.type = FLOAT_TYPE;
+	a.code = "%%%d  = fadd float %g, 0.0 ;\n";
+	return a;
 }
 
 struct _attribute simpleFuncall(char * funName){
-
+	struct _attribute a = newAttribute(funName);
+	a.type = FLOAT_TYPE;
+	a.code="call i32 ()* @%s ()\n";
+	return a;
 
 }
 
 
 struct _attribute multipleFuncall(char * funName,struct _list * l){
-
+			//TODO
+	return newAttribute("");
 
 }
 
 
 struct _attribute varIncr(char * name){
 
+	return newAttribute("");
 
 }
 
 struct _attribute varDecr(char * name){
 
+	return newAttribute("");
 
 }
 
 
 struct _attribute getValArray(struct _attribute array, struct _attribute i){
+	return newAttribute("");
 
 }
 
 
 
 struct _list * expressionList(struct _attribute a){
+	return init_list();
 
 }
 
 
 struct _list * insertExpr(struct _attribute a ,struct _list * l){
-
+	return init_list();
 }
 
 
 
 struct _attribute prefixedVarIncr(struct _attribute attr){
+	return newAttribute("");
 
 }
 
 
 struct _attribute prefixedVarDecr(struct _attribute attr){
+	return newAttribute("");
 
 }
 
@@ -124,122 +152,125 @@ struct _attribute prefixedVarDecr(struct _attribute attr){
 // 	return var;
 // }
 
+struct _attribute binOp(struct _attribute a1,struct _attribute a2,char* intOp, char * floatOp){
+	if (a1.type != a2.type){
+		perror("invalid operation");
+		exit(1);
+	}
+	struct _attribute a = newAttribute(a1.identifier);
+
+	switch(a1.type){
+		case INT_TYPE : 
+		a.type = INT_TYPE;
+		a.code="%%%d = %s i32 %%%d, i32 %%%d; \n";	
+		break;
+		case FLOAT_TYPE:
+		a.type = FLOAT_TYPE;
+		a.code="%%%d = %s float %%%d, float %%%d; \n";	
+		break;
+		default: 
+		perror("invalid operation");
+		exit(1);
+
+	}
+	return	a;
+}
+
+
 struct _attribute multiply(struct _attribute a1,struct _attribute a2){
-	// if (!a || !b)
-	// 	return NULL;
-	// if (a->type == UNKNOWN)
-	// 	a->type = b->type;
-	// else if (b->type != a->type && b->type != UNKNOWN)
-	// 	return NULL;
-	// if (a->type == INT_TYPE)
-	// 	a->value.ival *= b->value.ival;
-	// else if(a->type == FLOAT_TYPE)
-	// 	a->value.fval *= b->value.fval;
-	// else
-	// 	return NULL;
-	// // varFree(b);
-	// return a;
+	return binOp(a1,a2,"mul","fmul");
 }
 
 struct _attribute divide(struct _attribute a1,struct _attribute a2){
-	// if (!a || !b)
-	// 	return NULL;
-	// if (a->type == UNKNOWN)
-	// 	a->type = b->type;
-	// else if (b->type != a->type && b->type != UNKNOWN)
-	// 	return NULL;
-	// if (a->type == INT_TYPE)
-	// 	a->value.ival /= b->value.ival;
-	// else if(a->type == FLOAT_TYPE)
-	// 	a->value.fval /= b->value.fval;
-	// else
-	// 	return NULL;
-	// // varFree(b);
-	// return a;
+	return binOp(a1,a2,"sdiv","fdiv");
 }
 
 struct _attribute add(struct _attribute a1,struct _attribute a2){
-	// if (!a || !b)
-	// 	return NULL;
-	// if (a->type == UNKNOWN)
-	// 	a->type = b->type;
-	// else if (b->type != a->type && b->type != UNKNOWN)
-	// 	return NULL;
-	// if (a->type == INT_TYPE)
-	// 	a->value.ival += b->value.ival;
-	// else if(a->type == FLOAT_TYPE)
-	// 	a->value.fval += b->value.fval;
-	// else
-	// 	return NULL;
-	// // varFree(b);
-	// return a;
+	return binOp(a1,a2,"add","fadd");
 }
 
 struct _attribute sub(struct _attribute a1 ,struct _attribute a2){
-	// if (!a || !b)
-	// 	return NULL;
-	// if (a->type == UNKNOWN)     // b ne peut jamais être UNKNOW?
-	// 	a->type = b->type;		//faut donc caster la valeur de a avant de calculer
-	// else if (b->type != a->type && b->type != UNKNOWN)
-	// 	return NULL;
-	// if (a->type == INT_TYPE)
-	// 	a->value.ival -= b->value.ival; //  LLVM("%%d = sub i32 %%d, %%d",registre de sortie, a->value.ival, b->value.ival)
-	// else if(a->type == FLOAT_TYPE)		//  
-	// 	a->value.fval -= b->value.fval;	// LLVM("%%d = fsub float %%d, %%d",registre de sortie, a->value.fval, b->value.fval)
-	// else
-	// 	return NULL;
-	// // varFree(b);
-	
-	// return a;
-}
-struct _variable *incr(struct _variable *a){
-	if (!a)
-		return NULL;
-	switch(a->type){
-		case INT_TYPE :
-		a->value.ival++;
-		break;
-		case FLOAT_TYPE : 
-		a->value.fval++;
-		break;
-		default: 
-		return NULL;
-	}
-	return a;
-}
-struct _variable *decr(struct _variable *a){
-	if (!a)
-		return NULL;
-	switch(a->type){
-		case INT_TYPE :
-		a->value.ival--;
-		break;
-		case FLOAT_TYPE : 
-		a->value.fval--;
-		break;
-		default: 
-		return NULL;
-	}
-	return a;
-}
-struct _attribute neg(struct _attribute a){
-	// if (!a)
-	// 	return NULL;
-	// switch(a->type){
-	// 	case INT_TYPE :
-	// 	a->value.ival *= -1;
-	// 	break;
-	// 	case FLOAT_TYPE : 
-	// 	a->value.fval *= -1;
-	// 	break;
-	// 	default: 
-	// 	return NULL;
-	// }
-	// return a;
+	return binOp(a1,a2,"sub","fsub");
 }
 
+
+// struct _variable *incr(struct _variable *a){
+// 	if (!a)
+// 		return NULL;
+// 	switch(a->type){
+// 		case INT_TYPE :
+// 		a->value.ival++;
+// 		break;
+// 		case FLOAT_TYPE : 
+// 		a->value.fval++;
+// 		break;
+// 		default: 
+// 		return NULL;
+// 	}
+// 	return a;
+// }
+// struct _variable *decr(struct _variable *a){
+// 	if (!a)
+// 		return NULL;
+// 	switch(a->type){
+// 		case INT_TYPE :
+// 		a->value.ival--;
+// 		break;
+// 		case FLOAT_TYPE : 
+// 		a->value.fval--;
+// 		break;
+// 		default: 
+// 		return NULL;
+// 	}
+// 	return a;
+// }
+
+
+struct _attribute neg(struct _attribute a1){
+	struct _attribute a = newAttribute(a1.identifier);
+	switch(a.type){
+		case INT_TYPE : 
+		a.type = INT_TYPE;
+		a.code = "%%%d = sub i32 0 , %%%d" ;
+		break;
+		case FLOAT_TYPE:
+		a.type = FLOAT_TYPE;
+		a.code = "%%%d = fsub float 0.0 , %%%d" ;
+		break;
+		default:
+		perror("invalid operation");
+		exit(1);
+	}
+	return a;
+}
+
+
+struct _attribute cmp(struct _attribute a1 ,struct _attribute a2 , char* intConditionCode,  char* floatConditionCode ){
+	if (a1.type != a2.type){
+		perror("invalid operation");
+		exit(1);
+	}
+	struct _attribute a = newAttribute(a1.identifier);
+
+	switch(a1.type){
+		case INT_TYPE : 
+		a.type = INT_TYPE;
+		a.code="%%%d = icmp %s i32 %%%d, i32 %%%d; \n";	
+		break;
+		case FLOAT_TYPE:
+		a.type = FLOAT_TYPE;
+		a.code="%%%d = fcmp %s float %%%d, float %%%d; \n";	
+		break;
+		default: 
+		perror("invalid operation");
+		exit(1);
+	}
+	return	a;
+
+}
 
 struct _attribute l_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"slt","ult");
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -256,6 +287,8 @@ struct _attribute l_op (struct _attribute a1 ,struct _attribute a2 ){
 }
 
 struct _attribute g_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"sgt","ugt");
+
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -272,6 +305,8 @@ struct _attribute g_op (struct _attribute a1 ,struct _attribute a2 ){
 }
 
 struct _attribute le_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"sle","ule");
+
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -288,6 +323,8 @@ struct _attribute le_op (struct _attribute a1 ,struct _attribute a2 ){
 }
 
 struct _attribute ge_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"sge","uge");
+
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -304,6 +341,8 @@ struct _attribute ge_op (struct _attribute a1 ,struct _attribute a2 ){
 }
 
 struct _attribute ne_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"ne","une");
+
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -320,6 +359,8 @@ struct _attribute ne_op (struct _attribute a1 ,struct _attribute a2 ){
 }
 
 struct _attribute eq_op (struct _attribute a1 ,struct _attribute a2 ){
+	return cmp (a1,a2,"eq","ueq");
+
 	// if (!a || !b)
 	// 	return NULL;
 	// float valA = a->value.fval,valB = b->value.fval;
@@ -406,16 +447,7 @@ struct _variable * declareVar(char* nom,struct _node* htab){
 	return var;
 }
 
-struct _attribute getVar(char* nom,struct _node* htab){
-	// fprintf(stderr, "research of %s\n",nom );
-	// char dest [100];
-	// sprintf(dest,"/%s",nom);
-	// struct _variable * var =NULL;
-	// var = get_node(htab,dest);
-	// if (!var)
-	// 	fprintf(stderr, "%s (%d) Unreachable variable : %s\n",__FILE__,__LINE__,dest );
-	// return var;
-}
+
 
 void setType(struct _variable *var, enum _type t){
 	if(! var){
