@@ -11,18 +11,22 @@ enum _type {
 };
 
 /******Enum and struct ****/
-enum _affectation{
+enum _affectation {
 	AFF=0,
 	ADD,
 	MUL,
 	SUB
 };
 
-
-struct _code
-{
-	char* text;
+struct _string {
+	char *text;
 	int length;
+	struct _string *next;
+};
+
+struct _code {
+	struct _string *begin;
+	struct _string *end;
 };
 
 struct _attribute {
@@ -71,7 +75,7 @@ struct _list
 	int size;
 	struct _nodeList* head ;
 	struct _nodeList* tail;
-};
+}; 
 
 struct _nodeList
 {
