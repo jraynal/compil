@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "includes/tree.h"
+#include "includes/list.h"
 #include "includes/structs.h"
 
  //for dynamic allocation
@@ -12,14 +14,13 @@ struct _variable * varCreate(enum _type type,	union _value value);
 // struct _attribute varCreateInt(int );
 // struct _attribute varCreateFloat(float );
 
-
+struct _attribute getVar(const char* nom,struct _node* htab);
 struct _attribute newInt(int i);
 struct _attribute newFloat(float f);
-
-struct _attribute simpleFuncall(char * funName);
-struct _attribute multipleFuncall(char * funName,struct _list * l);
-struct _attribute varIncr(char * name);
-struct _attribute varDecr(char * name);
+struct _attribute simpleFuncall(struct _node* htab,const char * funName);
+struct _attribute multipleFuncall(struct _node* htab,const char * funName,struct _list * l);
+struct _attribute varIncr(const char * name,struct _node* htab);
+struct _attribute varDecr(const char * name,struct _node* htab);
 
 struct _attribute getValArray(struct _attribute array, struct _attribute i);
 
@@ -52,7 +53,6 @@ struct _attribute eq_op (struct _attribute,struct _attribute);
 
 void affectValue (struct _attribute,enum _affectation ,struct _attribute);
 struct _variable * declareVar(char* nom, struct _node* htab);
-struct _attribute getVar(char* nom,struct _node* htab);
 
 
 void setType(struct _variable *var, enum _type t);

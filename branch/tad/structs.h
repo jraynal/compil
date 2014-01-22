@@ -26,10 +26,10 @@ struct _code
 };
 
 struct _attribute {
-	int regNum;
+	const char *reg;
 	enum _type type;
 	struct _code code;
-	char * identifier;
+	const char * identifier;
 };
 
 /******************* Storage unit in the tree *********************/
@@ -44,6 +44,7 @@ union _value {
 // Structure manipulée par les actions sémantiques
 struct _variable {
 	enum _type type;
+	char * reg_name;
 	union _value value;
 };
 

@@ -56,10 +56,10 @@ primary_expression
 | CONSTANTI											{$$=newInt($1);}
 | CONSTANTF 										{$$=newFloat($1);}
 | '(' expression ')'    							{$$=$2;}
-| IDENTIFIER '(' ')'								{$$=simpleFuncall($1);}
-| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall($1,$3);}
-| IDENTIFIER INC_OP 								{$$=getVar($1,htable);varIncr($1);}
-| IDENTIFIER DEC_OP									{$$=getVar($1,htable);varDecr($1);}
+| IDENTIFIER '(' ')'								{$$=simpleFuncall(htable,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall(htable,$1,$3);}
+| IDENTIFIER INC_OP 								{$$=varIncr($1,htable);}
+| IDENTIFIER DEC_OP									{$$=varDecr($1,htable);}
 ;
 
 postfix_expression
