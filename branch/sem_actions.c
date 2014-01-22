@@ -19,7 +19,7 @@ const char *new_reg(){
 	return itoa(i);
 }
 
-void addcode(struct _code c,char* str,...){
+void addCode(struct _code c,char* str,...){
 	//TODO (tad)
 	return;
 }
@@ -28,8 +28,6 @@ void initCode(struct _code * c ){
 	c->text="";
 	return;
 }
-
-
 
 char* strOfNametype(enum _type t){
 	switch(t){
@@ -57,7 +55,7 @@ struct _attribute newAttribute(const char * id){
 	struct _attribute a;
 	a.reg = new_reg();
 	a.type = UNKNOWN;
-	initCode(&a.code);
+	a.code = initCode();
 	a.identifier= id;
 	return a;
 }
@@ -79,57 +77,74 @@ struct _attribute get_attr_from_tree(struct _node* htab,const char* name){
 	CHK(htab);
 	char dest [100];
 	sprintf(dest,"/%s",name);
-	struct _variable * var =NULL;
-	var = get_node(htab,dest);
+	/* Obtention de l'indentifiant */
+	struct _variable *var = get_node(htab,dest);
 	CHK (var);
+
+	/* Creation de la liste d'attributs */
 	struct _attribute a = newAttribute(name);
-	a.type = var->type;
-	return a;
+
+	/* Chargement de l'identifiant */
+	char * str_type = strOfNametype(a.type);
+	addCode(a.code,"%%%s =load %s* %s ",a.reg,str_type,var.addr);	// chargement en mémoire
+	a.type = var->type;												// partage du type
+	return a;														// ecriture
 }
 
 
 struct _attribute getVar(const char* name,struct _node* htab){
 	struct _attribute a = get_attr_from_tree(htab,name);
-	addcode(a.code,"%%%s =load %s %s ",a.reg,strOfNametype(a.type),officialName(name));
-
 	return a;
 }
 
 struct _attribute varIncr(const char * name,struct _node* htab){
 	struct _attribute a = get_attr_from_tree(htab,name);
-	const char * official_name = officialName(name);
-	char * str_type = strOfNametype(a.type);
-	addcode(a.code,"%%%s =load %s %s ",a.reg,str_type,official_name);
 	
-	const char *reg = new_reg();
+	/* Creation du registre de sortie du calcul */
+	const char *calc_reg = new_reg();
 	switch(a.type){
-		case INT_TYPE : 
-			addcode(a.code,"%%%s =add %s %%%s, i32 1",reg,str_type,a.reg);
-			addcode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+		/* Addition d'entiers */
+		case INT_TYPE :
+			addCode(a.code,"%%%s =add %s %%%s, i32 1",reg,str_type,a.reg);
+			addCode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
 			break;
+		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addcode(a.code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a.reg);
-			addcode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+			addCode(a.code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a.reg);
+			addCode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
 			break; 
 		default:
 			break;
 
 	}
-	// addcode(a.code,"%%%s =add %s %%%s, %s",a.reg,strOfNametype(var->type),officialName(nom));
-	// addcode(a.code,"%%%s =load %s %s ",a.reg,strOfNametype(var->type),officialName(nom));
 	return a;
-
 }
 
-struct _attribute varDecr(const char * name,struct _node* htab){
-
-	return newAttribute("");
-
+struct _attribute varDecr(const char * name,struct _node* htab) {
+	struct _attribute a = get_attr_from_tree(htab,name);
+	
+	/* Creation du registre de sortie du calcul */
+	const char *calc_reg = new_reg();
+	switch(a.type){
+		/* Addition d'entiers */
+		case INT_TYPE :
+			addCode(a.code,"%%%s =add %s %%%s, i32 1",reg,str_type,a.reg);
+			addCode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+			break;
+		/* Addition de flottants */
+		case FLOAT_TYPE :
+			addCode(a.code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a.reg);
+			addCode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+			break; 
+		default:
+			break;
+	}
+	return a;
 }
 
 struct _attribute simpleFuncall(struct _node* htab,const char * funName){
 	struct _attribute a = get_attr_from_tree(htab,funName);
-	addcode(a.code,"call  %s @%s ()\n",strOfNametype(a.type), a.identifier);
+	addCode(a.code,"call  %s @%s ()\n",strOfNametype(a.type), a.identifier);
 	return a;
 
 }
@@ -145,22 +160,25 @@ struct _attribute multipleFuncall(struct _node* htab,const char * funName,struct
 struct _attribute newInt(int i){
 	struct _attribute a = newAttribute("/");
 	a.type = INT_TYPE;
-	addcode(a.code,"%%%s  = add i32 %s, 0;\n",a.reg,i);
+	addCode(a.code,"%%%s  = add i32 %s, 0;\n",a.reg,i);
 	return a;
 }
 
 struct _attribute newFloat(float f){
 	struct _attribute a = newAttribute("/");
 	a.type = FLOAT_TYPE;
-	addcode(a.code,"%%%s  = fadd float %g, 0.0 ;\n",a.reg,f);
+	addCode(a.code,"%%%s  = fadd float %g, 0.0 ;\n",a.reg,f);
 	return a;
 }
 
 
 
 struct _attribute getValArray(struct _attribute array, struct _attribute i){
-	return newAttribute("");
-
+	struct _attribute a = newAttribute("/");
+	a.type = array.type;
+	/* TODO: acès à la i.reg ième case du tableau en assembleur.... */
+	addCode(a.code,"");
+	return a;
 }
 
 
@@ -226,11 +244,11 @@ struct _attribute binOp(struct _attribute a1,struct _attribute a2,char* intOp, c
 	switch(a1.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		addcode(a.code,"%%%s = %s i32 %%%s, i32 %%%s; \n",a.reg,intOp,a1.reg,a2.reg);	
+		addCode(a.code,"%%%s = %s i32 %%%s, i32 %%%s; \n",a.reg,intOp,a1.reg,a2.reg);	
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		addcode(a.code,"%%%s = %s float %%%s, float %%%s; \n",a.reg,floatOp,a1.reg,a2.reg);	
+		addCode(a.code,"%%%s = %s float %%%s, float %%%s; \n",a.reg,floatOp,a1.reg,a2.reg);	
 		break;
 		default: 
 		perror("invalid operation");
@@ -295,11 +313,11 @@ struct _attribute neg(struct _attribute a1){
 	switch(a.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		addcode(a.code,"%%%s = sub i32 0 , %%%s",a.reg,a1.reg) ;
+		addCode(a.code,"%%%s = sub i32 0 , %%%s",a.reg,a1.reg) ;
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		addcode(a.code , "%%%s = fsub float 0.0 , %%%s",a.reg,a1.reg) ;
+		addCode(a.code , "%%%s = fsub float 0.0 , %%%s",a.reg,a1.reg) ;
 		break;
 		default:
 		perror("invalid operation");
@@ -319,11 +337,11 @@ struct _attribute cmp(struct _attribute a1 ,struct _attribute a2 , char* intCond
 	switch(a1.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		addcode(a.code,"%%%s = icmp %s i32 %%%s, i32 %%%s; \n",a.reg,intConditionCode, a1.reg, a2.reg);	
+		addCode(a.code,"%%%s = icmp %s i32 %%%s, i32 %%%s; \n",a.reg,intConditionCode, a1.reg, a2.reg);	
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		addcode (a.code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a.reg,floatConditionCode,a1.reg,a2.reg);	
+		addCode (a.code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a.reg,floatConditionCode,a1.reg,a2.reg);	
 		break;
 		default: 
 		perror("invalid operation");
