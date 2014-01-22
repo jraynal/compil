@@ -1,24 +1,63 @@
 #include "sem_actions.h"
-#include "includes/tree.h"
-#include "includes/list.h"
-#include <stdlib.h>
-#include <stdio.h>
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
 #define CHK(truc) do{if(truc == NULL) perror(#truc); exit(1);}while(0)
 
-int new_reg(){
-	static int i =0;
-	i++;
-	return i;
+const char *itoa(int i) {
+	char *c=NULL;
+	int len=0;
+	len=snprintf(c,len,"%d",i);
+	c=(char*)malloc(len+1);
+	snprintf(c,len+1,"%d",i);
+	return c;
 }
 
-struct _attribute newAttribute(char * id){
+const char *new_reg(){
+	static int i =0;
+	i++;
+	return itoa(i);
+}
+
+void addcode(struct _code c,char* str,...){
+	//TODO (tad)
+	return;
+}
+void initCode(struct _code * c ){
+	//TODO (tad)
+	c->text="";
+	return;
+}
+
+
+
+char* strOfNametype(enum _type t){
+	switch(t){
+		case INT_TYPE :
+		return "i32";
+		break;
+		case FLOAT_TYPE:
+		return "float";
+		break;
+		default:
+		return "";
+	}
+	perror("uncommon excecution");
+	exit(1);
+}
+
+const char* officialName(const char* name){
+	CHK(name);
+	if (strcmp(name, "$accel")== 0)
+		return "%accel";
+	else return name;
+}
+
+struct _attribute newAttribute(const char * id){
 	struct _attribute a;
-	a.regNum = new_reg();
+	a.reg = new_reg();
 	a.type = UNKNOWN;
-	// a.code = "";
+	initCode(&a.code);
 	a.identifier= id;
 	return a;
 }
@@ -36,62 +75,87 @@ struct _variable * varCreate(enum _type type,	union _value value){
 	return var;
 }
 
-struct _attribute getVar(char* nom,struct _node* htab){
+struct _attribute get_attr_from_tree(struct _node* htab,const char* name){
 	CHK(htab);
 	char dest [100];
-	sprintf(dest,"/%s",nom);
+	sprintf(dest,"/%s",name);
 	struct _variable * var =NULL;
 	var = get_node(htab,dest);
 	CHK (var);
-	struct _attribute a = newAttribute((char*)dest);
+	struct _attribute a = newAttribute(name);
 	a.type = var->type;
-	a.code = "%%%d =load %s %s ";
+	return a;
+}
+
+
+struct _attribute getVar(const char* name,struct _node* htab){
+	struct _attribute a = get_attr_from_tree(htab,name);
+	addcode(a.code,"%%%s =load %s %s ",a.reg,strOfNametype(a.type),officialName(name));
 
 	return a;
+}
+
+struct _attribute varIncr(const char * name,struct _node* htab){
+	struct _attribute a = get_attr_from_tree(htab,name);
+	const char * official_name = officialName(name);
+	char * str_type = strOfNametype(a.type);
+	addcode(a.code,"%%%s =load %s %s ",a.reg,str_type,official_name);
+	
+	const char *reg = new_reg();
+	switch(a.type){
+		case INT_TYPE : 
+			addcode(a.code,"%%%s =add %s %%%s, i32 1",reg,str_type,a.reg);
+			addcode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+			break;
+		case FLOAT_TYPE :
+			addcode(a.code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a.reg);
+			addcode(a.code,"store %s %%%s, %s %s ",str_type,reg,str_type,official_name);
+			break; 
+		default:
+			break;
+
+	}
+	// addcode(a.code,"%%%s =add %s %%%s, %s",a.reg,strOfNametype(var->type),officialName(nom));
+	// addcode(a.code,"%%%s =load %s %s ",a.reg,strOfNametype(var->type),officialName(nom));
+	return a;
+
+}
+
+struct _attribute varDecr(const char * name,struct _node* htab){
+
+	return newAttribute("");
+
+}
+
+struct _attribute simpleFuncall(struct _node* htab,const char * funName){
+	struct _attribute a = get_attr_from_tree(htab,funName);
+	addcode(a.code,"call  %s @%s ()\n",strOfNametype(a.type), a.identifier);
+	return a;
+
+}
+
+
+struct _attribute multipleFuncall(struct _node* htab,const char * funName,struct _list * l){
+	struct _attribute a = get_attr_from_tree(htab,funName);
+	//TODO
+	return a;
+
 }
 
 struct _attribute newInt(int i){
 	struct _attribute a = newAttribute("/");
 	a.type = INT_TYPE;
-	a.code = "%%%d  = add i32 %d, 0;\n";
+	addcode(a.code,"%%%s  = add i32 %s, 0;\n",a.reg,i);
 	return a;
 }
-
 
 struct _attribute newFloat(float f){
 	struct _attribute a = newAttribute("/");
 	a.type = FLOAT_TYPE;
-	a.code = "%%%d  = fadd float %g, 0.0 ;\n";
+	addcode(a.code,"%%%s  = fadd float %g, 0.0 ;\n",a.reg,f);
 	return a;
 }
 
-struct _attribute simpleFuncall(char * funName){
-	struct _attribute a = newAttribute(funName);
-	a.type = FLOAT_TYPE;
-	a.code="call i32 ()* @%s ()\n";
-	return a;
-
-}
-
-
-struct _attribute multipleFuncall(char * funName,struct _list * l){
-			//TODO
-	return newAttribute("");
-
-}
-
-
-struct _attribute varIncr(char * name){
-
-	return newAttribute("");
-
-}
-
-struct _attribute varDecr(char * name){
-
-	return newAttribute("");
-
-}
 
 
 struct _attribute getValArray(struct _attribute array, struct _attribute i){
@@ -162,11 +226,11 @@ struct _attribute binOp(struct _attribute a1,struct _attribute a2,char* intOp, c
 	switch(a1.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		a.code="%%%d = %s i32 %%%d, i32 %%%d; \n";	
+		addcode(a.code,"%%%s = %s i32 %%%s, i32 %%%s; \n",a.reg,intOp,a1.reg,a2.reg);	
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		a.code="%%%d = %s float %%%d, float %%%d; \n";	
+		addcode(a.code,"%%%s = %s float %%%s, float %%%s; \n",a.reg,floatOp,a1.reg,a2.reg);	
 		break;
 		default: 
 		perror("invalid operation");
@@ -231,11 +295,11 @@ struct _attribute neg(struct _attribute a1){
 	switch(a.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		a.code = "%%%d = sub i32 0 , %%%d" ;
+		addcode(a.code,"%%%s = sub i32 0 , %%%s",a.reg,a1.reg) ;
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		a.code = "%%%d = fsub float 0.0 , %%%d" ;
+		addcode(a.code , "%%%s = fsub float 0.0 , %%%s",a.reg,a1.reg) ;
 		break;
 		default:
 		perror("invalid operation");
@@ -255,11 +319,11 @@ struct _attribute cmp(struct _attribute a1 ,struct _attribute a2 , char* intCond
 	switch(a1.type){
 		case INT_TYPE : 
 		a.type = INT_TYPE;
-		a.code="%%%d = icmp %s i32 %%%d, i32 %%%d; \n";	
+		addcode(a.code,"%%%s = icmp %s i32 %%%s, i32 %%%s; \n",a.reg,intConditionCode, a1.reg, a2.reg);	
 		break;
 		case FLOAT_TYPE:
 		a.type = FLOAT_TYPE;
-		a.code="%%%d = fcmp %s float %%%d, float %%%d; \n";	
+		addcode (a.code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a.reg,floatConditionCode,a1.reg,a2.reg);	
 		break;
 		default: 
 		perror("invalid operation");
@@ -378,21 +442,21 @@ struct _attribute eq_op (struct _attribute a1 ,struct _attribute a2 ){
 
 void affectValue (struct _attribute varName,enum _affectation how,struct _attribute value){
 	// if(!toModify){
-	// 	fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+	// 	fprintf(stderr,"Invalid argument %s:%s(%s)\n",__FILE__,__LINE__,__func__);
 	// 	return;
 	// }
 	// if(!withWhat){
-	// 	fprintf(stderr,"Invalid argument %s:%d(%s)\n",__FILE__,__LINE__,__func__);
+	// 	fprintf(stderr,"Invalid argument %s:%s(%s)\n",__FILE__,__LINE__,__func__);
 	// 	return;
 	// }
 	// if (toModify->type != withWhat->type && withWhat->type != UNKNOWN){
-	// 	fprintf(stderr,"(%s:%d,%s)ERROR Invalid type : %d and %d are not the same type\n",__FILE__,__LINE__,__func__,toModify->type,withWhat->type);
+	// 	fprintf(stderr,"(%s:%s,%s)ERROR Invalid type : %s and %s are not the same type\n",__FILE__,__LINE__,__func__,toModify->type,withWhat->type);
 	// 	return;
 	// }
 	// // LLVM(store )
 	// if (toModify->type == INT_TYPE){
 	// 	// int i = new_reg	();
-	// 	fprintf(stdout, " store i32 %d,i32 %s\n",withWhat->value.ival,toModify->name);
+	// 	fprintf(stdout, " store i32 %s,i32 %s\n",withWhat->value.ival,toModify->name);
 	// 	switch(how){
 	// 		case 1:
 	// 		toModify->value.ival *= withWhat->value.ival;
@@ -405,7 +469,7 @@ void affectValue (struct _attribute varName,enum _affectation how,struct _attrib
 	// 		break;
 	// 		default:
 	// 		toModify->value.ival = withWhat->value.ival;
-	// 		fprintf(stderr,"int value (%d) affected\n",toModify->value.ival );
+	// 		fprintf(stderr,"int value (%s) affected\n",toModify->value.ival );
 	// 		break;
 	// 	}
 	// }else if (toModify->type == FLOAT_TYPE){
@@ -426,7 +490,7 @@ void affectValue (struct _attribute varName,enum _affectation how,struct _attrib
 	// 	}
 	// }
 	// else
-	// 	fprintf(stderr, "unmatched type : %d\n", (int)toModify->type);
+	// 	fprintf(stderr, "unmatched type : %s\n", (int)toModify->type);
 }
 
 
@@ -470,3 +534,5 @@ void setTypeList(struct _list * list, enum _type t){
 	}
 	del_list(list);
 }
+
+
