@@ -28,13 +28,14 @@ struct _code
 struct _attribute {
 	const char *reg;
 	enum _type type;
-	struct _code code;
+	struct _code *code;
 	const char * identifier;
 };
 
 /******************* Storage unit in the tree *********************/
 
 // Union des types de valeurs possible
+/* OBSOLETE */
 union _value {
 	int ival;
 	float fval;
@@ -44,8 +45,8 @@ union _value {
 // Structure manipulée par les actions sémantiques
 struct _variable {
 	enum _type type;
-	char * reg_name;
-	union _value value;
+	char *addr;
+	//union _value value;
 };
 
 
