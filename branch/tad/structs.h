@@ -31,6 +31,7 @@ struct _code {
 
 struct _attribute {
 	const char *reg;
+	const char *addr;
 	enum _type type;
 	struct _code *code;
 	const char * identifier;
@@ -87,7 +88,7 @@ struct _nodeList
 };
 
 /*******Global Variables ****/
-struct _node* htable;
+struct _node* adr; // FAUX, il est spécifique à un contexte.
 struct _list * garbageCollector;
 
 #endif //STRUCTS_H

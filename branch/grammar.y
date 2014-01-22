@@ -27,9 +27,9 @@
 	int Int;
 	float Float;
 	char * text;
-	struct _attribute attr;
+	struct _attribute *attr;
 	struct _list * list;
-	struct _attribute(*unaryOp)(struct _attribute);
+	struct _attribute*(*unaryOp)(struct _attribute*);
 	enum _affectation affect;
 
 	struct _variable * var;
@@ -40,8 +40,8 @@
 %type<text> IDENTIFIER 
 %type<Int> CONSTANTI
 %type<Float> CONSTANTF
-%type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression comparison_expression expression 
-%type<list> declarator_list argument_expression_list
+%type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression comparison_expression expression parameter_declaration
+%type<list> declarator_list argument_expression_list parameter_list
 %type<unaryOp> unary_operator
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
 
@@ -52,14 +52,14 @@
 %%
 
 primary_expression
-: IDENTIFIER 										{$$=getVar($1,htable);}
+: IDENTIFIER 										{$$=getVar($1,adr);}
 | CONSTANTI											{$$=newInt($1);}
 | CONSTANTF 										{$$=newFloat($1);}
 | '(' expression ')'    							{$$=$2;}
-| IDENTIFIER '(' ')'								{$$=simpleFuncall(htable,$1);}
-| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall(htable,$1,$3);}
-| IDENTIFIER INC_OP 								{$$=varIncr($1,htable);}
-| IDENTIFIER DEC_OP									{$$=varDecr($1,htable);}
+| IDENTIFIER '(' ')'								{$$=simpleFuncall(adr,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall(adr,$1,$3);}
+| IDENTIFIER INC_OP 								{$$=varIncr($1,adr);}
+| IDENTIFIER DEC_OP									{$$=varDecr($1,adr);}
 ;
 
 postfix_expression
@@ -134,7 +134,7 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  									{$$=declareVar($1,htable);if(!$$)printf("No return\n");}
+: IDENTIFIER  									{$$=declareVar($1,adr);if(!$$)printf("No return\n");}
 | '(' declarator ')'                      		{$$=NULL;}
 | declarator '[' CONSTANTI ']'             		{$$=NULL;}
 | declarator '[' ']'                        	{$$=NULL;}
@@ -143,8 +143,8 @@ declarator
 ;
 
 parameter_list
-: parameter_declaration							{}
-| parameter_list ',' parameter_declaration		{}
+: parameter_declaration							{$$=init_list();insertElmnt($1,$$);}
+| parameter_list ',' parameter_declaration		{insertElmnt($3,$1);$$=$1;}
 ;
 
 parameter_declaration
@@ -160,9 +160,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   								//{htable=init_tree();}
-| '{' statement_list '}'					//{htable=init_tree();}
-| '{' declaration_list statement_list '}'	//{htable=init_tree();}
+: '{' '}'   								//{adr=init_tree();}
+| '{' statement_list '}'					//{adr=init_tree();}
+| '{' declaration_list statement_list '}'	//{adr=init_tree();}
 ;
 
 declaration_list
@@ -242,7 +242,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-	htable=init_tree();
+	adr=init_tree();
 	garbageCollector = init_list();
 	fprintf(stdout, "%s\n",header() );
 	fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
@@ -255,7 +255,7 @@ int main (int argc, char *argv[]) {
 	fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	del_list_and_content(garbageCollector);
 
-	del_tree(htable);
+	del_tree(adr);
 	free (file_name);
 	fclose(input);
 	return 0;
