@@ -52,7 +52,7 @@ union _value {
 /* TODO: différencier variables R_ONLY ou RW */
 /* TODO: champs de type d'objet: variable, tableau ou foction */
 struct _variable {
-	enum _type *type;
+	enum _type type;
 	const char *addr;
 	//union _value value;
 };
