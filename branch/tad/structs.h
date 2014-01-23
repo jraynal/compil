@@ -90,7 +90,8 @@ struct _nodeList
 };
 
 /*******Global Variables ****/
-struct _node* adr; // FAUX, il est spécifique à un contexte.
+// FAUX, il est spécifique à un contexte.
+// struct _node* adr; 
 struct _list * garbageCollector;
 
 #endif //STRUCTS_H

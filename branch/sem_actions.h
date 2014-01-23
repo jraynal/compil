@@ -59,6 +59,8 @@ struct _attribute *declareVar(char* nom, struct _node* adr);
 void setType(struct _attribute *a, enum _type t);
 void setTypeList(struct _list * list, enum _type t);
 
+void print(struct _attribute *a);
+
 
 
 #endif //FUNCTIONS_H
