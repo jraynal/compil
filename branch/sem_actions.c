@@ -2,7 +2,7 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-#define CHK(truc) do{if(truc == NULL) perror(#truc); exit(1);}while(0)
+#define CHK(truc) do{if(truc == NULL) perror(#truc); fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}while(0)
 
 const char *itoa(int i) {
 	char *c=NULL;
@@ -31,6 +31,7 @@ char* strOfNametype(enum _type *t){
 		return "";
 	}
 	perror("uncommon excecution");
+	fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 	exit(1);
 }
 
@@ -265,6 +266,7 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp, char * floatOp){
 	if (*a1->type != *a2->type){
 		perror("invalid operation");
+		fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
 	// struct _attribute *a = newAttribute(a1->identifier);
@@ -285,6 +287,7 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		break;
 		default: 
 		perror("invalid operation");
+		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 
 	}
@@ -354,6 +357,7 @@ struct _attribute *neg(struct _attribute *a1){
 		break;
 		default:
 		perror("invalid operation");
+		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
 	return a;
@@ -363,6 +367,7 @@ struct _attribute *neg(struct _attribute *a1){
 struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intConditionCode,  char* floatConditionCode ){
 	if (*a1->type != *a2->type){
 		perror("invalid operation");
+		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
 	// struct _attribute *a = newAttribute(a1->identifier);
@@ -381,6 +386,7 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 		break;
 		default:
 		perror("invalid operation");
+		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
 	return	a;
@@ -526,4 +532,8 @@ void setTypeList(struct _list * list, enum _type t){
 	del_list(list);
 }
 
+void print(struct _attribute *a) {
+	printCode(STDOUT_FILENO,a->code);
+	deleteCode(a->code);
+}
 
