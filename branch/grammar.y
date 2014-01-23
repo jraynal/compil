@@ -196,17 +196,17 @@ jump_statement
 ;
 
 program
-: external_declaration
-| program external_declaration
+: external_declaration															{$$=$1}
+| program external_declaration													{}
 ;
 
 external_declaration
-: function_definition
-| declaration
+: function_definition															{$$=$1}
+| declaration 																	{$$=$1}
 ;
 
 function_definition
-: type_name declarator compound_statement {setType($2,$1);}
+: type_name declarator compound_statement 										{setType($2,$1);}
 ;
 
 %%
