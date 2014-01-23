@@ -45,7 +45,7 @@ const char* officialName(const char* name){
 struct _attribute *newAttribute(const char * id){
 	struct _attribute *a=malloc(sizeof(struct _attribute));
 	a->reg = new_reg(); // registre de la donnée
-	a->addr= NULL; // adresse de la donnée (identifiants uniquement)
+	a->addr= NULL; // ctxtesse de la donnée (identifiants uniquement)
 	enum _type t = UNKNOWN;
 	a->type = &t;
 	a->code = initCode();
@@ -65,12 +65,12 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 	return var;
 }
 
-struct _attribute *get_attr_from_tree(struct _node* adr,const char* name){
-	CHK(adr);
+struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
+	CHK(ctxt);
 	char dest [100];
 	sprintf(dest,"/%s",name);
 	/* Obtention de l'indentifiant */
-	struct _variable *var = get_node(adr,dest);
+	struct _variable *var = get_var_layer(ctxt,dest);
 	CHK (var);
 
 	/* Creation de la liste d'attributs */
@@ -79,19 +79,19 @@ struct _attribute *get_attr_from_tree(struct _node* adr,const char* name){
 	/* Chargement de l'identifiant */
 	char * str_type = strOfNametype(a->type);
 	addCode(a->code,"%%%s =load %s* %s ",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
-	a->addr = var->addr;												// sauvegarde de l'adrresse pour tableaux par exemple
+	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;												// partage du type
 	return a;														// ecriture
 }
 
 
-struct _attribute *getVar(const char* name,struct _node* adr){
-	struct _attribute *a = get_attr_from_tree(adr,name);
+struct _attribute *getVar(const char* name,struct _layer *ctxt) {
+	struct _attribute *a = get_attr_from_tree(ctxt,name);
 	return a;
 }
 
-struct _attribute *varIncr(const char * name,struct _node* adr){
-	struct _attribute *a = get_attr_from_tree(adr,name);
+struct _attribute *varIncr(const char * name,struct _layer* ctxt){
+	struct _attribute *a = get_attr_from_tree(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	
 	/* Creation du registre de sortie du calcul */
@@ -115,8 +115,8 @@ struct _attribute *varIncr(const char * name,struct _node* adr){
 	return a;
 }
 
-struct _attribute *varDecr(const char * name,struct _node* adr) {
-	struct _attribute *a = get_attr_from_tree(adr,name);
+struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
+	struct _attribute *a = get_attr_from_tree(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
@@ -136,16 +136,16 @@ struct _attribute *varDecr(const char * name,struct _node* adr) {
 	return a;
 }
 
-struct _attribute *simpleFuncall(struct _node* adr,const char * funName){
-	struct _attribute *a = get_attr_from_tree(adr,funName);
+struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
+	struct _attribute *a = get_attr_from_tree(ctxt,funName);
 	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
 	return a;
 
 }
 
 
-struct _attribute *multipleFuncall(struct _node* adr,const char * funName,struct _list * l){
-	struct _attribute *a = get_attr_from_tree(adr,funName);
+struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * l){
+	struct _attribute *a = get_attr_from_tree(ctxt,funName);
 	//TODO
 	return a;
 
@@ -172,7 +172,7 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	// Ne pas oublier le code des autres...
 	a->code=fusionCode(array->code,i->code);
 	a->type = array->type;
-	/* retourne l'élément situé à i.reg * array.type de l'adresse de base, donc le ième */
+	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
 	addCode(a->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",a->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
 	return a;
 }
@@ -474,24 +474,24 @@ void affectValue (struct _attribute *varName,enum _affectation how,struct _attri
 	// 	fprintf(stderr, "unmatched type : %s\n", (int)toModify->type);
 }
 
-// adr = arbre de recherche
-struct _attribute *declareVar(char* nom,struct _node* adr){
+// ctxt = arbre de recherche
+struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	//vérification de l'existence de l'ARBRE DE RECHERCHE
-	if(!adr)
-		fprintf(stderr, "No adr\n"); 
+	if(!ctxt)
+		fprintf(stderr, "No ctxt\n"); 
 	char dest[strlen(nom)+2];
 	sprintf(dest,"/%s",nom);
 	struct _attribute *a=newAttribute(nom);
-	// Modification du type de la variable et de l'adrese du pointeur par effet de bord.
+	// Modification du type de la variable et de l'ctxtese du pointeur par effet de bord.
 	// On ne pourra alour la mémoire qu'en connaisant le type!
 	struct _variable * var = varCreate(a->type,a->addr);
 
 	// Ajout de la clef dans l'arbre
-	set_node(adr,dest,var);
+	set_var_layer(ctxt,dest,var);
 
 	/* DEBUG SPOTTED */
 	// Vérifiction de la présence de la clef
-	// var = get_node(adr,dest);
+	// var = get_layer(ctxt,dest);
 	// if(var==NULL)
 	// 	fprintf(stderr, "Variable non set : %s\n",dest);
 	// fprintf(stderr, "declaration de %s\n",nom);
@@ -537,13 +537,13 @@ void print(struct _attribute *a) {
 	deleteCode(a->code);
 }
 
-struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _atribute *other) {
+struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
 	/* TODO: cond avec cas sans else si other est à NULL*/
 	return NULL;
 }
 
 struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct _attribute *ite, struct _attribute *body) {
-	struct _attribute *a=newAttribute();
+	struct _attribute *a=newAttribute("/");
 	a->code=init->code;
 	/* TODO: effacer certaines parties pour un while quand init et ite sont à
 	 * NULL */

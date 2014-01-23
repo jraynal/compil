@@ -10,7 +10,7 @@
 	extern int yylineno;
 	int yylex ();
 	int yyerror ();
-
+	struct _layer *my_ctxt;
 
 
 %}
@@ -42,9 +42,7 @@
 %type<Float> CONSTANTF
 %type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression 
 %type<attr> comparison_expression expression parameter_declaration declarator declaration function_definition external_declaration
-%type<attr> compount_statement expression_statement selection_statement
-%iteration_statement jump_statement declaration declaration_list
-%statement_list statement expression
+%type<attr> compound_statement expression_statement selection_statement iteration_statement jump_statement declaration_list statement_list statement 
 %type<list> declarator_list argument_expression_list parameter_list
 %type<unaryOp> unary_operator
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
@@ -55,14 +53,14 @@
 %%
 
 primary_expression
-: IDENTIFIER 										{$$=getVar($1,adr);}
+: IDENTIFIER 										{$$=getVar($1,my_ctxt);}
 | CONSTANTI											{$$=newInt($1);}
 | CONSTANTF 										{$$=newFloat($1);}
 | '(' expression ')'    							{$$=$2;}
-| IDENTIFIER '(' ')'								{$$=simpleFuncall(adr,$1);}
-| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall(adr,$1,$3);}
-| IDENTIFIER INC_OP 								{$$=varIncr($1,adr);}
-| IDENTIFIER DEC_OP									{$$=varDecr($1,adr);}
+| IDENTIFIER '(' ')'								{$$=simpleFuncall(my_ctxt,$1);}
+| IDENTIFIER '(' argument_expression_list ')' 		{$$=multipleFuncall(my_ctxt,$1,$3);}
+| IDENTIFIER INC_OP 								{$$=varIncr($1,my_ctxt);}
+| IDENTIFIER DEC_OP									{$$=varDecr($1,my_ctxt);}
 ;
 
 postfix_expression
@@ -137,7 +135,7 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  									{$$=declareVar($1,adr);if(!$$)printf("No return\n");}
+: IDENTIFIER  									{$$=declareVar($1,my_ctxt);if(!$$)printf("No return\n");}
 | '(' declarator ')'                      		{$$=NULL;}
 | declarator '[' CONSTANTI ']'             		{$$=NULL;}
 | declarator '[' ']'                        	{$$=NULL;}
@@ -155,22 +153,22 @@ parameter_declaration
 ;
 
 statement
-: compound_statement   {$$=$1}
-| expression_statement {$$=$1}
-| selection_statement  {$$=$1}
-| iteration_statement  {$$=$1}
-| jump_statement       {$$=$1}
+: compound_statement   {$$=$1;}
+| expression_statement {$$=$1;}
+| selection_statement  {$$=$1;}
+| iteration_statement  {$$=$1;}
+| jump_statement       {$$=$1;}
 ;
 
 compound_statement
 : '{' '}'   								{}
 | '{' statement_list '}'					{$$=$2;}
-| '{' declaration_list statement_list '}'	{$$=$2;}
+| '{' declaration_list statement_list '}'	{$$=$3;}
 ;
 
 declaration_list
 : declaration {$$=$1;}
-| declaration_list declaration {$$=$1;}
+| declaration_list declaration {$$=$2;}
 ;
 
 statement_list
@@ -179,13 +177,13 @@ statement_list
 ;
 
 expression_statement
-: ';'
+: ';' {}
 | expression ';'  {$$=$1;}
 ;
 
 selection_statement
 : IF '(' expression ')' statement {$$=selection($3,$5,NULL);}
-| IF '(' expression ')' statement ELSE statement {$$=selection($3,$4,$5)}
+| IF '(' expression ')' statement ELSE statement {$$=selection($3,$5,$7);}
 | FOR '(' expression_statement expression_statement expression ')' statement {$$=loop($3,$4,$5,$7);}
 ;
 
@@ -245,7 +243,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-	
+	struct _layer *my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();

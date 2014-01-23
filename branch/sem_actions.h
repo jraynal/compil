@@ -8,6 +8,7 @@
 #include "tad/list.h"
 #include "tad/structs.h"
 #include "tad/code.h"
+#include "tad/layer.h"
 
  //for dynamic allocation
 
@@ -15,13 +16,13 @@ struct _variable * varCreate(enum _type *type, const char * addr);
 // struct _attribute *varCreateInt(int );
 // struct _attribute *varCreateFloat(float );
 
-struct _attribute *getVar(const char* nom,struct _node* htab);
+struct _attribute *getVar(const char* nom,struct _layer* htab);
 struct _attribute *newInt(int i);
 struct _attribute *newFloat(float f);
-struct _attribute *simpleFuncall(struct _node* htab,const char * funName);
-struct _attribute *multipleFuncall(struct _node* htab,const char * funName,struct _list * l);
-struct _attribute *varIncr(const char * name,struct _node* htab);
-struct _attribute *varDecr(const char * name,struct _node* htab);
+struct _attribute *simpleFuncall(struct _layer* htab,const char * funName);
+struct _attribute *multipleFuncall(struct _layer* htab,const char * funName,struct _list * l);
+struct _attribute *varIncr(const char * name,struct _layer* htab);
+struct _attribute *varDecr(const char * name,struct _layer* htab);
 
 struct _attribute *getValArray(struct _attribute *array, struct _attribute *i);
 
@@ -53,7 +54,7 @@ struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 
 
 void affectValue (struct _attribute *,enum _affectation ,struct _attribute *);
-struct _attribute *declareVar(char* nom, struct _node* adr);
+struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
 
 void setType(struct _attribute *a, enum _type t);

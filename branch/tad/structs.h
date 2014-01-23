@@ -52,7 +52,7 @@ union _value {
 /* TODO: différencier variables R_ONLY ou RW */
 /* TODO: champs de type d'objet: variable, tableau ou foction */
 struct _variable {
-	enum _type type;
+	enum _type *type;
 	const char *addr;
 	//union _value value;
 };
@@ -94,6 +94,7 @@ struct _nodeList
 /*******Global Variables ****/
 // FAUX, il est spécifique à un contexte.
 // struct _node* adr; 
+extern struct _layer *my_ctxt;
 struct _list * garbageCollector;
 
 #endif //STRUCTS_H
