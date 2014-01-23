@@ -42,6 +42,9 @@
 %type<Float> CONSTANTF
 %type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression 
 %type<attr> comparison_expression expression parameter_declaration declarator declaration function_definition external_declaration
+%type<attr> compount_statement expression_statement selection_statement
+%iteration_statement jump_statement declaration declaration_list
+%statement_list statement expression
 %type<list> declarator_list argument_expression_list parameter_list
 %type<unaryOp> unary_operator
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
@@ -152,47 +155,47 @@ parameter_declaration
 ;
 
 statement
-: compound_statement
-| expression_statement 
-| selection_statement
-| iteration_statement
-| jump_statement
+: compound_statement   {$$=$1}
+| expression_statement {$$=$1}
+| selection_statement  {$$=$1}
+| iteration_statement  {$$=$1}
+| jump_statement       {$$=$1}
 ;
 
 compound_statement
 : '{' '}'   								{}
-| '{' statement_list '}'					//{adr=init_tree();}
-| '{' declaration_list statement_list '}'	//{adr=init_tree();}
+| '{' statement_list '}'					{$$=$2;}
+| '{' declaration_list statement_list '}'	{$$=$2;}
 ;
 
 declaration_list
-: declaration
-| declaration_list declaration
+: declaration {$$=$1;}
+| declaration_list declaration {$$=$1;}
 ;
 
 statement_list
-: statement
-| statement_list statement
+: statement {$$=$1;}
+| statement_list statement {$$=$2;}
 ;
 
 expression_statement
 : ';'
-| expression ';' 
+| expression ';'  {$$=$1;}
 ;
 
 selection_statement
-: IF '(' expression ')' statement
-| IF '(' expression ')' statement ELSE statement
-| FOR '(' expression_statement expression_statement expression ')' statement
+: IF '(' expression ')' statement {$$=selection($3,$5,NULL);}
+| IF '(' expression ')' statement ELSE statement {$$=selection($3,$4,$5)}
+| FOR '(' expression_statement expression_statement expression ')' statement {$$=loop($3,$4,$5,$7);}
 ;
 
 iteration_statement
-: WHILE '(' expression ')' statement
+: WHILE '(' expression ')' statement {loop(NULL,$3,NULL,$5);}
 ;
 
 jump_statement
-: RETURN ';'
-| RETURN expression ';'
+: RETURN ';' {}
+| RETURN expression ';' {$$=$2;}
 ;
 
 program

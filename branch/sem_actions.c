@@ -537,3 +537,19 @@ void print(struct _attribute *a) {
 	deleteCode(a->code);
 }
 
+struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _atribute *other) {
+	/* TODO: cond avec cas sans else si other est à NULL*/
+	return NULL;
+}
+
+struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct _attribute *ite, struct _attribute *body) {
+	struct _attribute *a=newAttribute();
+	a->code=init->code;
+	/* TODO: effacer certaines parties pour un while quand init et ite sont à
+	 * NULL */
+	/* TODO: label  */
+	selection(cond,body,NULL); // On teste et on fait au besoin
+	a->code=fusionCode(a->code,ite->code);
+	/* TODO: renvoie au label */
+	return NULL;
+}
