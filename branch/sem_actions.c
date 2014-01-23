@@ -19,8 +19,8 @@ const char *new_reg(){
 	return itoa(i);
 }
 
-char* strOfNametype(enum _type t){
-	switch(t){
+char* strOfNametype(enum _type *t){
+	switch(*t){
 		case INT_TYPE :
 		return "i32";
 		break;
@@ -45,13 +45,14 @@ struct _attribute *newAttribute(const char * id){
 	struct _attribute *a=malloc(sizeof(struct _attribute));
 	a->reg = new_reg(); // registre de la donnée
 	a->addr= NULL; // adresse de la donnée (identifiants uniquement)
-	a->type = UNKNOWN;
+	enum _type t = UNKNOWN;
+	a->type = &t;
 	a->code = initCode();
 	a->identifier= id;
 	return a;
 }
 
-struct _variable * varCreate(enum _type type, const char *addr){
+struct _variable * varCreate(enum _type *type, const char *addr){
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
 		var->type = type;
@@ -94,7 +95,7 @@ struct _attribute *varIncr(const char * name,struct _node* adr){
 	
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
-	switch(a->type){
+	switch(*a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
 			addCode(a->code,"%%%s =add %s %%%s, i32 1",reg,str_type,a->reg);
@@ -118,7 +119,7 @@ struct _attribute *varDecr(const char * name,struct _node* adr) {
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
-	switch(a->type){
+	switch(*a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
 			addCode(a->code,"%%%s =sub %s %%%s, i32 1",reg,str_type,a->reg);
@@ -151,14 +152,14 @@ struct _attribute *multipleFuncall(struct _node* adr,const char * funName,struct
 
 struct _attribute *newInt(int i){
 	struct _attribute *a = newAttribute("/");
-	a->type = INT_TYPE;
+	*a->type = INT_TYPE;
 	addCode(a->code,"%%%s  = add i32 %s, 0;\n",a->reg,i);
 	return a;
 }
 
 struct _attribute *newFloat(float f){
 	struct _attribute *a = newAttribute("/");
-	a->type = FLOAT_TYPE;
+	*a->type = FLOAT_TYPE;
 	addCode(a->code,"%%%s  = fadd float %g, 0.0 ;\n",a->reg,f);
 	return a;
 }
@@ -176,7 +177,7 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 }
 
 
-
+/* TODO: gestion propre des listes d'attributs */
 struct _list * expressionList(struct _attribute *a){
 	return init_list();
 }
@@ -193,7 +194,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
-	switch(a->type){
+	switch(*a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
 			addCode(a->code,"%%%s =add %s %%%s, i32 1",reg,str_type,a->reg);
@@ -217,7 +218,7 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
-	switch(a->type){
+	switch(*a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
 			addCode(a->code,"%%%s =sub %s %%%s, i32 1",reg,str_type,a->reg);
@@ -262,7 +263,7 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 // }
 
 struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp, char * floatOp){
-	if (a1->type != a2->type){
+	if (*a1->type != *a2->type){
 		perror("invalid operation");
 		exit(1);
 	}
@@ -273,13 +274,13 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 	// ne pas oublier de récupérer le code qui remonte...
 	a->code=fusionCode(a1->code,a2->code);
 
-	switch(a1->type){
+	switch(*a1->type){
 		case INT_TYPE : 
-		a->type = INT_TYPE;
+		*a->type = INT_TYPE;
 		addCode(a->code,"%%%s = %s i32 %%%s, i32 %%%s; \n",a->reg,intOp,a1->reg,a2->reg);	
 		break;
 		case FLOAT_TYPE:
-		a->type = FLOAT_TYPE;
+		*a->type = FLOAT_TYPE;
 		addCode(a->code,"%%%s = %s float %%%s, float %%%s; \n",a->reg,floatOp,a1->reg,a2->reg);	
 		break;
 		default: 
@@ -342,13 +343,13 @@ struct _attribute *sub(struct _attribute *a1 ,struct _attribute *a2){
 
 struct _attribute *neg(struct _attribute *a1){
 	struct _attribute *a = newAttribute(a1->identifier);
-	switch(a->type){
+	switch(*a->type){
 		case INT_TYPE : 
-		a->type = INT_TYPE;
+		*a->type = INT_TYPE;
 		addCode(a->code,"%%%s = sub i32 0 , %%%s",a->reg,a1->reg) ;
 		break;
 		case FLOAT_TYPE:
-		a->type = FLOAT_TYPE;
+		*a->type = FLOAT_TYPE;
 		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",a->reg,a1->reg) ;
 		break;
 		default:
@@ -360,7 +361,7 @@ struct _attribute *neg(struct _attribute *a1){
 
 
 struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intConditionCode,  char* floatConditionCode ){
-	if (a1->type != a2->type){
+	if (*a1->type != *a2->type){
 		perror("invalid operation");
 		exit(1);
 	}
@@ -369,13 +370,13 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 	struct _attribute *a = newAttribute("/");
 	// Encore une fois, y a du code qui remonte, on le stocke:
 	a->code=fusionCode(a1->code,a2->code);
-	switch(a1->type){
+	switch(*a1->type){
 		case INT_TYPE : 
-		a->type = INT_TYPE;
+		*a->type = INT_TYPE;
 		addCode(a->code,"%%%s = icmp %s i32 %%%s, i32 %%%s; \n",a->reg,intConditionCode, a1->reg, a2->reg);	
 		break;
 		case FLOAT_TYPE:
-		a->type = FLOAT_TYPE;
+		*a->type = FLOAT_TYPE;
 		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a->reg,floatConditionCode,a1->reg,a2->reg);	
 		break;
 		default:
@@ -501,7 +502,7 @@ void setType(struct _attribute *a, enum _type t){
 		return;
 	}
 	// Modification dans l'arbre par effet de bord
-	a->type = t;
+	a->type = &t;
 	return;
 }
 
@@ -517,6 +518,7 @@ void setTypeList(struct _list * list, enum _type t){
 		return;
 	}else{
 		while(! is_empty(list)){
+			/* TODO: set type a besoin d'un attribut et non pas d'une variable */
 			setType(list->head->value,t);
 			removeElmnt(list->head->value,list);
 		}

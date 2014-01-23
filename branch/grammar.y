@@ -1,7 +1,7 @@
 %{
-	#include "includes/structs.h"
-	#include "includes/tree.h"
-	#include "includes/list.h"
+	#include "tad/structs.h"
+	#include "tad/tree.h"
+	#include "tad/list.h"
 	
 	#include <stdio.h>
 	#include "sem_actions.h"
@@ -40,13 +40,12 @@
 %type<text> IDENTIFIER 
 %type<Int> CONSTANTI
 %type<Float> CONSTANTF
-%type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression comparison_expression expression parameter_declaration
+%type<attr> primary_expression postfix_expression unary_expression multiplicative_expression additive_expression comparison_expression expression parameter_declaration declarator
 %type<list> declarator_list argument_expression_list parameter_list
 %type<unaryOp> unary_operator
 %type<affect> SUB_ASSIGN MUL_ASSIGN ADD_ASSIGN assignment_operator
 
 
-%type<var> declarator
 %type<type> type_name
 
 %%

@@ -4,14 +4,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "includes/tree.h"
-#include "includes/list.h"
-#include "includes/structs.h"
-#include "includes/code.h"
+#include "tad/tree.h"
+#include "tad/list.h"
+#include "tad/structs.h"
+#include "tad/code.h"
 
  //for dynamic allocation
 
-struct _variable * varCreate(enum _type type, const char * addr);
+struct _variable * varCreate(enum _type *type, const char * addr);
 // struct _attribute *varCreateInt(int );
 // struct _attribute *varCreateFloat(float );
 

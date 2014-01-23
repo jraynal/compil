@@ -30,9 +30,9 @@ struct _code {
 };
 
 struct _attribute {
-	const char *reg;
-	const char *addr;
-	enum _type type;
+	const char *reg;    // Valeurs
+	const char *addr;   // Adresses
+	enum _type *type;
 	struct _code *code;
 	const char * identifier;
 };
@@ -48,9 +48,11 @@ union _value {
 
 
 // Structure manipulée par les actions sémantiques
+/* TODO: différencier variables R_ONLY ou RW */
+/* TODO: champs de type d'objet: variable, tableau ou foction */
 struct _variable {
-	enum _type type;
-	char *addr;
+	enum _type *type;
+	const char *addr;
 	//union _value value;
 };
 
