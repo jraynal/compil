@@ -76,6 +76,25 @@ struct _layer {
 	struct _layer *previous;
 };
 
+/************ HEAP to minize the number of register **********/
+struct _self_balancing_tree{
+	int value;
+	// number of node is the entire tree
+	int weight;
+	//left son
+	struct _self_balancing_tree * left;
+	//right son
+	struct _self_balancing_tree * right;
+};
+
+struct _int_heap{
+	// for each number i greater (or equal) than first_free , register i is free
+	int first_free;
+	// for each i in tree, register i is free
+	struct _self_balancing_tree * tree;
+};
+
+
 /************List************/
 struct _list
 {
