@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <assert.h>
+#include <string.h>
 #include "list.h"
 
 #ifndef DEBUG
@@ -8,15 +9,15 @@
 #define DB(say) fprintf(stderr,#say"\n");
 #endif
 
-struct _variable *init_data(int val){
+struct _variable *init_data(const char * val){
 	struct _variable *var = (struct _variable*)malloc(sizeof(struct _variable));
 	var->type=INT_TYPE;
-	var->value.ival=val;
+	var->addr=val;
 	return var;
 }
 void print_var(struct _variable *data){
 	if(data!=NULL){
-		printf("/%d(%d)",data->value.ival,data->type);
+		printf("/%s(%d)",data->addr,data->type);
 	}
 }
 
@@ -35,10 +36,10 @@ void print_list(struct _list* l){
 }
 
 
-void test_var(struct _variable *data, int val){
+void test_var(struct _variable *data, const char * val){
 	if(data!=NULL) {
 		DB(Testing returned values)
-		assert(data->value.ival==val);
+		assert(strcmp(data->addr,val)==0);
 	}
 	else
 		assert(1==0);
@@ -53,11 +54,11 @@ void test_init_list(){
 void test_set(){
 	struct _list * l = init_list();
 	struct _variable* data[10] ;
-	data[0] = init_data(42);
-	data[1] = init_data(43);
-	data[2] = init_data(43);
-	data[3] = init_data(7);
-	data[4] = init_data(1);
+	data[0] = init_data("42");
+	data[1] = init_data("43");
+	data[2] = init_data("43");
+	data[3] = init_data("7");
+	data[4] = init_data("1");
 	assert(is_empty(l));
 	print_list(l);
 
