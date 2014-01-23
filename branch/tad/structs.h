@@ -37,6 +37,7 @@ struct _attribute {
 	const char * identifier;
 };
 
+
 /******************* Storage unit in the tree *********************/
 
 // Union des types de valeurs possible
@@ -66,6 +67,7 @@ struct _node {
 	struct _node *brother;
 };
 
+/******************* Context **************************/
 // Bloc d'exécution courant
 struct _layer {
 	struct _node *root;
