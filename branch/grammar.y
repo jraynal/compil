@@ -252,10 +252,8 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-<<<<<<< HEAD
-=======
+
 	fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
->>>>>>> 0ec581c00206f958eebf4e5f11d6a56710d0d4c0
 	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);

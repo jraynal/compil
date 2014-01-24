@@ -2,11 +2,8 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-<<<<<<< HEAD
 #define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}}while(0)
-=======
-#define CHK(truc) do{if(truc == NULL) fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
->>>>>>> 0ec581c00206f958eebf4e5f11d6a56710d0d4c0
+
 
 const char *itoa(int i) {
 	char *c=NULL;
@@ -602,14 +599,9 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 	return NULL;
 }
 
-<<<<<<< HEAD
-struct _attribute *inception(struct _attribute *a){
-	// fail... ça marchera pas...
-	CHK(a);
-=======
 struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 	struct _attribute *a=newAttribute("/");
 	a->code=fusionCode(a1->code,a2->code);
->>>>>>> 0ec581c00206f958eebf4e5f11d6a56710d0d4c0
+	CHK(a);
 	return a;
 }
