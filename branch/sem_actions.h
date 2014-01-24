@@ -71,5 +71,4 @@ struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribut
 
 struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
 
-
 #endif //FUNCTIONS_H

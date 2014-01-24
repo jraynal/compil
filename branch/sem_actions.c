@@ -4,7 +4,6 @@
 
 #define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}}while(0)
 
-
 const char *itoa(int i) {
 	char *c=NULL;
 	int len=0;
@@ -603,5 +602,6 @@ struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 	struct _attribute *a=newAttribute("/");
 	a->code=fusionCode(a1->code,a2->code);
 	CHK(a);
+
 	return a;
 }
