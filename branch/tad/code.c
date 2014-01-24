@@ -1,6 +1,6 @@
 #include "code.h"
 #include <stdio.h>
-
+#define CHK(message,truc) do{if(truc == NULL) fprintf(stderr,#message" in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
 
 /* Private */
 static int isEnd(struct _code* c, struct _string *str);
@@ -27,8 +27,7 @@ struct _code *addCode(struct _code* code, char* str,...) {
 	va_start(argp, str);
 
         len = vsnprintf(NULL, 0, str, argp);
-        if (!(tmp = malloc((len + 1) * sizeof(char))))
-            exit(EXIT_FAILURE);
+        CHK(bad alloc,(tmp = malloc((len + 1) * sizeof(char))));
         len = vsnprintf(tmp, len + 1, str, argp);
 	va_end(argp);
 	/* Ajout dans le code */
@@ -37,8 +36,7 @@ struct _code *addCode(struct _code* code, char* str,...) {
 }
 
 int printCode(int fd, struct _code *code) {
-	if(code == NULL)
-		exit (EXIT_FAILURE);
+	CHK(is NULL,code);
 	struct _string * tmp = code->begin;
 	int written=0,r=0;
 	while(tmp) {
@@ -106,13 +104,12 @@ static void deleteString(struct _string* str) {
 }
 
 static int isEnd(struct _code* c, struct _string *str) {
-	if(c == NULL || str == NULL)
-		exit(EXIT_FAILURE);
+	CHK(is NULL,c);
+	CHK(is NULL,str);
 	return (c->end == str && str->next == NULL);
 }
 
 static int isEmpty(struct _code* c){
-	if (c == NULL)
-		exit(EXIT_FAILURE);
+	CHK(is NULL,c);
 	return (c->begin == NULL && c->end == NULL);
 }

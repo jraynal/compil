@@ -1,6 +1,6 @@
 #include "int_heap.h"
 
-#define CHK(truc) do{if(truc == NULL){printf("%s est NULL\n",#truc); exit(1);}}while(0)
+#define CHK(truc) do{if(truc == NULL) fprintf(stderr,#message" in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
 
 // INCLUDED TREE (self balancing tree where the root is always lower than the sons)
 
