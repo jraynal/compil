@@ -602,5 +602,7 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 	struct _attribute *a=newAttribute("/");
 	a->code=fusionCode(a1->code,a2->code);
+	CHK(a);
+
 	return a;
 }
