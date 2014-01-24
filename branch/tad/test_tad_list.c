@@ -17,7 +17,7 @@ struct _variable *init_data(const char * val){
 }
 void print_var(struct _variable *data){
 	if(data!=NULL){
-		printf("/%s(%d)",data->addr,data->type);
+		printf("/%s(%d)",data->addr,(int)data->type);
 	}
 }
 
@@ -60,17 +60,17 @@ void test_set(){
 	data[3] = init_data("7");
 	data[4] = init_data("1");
 	assert(is_empty(l));
-	print_list(l);
+	// print_list(l);
 
-	printf("insert : 1\n");
+	DB(insert : data1);
 	insertElmnt(data[4],l);
 	assert(!is_empty(l));
-	print_list(l);
+	// print_list(l);
 	assert(l->size==1);
 
-	printf("remove : 1\n");
+	DB(remove : data1);
 	removeElmnt(data[4],l);
-	print_list(l);
+	// print_list(l);
 	assert(is_empty(l));
 
 	assert(EXIT_SUCCESS==del_list(l));
@@ -78,31 +78,32 @@ void test_set(){
 
 	l = init_list();
 
-	printf("insert : 42\n");
+	DB(insert : data42);
 	insertElmnt(data[0],l);
 	assert(!is_empty(l));
-	print_list(l);
+	// print_list(l);
 	assert(l->size==1);
 
-	printf("insert : 43\n");
+	DB(insert : data43);
 	insertElmnt(data[1],l);
-	print_list(l);
+	// print_list(l);
 	assert(l->size==2);
 
-	printf("insert : 43\n");
+	DB(insert : data43);
 	insertElmnt(data[2],l);
-	print_list(l);
+	// print_list(l);
 	assert(l->size==3);
 
-	printf("remove : 7\n");
+	DB(remove : data7);
 	removeElmnt(data[3],l);
-	print_list(l);
+	// print_list(l);
 	assert(l->size==3);
 
-	printf("remove : 43\n");
+	DB(remove : data43);
 	removeElmnt(data[1],l);
-	print_list(l);
+	// print_list(l);
 	assert(l->size==2);
+
 
 	assert(EXIT_SUCCESS==del_list_and_content(l));
 	free(data[3]);

@@ -107,7 +107,6 @@ comparison_expression
 ;
 
 expression
-// on suppose que $1 est uniquement un identifiant
 : unary_expression assignment_operator comparison_expression {affectValue($1,$2,$3);}
 | comparison_expression
 ;
@@ -256,6 +255,7 @@ int main (int argc, char *argv[]) {
 	fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
+	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
 	fprintf(stdout, "%s\n",footer() );
