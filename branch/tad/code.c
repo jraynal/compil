@@ -55,7 +55,7 @@ int printCode(int fd, struct _code *code) {
 	CHK(is NULL,code);
 	struct _string * tmp = code->begin;
 	int written=0,r=0;
-	while(tmp) {
+	while(tmp==NULL) {
 		written=0; r=0;
 		while(written < tmp->length) {
 			if((r=write(fd,tmp->text,tmp->length-written))==-1)
@@ -109,7 +109,7 @@ static struct _string *getNext(struct _string *str) {
 static struct _string *initString(char *txt) {
 	struct _string *str=malloc(sizeof(struct _string));
 	str->text=txt;
-	str->length=strlen(txt);
+	str->length=strlen(txt)+1;
 	str->next=NULL;
 	return str; 
 }
