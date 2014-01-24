@@ -7,8 +7,8 @@
 #define DB(say) fprintf(stderr,#say"\n");
 #endif
 
-#define TEST1 "my name is bob\n"
-#define TEST2 "my name is michel and i am %d\n",12 
+#define TEST1 "my name is bob \n"
+#define TEST2 "my name is michel and i am %d  or %d\n",12,7 
 
 
 int main() {
@@ -16,12 +16,13 @@ int main() {
 	DB(Test de Code:);
 	struct _code *my_code=initCode();
 
-	// DB(Chaine sans arguments:)
-	// DB(ajout...)
-	// addCode(my_code,TEST1);
-	// DB(impression...)
-	// printCode(STDOUT_FILENO,my_code);
-	printf(TEST2 );
+	DB(Chaine sans arguments...)
+	DB(ajout...)
+	addCode(my_code,TEST1);
+	DB(impression...)
+	printCode(STDOUT_FILENO,my_code);
+
+	// printf(TEST2 );
 	DB(ajout2...)
 	addCode(my_code,TEST2);
 	DB(impression...)

@@ -1,6 +1,6 @@
 #include "code.h"
 #include <stdio.h>
-#define CHK(message,truc) do{if(truc == NULL) fprintf(stderr,#message" in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
+#define CHK(message,truc) do{if(truc == NULL){fprintf(stderr,#message" in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}}while(0)
 
 #ifndef DEBUG
 #define DB(say)
@@ -18,7 +18,13 @@ static void deleteString(struct _string *str);
 static int isEmpty(struct _code* c);
 /* Public */
 struct _code *fusionCode(struct _code* c1, struct _code* c2) {
+	CHK(invalid arg,c1);
+	CHK(invalid arg,c2);
 	struct _code *cmaster=initCode();
+	CHK(initCode,cmaster);
+	CHK(laststring,c1->end);
+	
+	c1->end->next = c2->begin;
 	cmaster->begin=c1->begin;
 	cmaster->end=c2->end;
 	free(c1);
@@ -32,13 +38,14 @@ struct _code *addCode(struct _code* code, char* str,...) {
 	/* formatage de la chaine */
 	va_list argp;
 	va_start(argp, str);
-	DB(Mesure de la taille à formater);
-        len = vsnprintf(NULL, 0, str, argp);
-				fprintf(stderr,"mesuré %d octets de long\n",len);
-        CHK(bad alloc,(tmp = malloc(len * sizeof(char))));
-	DB(formattage)
-        len = vsnprintf(tmp, len, str, argp);
+	len = vsnprintf(NULL, 0, str, argp);
+	fprintf(stderr,"(%d octets)\n",len);
+	CHK(bad alloc,(tmp = malloc((len+1) * sizeof(char))));
+	
+	len = vsnprintf(tmp, len+1, str, argp);
+	printf("%s\n",tmp );
 	va_end(argp);
+
 	/* Ajout dans le code */
 	addTail(code,initString(tmp));
 	return code;
@@ -71,10 +78,10 @@ void deleteCode(struct _code* code) {
 	struct _string *tmp = code->begin;
 	struct _string *tmp2;
 	while(tmp){
-			tmp2=getNext(tmp);
-			deleteString(tmp);
-			tmp=tmp2;
-		}
+		tmp2=getNext(tmp);
+		deleteString(tmp);
+		tmp=tmp2;
+	}
 	free(code);
 }
 

@@ -18,7 +18,7 @@ struct _variable *init_data(const char *  val){
 }
 void print_var(struct _variable *data){
 	if(data!=NULL){
-		printf("type: %d, addr \t%s\n",(int)data->type,data->addr);
+		printf("type: %d, addr \t%s\n",(int)*(data->type),data->addr);
 	}
 }
 

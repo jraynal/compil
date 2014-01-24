@@ -5,10 +5,11 @@ CC=gcc
 SRC=y.tab.c lex.yy.c sem_actions.c tad/tree.c tad/list.c tad/code.c tad/layer.c
 OBJ=$(SRC:.c=.o)
 EXEC=parse
+OTHER= structs.h
 
 all: $(EXEC)
 
-$(EXEC): $(OBJ)
+$(EXEC): $(OBJ) 
 	@echo "Linking $^ into [$@]"
 	@$(CC) $(CFLAGS) -o $@ $^ 
 
