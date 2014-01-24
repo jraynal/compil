@@ -68,12 +68,6 @@ struct _attribute * insert_statement_list(struct _attribute * statement, struct 
 void print(struct _attribute *a);
 struct _attribute *selection(struct _attribute *, struct _attribute *, struct _attribute *);
 struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribute *, struct _attribute *);
-<<<<<<< HEAD
-
-struct _attribute *inception(struct _attribute *a);
-=======
 struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
-
->>>>>>> 0ec581c00206f958eebf4e5f11d6a56710d0d4c0
 
 #endif //FUNCTIONS_H
