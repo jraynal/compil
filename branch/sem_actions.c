@@ -179,6 +179,7 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 struct _attribute *newInt(int i){
 	struct _attribute *a = newAttribute("/");
 	*a->type = INT_TYPE;
+
 	addCode(a->code,"%%%s  = add i32 %s, 0;\n",a->reg,i);
 	CHK(a);
 	return a;

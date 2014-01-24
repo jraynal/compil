@@ -1,5 +1,5 @@
 void f(){
 int accel; 
-// accel=1;
+accel=1;
 ;;;;
 }
