@@ -56,6 +56,8 @@ struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 void affectValue (struct _attribute *,enum _affectation ,struct _attribute *);
 struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
+void declare_array(struct _attribute* array, int size);
+
 void simple_declare_function(struct _attribute * func);
 void multiple_declare_function(struct _attribute * func , struct _list * args);
 
