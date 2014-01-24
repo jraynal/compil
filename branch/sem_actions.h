@@ -63,7 +63,7 @@ void multiple_declare_function(struct _attribute * func , struct _list * args);
 
 struct _attribute *allocate_id(struct _attribute *,enum _type);
 void setType(struct _attribute *a, enum _type t);
-void setTypeList(struct _list * list, enum _type t);
+struct _attribute * setTypeList(struct _list * list, enum _type t);
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content);
 
 struct _attribute *  new_statement_list(struct _attribute * statement);

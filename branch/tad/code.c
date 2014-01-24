@@ -22,11 +22,21 @@ struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 	CHK(invalid arg,c2);
 	struct _code *cmaster=initCode();
 	CHK(initCode,cmaster);
-	CHK(laststring,c1->end);
 	
-	c1->end->next = c2->begin;
-	cmaster->begin=c1->begin;
-	cmaster->end=c2->end;
+	if(!isEmpty(c1) && ! isEmpty(c2)){
+		cmaster->begin=c1->begin;
+		CHK(laststring,c1->end);
+		c1->end->next = c2->begin;
+		cmaster->end = c2->end;
+	}
+	else if (!isEmpty(c1)){
+		cmaster->begin=c1->begin;
+		cmaster->end = c1->end;
+	}
+	else{
+		cmaster->begin=c2->begin;
+		cmaster->end = c2->end;
+	}
 	free(c1);
 	free(c2);
 	return cmaster;

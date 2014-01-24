@@ -175,7 +175,7 @@ compound_statement
 declaration_list
 : declaration {$$=$1;}
 | declaration_list declaration {
-								$$=$2;
+								$$=concat($1,$2);
 								is_first_declarator=1; //tout a été init dans le contexte
 								}
 ;
