@@ -553,3 +553,8 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 	/* TODO: renvoie au label */
 	return NULL;
 }
+
+struct _attribute *inception(struct _attribute *a){
+	// fail... ça marchera pas...
+	return a;
+}
