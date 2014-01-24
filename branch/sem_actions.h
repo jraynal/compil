@@ -51,15 +51,12 @@ struct _attribute *ge_op (struct _attribute *,struct _attribute *);
 struct _attribute *ne_op (struct _attribute *,struct _attribute *);
 struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 
-
-
-void affectValue (struct _attribute *,enum _affectation ,struct _attribute *);
 struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
-void declare_array(struct _attribute* array, int size);
+struct _attribute *declare_array(struct _attribute* array, int size);
 
-void simple_declare_function(struct _attribute * func);
-void multiple_declare_function(struct _attribute * func , struct _list * args);
+struct _attribute *simple_declare_function(struct _attribute * func);
+struct _attribute *multiple_declare_function(struct _attribute * func , struct _list * args);
 
 struct _attribute *allocate_id(struct _attribute *,enum _type);
 void setType(struct _attribute *a, enum _type t);
@@ -75,4 +72,6 @@ struct _attribute *selection(struct _attribute *, struct _attribute *, struct _a
 struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribute *, struct _attribute *);
 
 struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
+struct _attribute *assignment(struct _attribute *tgt, enum _affectation ,struct _attribute *ori);
+
 #endif //FUNCTIONS_H

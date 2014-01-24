@@ -25,6 +25,17 @@ enum _affectation {
 	SUB
 };
 
+struct _attribute {
+	const char *reg;    // Valeurs
+	const char *addr;   // Adresses
+	enum _type *type;
+	struct _code *code;
+	const char * identifier;
+	struct _list * arguments;
+};
+
+/****************** tad code ***********************/
+
 struct _string {
 	char *text;
 	int length;
@@ -35,16 +46,6 @@ struct _code {
 	struct _string *begin;
 	struct _string *end;
 };
-
-struct _attribute {
-	const char *reg;    // Valeurs
-	const char *addr;   // Adresses
-	enum _type *type;
-	struct _code *code;
-	const char * identifier;
-	struct _list * arguments;
-};
-
 
 /******************* Storage unit in the tree *********************/
 

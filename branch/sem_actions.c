@@ -19,6 +19,10 @@ const char *new_reg(){
 	return itoa(i);
 }
 
+const char *new_label(){
+	static int i =0;
+	return itoa(i++);
+}
 char* strOfNametype(enum _type *t){
 	switch(*t){
 		case INT_TYPE :
@@ -399,12 +403,6 @@ struct _attribute *eq_op (struct _attribute *a1 ,struct _attribute *a2 ){
 	return cmp (a1,a2,"eq","ueq");
 }
 
-
-// Ne se fait que lorqu'on a à faire à un identifiant.
-// VOID ie terminal? on peut pas faire une affectation dans une expression?
-void affectValue (struct _attribute *varName,enum _affectation how,struct _attribute *value){
-}
-
 struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	//vérification de l'existence de l'ARBRE DE RECHERCHE
 	CHK(ctxt);
@@ -430,23 +428,25 @@ struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	CHK(a);
 	return a;
 }
-void declare_array(struct _attribute* array, int size){
 
-	
+struct _attribute * declare_array(struct _attribute* array, int size){
+	CHK(array);
+	addCode(array->code,"%%%s = alloca %s,%s %d",array->addr,strOfNametype(array->type),strOfNametype(array->type),size);
+	return array;
 }
 
-void simple_declare_function(struct _attribute * func){
+struct _attribute *simple_declare_function(struct _attribute * func){
 	CHK(func);
 	*(func->type) = UNKNOWN_FUNC;
 	func->arguments = init_list();
-
+return NULL;
 }
-void multiple_declare_function(struct _attribute * func , struct _list * args){
+struct _attribute *multiple_declare_function(struct _attribute * func , struct _list * args){
 	CHK(func);
 	CHK(args);
 	*(func->type) = UNKNOWN_FUNC;
 	func->arguments = args;
-
+return NULL;
 }
 
 struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
@@ -541,3 +541,28 @@ struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 	deleteAttribute(a2);
 	return a;
 }
+
+struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,struct _attribute *ori){
+	struct _attribute *a;
+	CHK(tgt);
+	CHK(ori);
+	switch(eg){
+		case ADD:
+			a=add(tgt,ori);
+			break;
+		case MUL:
+			a=multiply(tgt,ori);
+			break;
+		case SUB:
+			a=sub(tgt,ori);
+			break;
+		default:
+			break;
+	}
+	char *type = strOfNametype(a->type);
+	addCode(a->code,"store %s %%%s, %s* %%%s",type,a->reg,type,tgt->addr);
+	deleteAttribute(tgt);
+	deleteAttribute(ori);
+	return NULL;
+}
+
