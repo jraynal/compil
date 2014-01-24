@@ -244,12 +244,11 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 	struct _layer *my_ctxt = init_layer();
-	add_layer(my_ctxt);
 	fprintf(stdout, "%s\n",header() );
+	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
 	fprintf(stdout, "%s\n",footer() );
-	add_layer(my_ctxt);
 	delete_layer(my_ctxt);
 	// fprintf(stderr,"true: %d\n", 1==1);
 	// fprintf(stderr, "size:%d\n",garbageCollector->size);
