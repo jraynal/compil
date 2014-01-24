@@ -7,7 +7,14 @@ enum _type {
 	INT_TYPE=0,
 	FLOAT_TYPE,
 	VOID_TYPE,
-	UNKNOWN
+	UNKNOWN,
+	INT_FUNC,
+	FLOAT_FUNC,
+	VOID_FUNC,
+	UNKNOWN_FUNC,
+	INT_ARRAY,
+	FLOAT_ARRAY,
+	UNKNOWN_ARRAY
 };
 
 /******Enum and struct ****/
@@ -35,6 +42,7 @@ struct _attribute {
 	enum _type *type;
 	struct _code *code;
 	const char * identifier;
+	struct _list * arguments;
 };
 
 
@@ -54,6 +62,7 @@ union _value {
 struct _variable {
 	enum _type *type;
 	const char *addr;
+	//TODO : inserer la listes des arguments des fonctions
 	//union _value value;
 };
 

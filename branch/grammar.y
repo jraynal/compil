@@ -143,10 +143,10 @@ declarator
 													$$=declareVar($1,my_ctxt);
 												}
 | '(' declarator ')'                      		{$$=NULL;}
-| declarator '[' CONSTANTI ']'             		{$$=NULL;}
-| declarator '[' ']'                        	{$$=NULL;}
-| declarator '(' parameter_list ')'				{$$=$1;}
-| declarator '(' ')'							{$$=$1;}
+| declarator '[' CONSTANTI ']'             		{declare_array($1,$3); $$=$1;}
+| declarator '[' ']'                        	{declare_array($1,0);$$=$1;}
+| declarator '(' parameter_list ')'				{multiple_declare_function($1,$3);$$=$1;}
+| declarator '(' ')'							{simple_declare_function($1);$$=$1;}
 ;
 
 parameter_list

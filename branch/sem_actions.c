@@ -53,6 +53,7 @@ struct _attribute *newAttribute(const char * id){
 	a->type = &t;
 	a->code = initCode();
 	a->identifier= id;
+	a->arguments = NULL;
 	CHK(a);
 	return a;
 }
@@ -70,7 +71,7 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 	return var;
 }
 
-struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
+struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	CHK(ctxt);
 	CHK(name);
 	char dest [100];
@@ -95,13 +96,13 @@ struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
 
 
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
-	struct _attribute *a = get_attr_from_tree(ctxt,name);
+	struct _attribute *a = get_attr_from_context(ctxt,name);
 	CHK(a);
 	return a;
 }
 
 struct _attribute *varIncr(const char * name,struct _layer* ctxt){
-	struct _attribute *a = get_attr_from_tree(ctxt,name);
+	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	
 	/* Creation du registre de sortie du calcul */
@@ -127,7 +128,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 }
 
 struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
-	struct _attribute *a = get_attr_from_tree(ctxt,name);
+	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
@@ -148,7 +149,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 }
 
 struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
-	struct _attribute *a = get_attr_from_tree(ctxt,funName);
+	struct _attribute *a = get_attr_from_context(ctxt,funName);
 	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
 	CHK(a);
 	return a;
@@ -157,20 +158,22 @@ struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 
 
 struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * list){
-	struct _attribute *a = get_attr_from_tree(ctxt,funName);
+	CHK(ctxt);
+	CHK(funName);
+	CHK(list);
+	struct _attribute *a = get_attr_from_context(ctxt,funName);
+	CHK(a);
 	struct _attribute *  argument;
 	addCode(a->code,"call  %s @%s (",strOfNametype(a->type), a->identifier);
 		while(!is_empty(list)){
 			argument = (struct _attribute *) list->tail->value;
-			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);
+			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);// LLVM
 			removeElmnt(argument,list);
-
 		}
 		addCode(a->code,")");
-	//TODO
+		del_list(list);
 	CHK(a);
 	return a;
-
 }
 
 struct _attribute *newInt(int i){
@@ -530,6 +533,24 @@ struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	CHK(a);
 	return a;
 }
+void declare_array(struct _attribute* array, int size){
+
+	
+}
+
+void simple_declare_function(struct _attribute * func){
+	CHK(func);
+	*(func->type) = UNKNOWN_FUNC;
+	func->arguments = init_list();
+
+}
+void multiple_declare_function(struct _attribute * func , struct _list * args){
+	CHK(func);
+	CHK(args);
+	*(func->type) = UNKNOWN_FUNC;
+	func->arguments = args;
+
+}
 
 struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
 	CHK(a);
@@ -541,6 +562,8 @@ struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
 void setType(struct _attribute *a, enum _type t){
 	CHK(a);
 	// Modification dans l'arbre par effet de bord
+	//modifier le type selon si c'est une fonction ou non TODO
+	// TODO : code llvm  //LLVM
 	a->type = &t;
 	return;
 }

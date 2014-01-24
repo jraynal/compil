@@ -56,6 +56,9 @@ struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 void affectValue (struct _attribute *,enum _affectation ,struct _attribute *);
 struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
+void simple_declare_function(struct _attribute * func);
+void multiple_declare_function(struct _attribute * func , struct _list * args);
+
 struct _attribute *allocate_id(struct _attribute *,enum _type);
 void setType(struct _attribute *a, enum _type t);
 void setTypeList(struct _list * list, enum _type t);
@@ -70,5 +73,4 @@ struct _attribute *selection(struct _attribute *, struct _attribute *, struct _a
 struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribute *, struct _attribute *);
 
 struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
-
 #endif //FUNCTIONS_H
