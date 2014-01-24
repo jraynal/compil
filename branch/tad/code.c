@@ -49,7 +49,7 @@ struct _code *addCode(struct _code* code, char* str,...) {
 	va_list argp;
 	va_start(argp, str);
 	len = snprintf(NULL, 0, str, argp);
-	fprintf(stderr,"(%d octets)\n",len);
+	// fprintf(stderr,"(%d octets)\n",len);
 	CHK(bad alloc,(tmp = malloc((len+2) * sizeof(char))));
 	
 	len = vsnprintf(tmp, len+2, str, argp);
