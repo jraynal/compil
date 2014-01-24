@@ -2,6 +2,13 @@
 #include <stdio.h>
 #define CHK(message,truc) do{if(truc == NULL) fprintf(stderr,#message" in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
 
+#ifndef DEBUG
+#define DB(say)
+#else
+#define DB(say) fprintf(stderr,#say"\n");
+#endif
+
+
 /* Private */
 static int isEnd(struct _code* c, struct _string *str);
 static int addTail(struct _code *c, struct _string *str );
@@ -25,10 +32,12 @@ struct _code *addCode(struct _code* code, char* str,...) {
 	/* formatage de la chaine */
 	va_list argp;
 	va_start(argp, str);
-
+	DB(Mesure de la taille à formater);
         len = vsnprintf(NULL, 0, str, argp);
-        CHK(bad alloc,(tmp = malloc((len + 1) * sizeof(char))));
-        len = vsnprintf(tmp, len + 1, str, argp);
+				fprintf(stderr,"mesuré %d octets de long\n",len);
+        CHK(bad alloc,(tmp = malloc(len * sizeof(char))));
+	DB(formattage)
+        len = vsnprintf(tmp, len, str, argp);
 	va_end(argp);
 	/* Ajout dans le code */
 	addTail(code,initString(tmp));

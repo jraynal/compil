@@ -68,6 +68,7 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 
 struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
 	CHK(ctxt);
+	CHK(name);
 	char dest [100];
 	sprintf(dest,"/%s",name);
 	/* Obtention de l'indentifiant */
