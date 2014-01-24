@@ -155,7 +155,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator							{ setType($2,$1);}
+: type_name declarator							{ allocate_id($2,$1); }
 ;
 
 statement

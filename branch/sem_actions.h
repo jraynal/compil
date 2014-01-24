@@ -56,7 +56,7 @@ struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 void affectValue (struct _attribute *,enum _affectation ,struct _attribute *);
 struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
-
+struct _attribute *allocate_id(struct _attribute *,enum _type);
 void setType(struct _attribute *a, enum _type t);
 void setTypeList(struct _list * list, enum _type t);
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content);
