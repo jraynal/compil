@@ -152,8 +152,17 @@ struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 }
 
 
-struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * l){
+struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * list){
 	struct _attribute *a = get_attr_from_tree(ctxt,funName);
+	struct _attribute *  argument;
+	addCode(a->code,"call  %s @%s (",strOfNametype(a->type), a->identifier);
+		while(!is_empty(list)){
+			argument = (struct _attribute *) list->tail->value;
+			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);
+			removeElmnt(argument,list);
+
+		}
+		addCode(a->code,")");
 	//TODO
 	CHK(a);
 	return a;
