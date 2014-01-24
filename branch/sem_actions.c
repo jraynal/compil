@@ -563,12 +563,14 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 			a=sub(tgt,ori);
 			break;
 		default:
+			a=newAttribute("/");
+			a->reg=ori->reg;
 			break;
 	}
 	char *type = strOfNametype(a->type);
 	addCode(a->code,"store %s %%%s, %s* %%%s",type,a->reg,type,tgt->addr);
 	deleteAttribute(tgt);
 	deleteAttribute(ori);
-	return NULL;
+	return a;
 }
 
