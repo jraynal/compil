@@ -57,7 +57,10 @@ struct _layer * close_layer( struct _layer * layer){
 	struct _layer * father = layer->previous;
 	del_tree(layer->root);
 	free(layer);
-	return father;
+	layer= father;
+	CHK(layer);
+	exit(1);
+	return layer;
 }
 
 
