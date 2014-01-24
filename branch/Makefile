@@ -1,6 +1,6 @@
 LEX=lex
 YACC=yacc
-CFLAGS=-Wall -g
+CFLAGS=-W -Wall -Wextra -g -O0
 CC=gcc
 SRC=y.tab.c lex.yy.c sem_actions.c tad/tree.c tad/list.c tad/code.c tad/layer.c
 OBJ=$(SRC:.c=.o)

@@ -107,15 +107,15 @@ comparison_expression
 ;
 
 expression
-: unary_expression assignment_operator comparison_expression {affectValue($1,$2,$3);}
-| comparison_expression
+: unary_expression assignment_operator comparison_expression {assignment($1,$2,$3);}
+| comparison_expression 		{$$=$1;}
 ;
 
 assignment_operator
-: '='        									{$$=0;}   
-| MUL_ASSIGN 									{$$=1;}               
-| ADD_ASSIGN 									{$$=2;}
-| SUB_ASSIGN            						{$$=3;}
+: '='        									{$$=AFF;}   
+| MUL_ASSIGN 									{$$=MUL;}               
+| ADD_ASSIGN 									{$$=ADD;}
+| SUB_ASSIGN            			{$$=SUB;}
 ;
 
 declaration
@@ -129,8 +129,8 @@ declarator_list
 
 type_name
 : VOID 			{$$=VOID_TYPE;}
-| INT   		{$$=INT_TYPE;}//{union _value val; $$=varCreate(INT_TYPE,val);}
-| FLOAT			{$$=FLOAT_TYPE;}//{union _value val; $$=varCreate(FLOAT_TYPE,val);}
+| INT   		{$$=INT_TYPE;}
+| FLOAT			{$$=FLOAT_TYPE;}
 ;
 
 declarator
@@ -142,11 +142,11 @@ declarator
 													}
 													$$=declareVar($1,my_ctxt);
 												}
-| '(' declarator ')'                      		{$$=NULL;}
-| declarator '[' CONSTANTI ']'             		{declare_array($1,$3); $$=$1;}
-| declarator '[' ']'                        	{declare_array($1,0);$$=$1;}
-| declarator '(' parameter_list ')'				{multiple_declare_function($1,$3);$$=$1;}
-| declarator '(' ')'							{simple_declare_function($1);$$=$1;}
+| '(' declarator ')'                      		{$$=$2;}
+| declarator '[' CONSTANTI ']'             		{$$=declare_array($1,$3);}
+| declarator '[' ']'                        	{$$=declare_array($1,0);}
+| declarator '(' parameter_list ')'				{$$=multiple_declare_function($1,$3);}
+| declarator '(' ')'							{$$=simple_declare_function($1);}
 ;
 
 parameter_list
@@ -155,7 +155,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator							{ allocate_id($2,$1); }
+: type_name declarator							{ $$=allocate_id($2,$1); }
 ;
 
 statement
@@ -197,7 +197,7 @@ selection_statement
 ;
 
 iteration_statement
-: WHILE '(' expression ')' statement {loop(NULL,$3,NULL,$5);}
+: WHILE '(' expression ')' statement {$$=loop(NULL,$3,NULL,$5);}
 ;
 
 jump_statement
