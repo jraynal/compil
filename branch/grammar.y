@@ -119,7 +119,7 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';' 				{setTypeList($2,$1);}
+: type_name declarator_list ';' 				{$$=setTypeList($2,$1);}
 ;
 
 declarator_list

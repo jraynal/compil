@@ -300,9 +300,9 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		exit(1);
 
 	}
-	CHK(a);
 	deleteAttribute(a1);
 	deleteAttribute(a2);
+	CHK(a);
 	return	a;
 }
 
@@ -339,6 +339,7 @@ struct _attribute *neg(struct _attribute *a){
 		exit(1);
 	}
 	deleteAttribute(a);
+	CHK(na);
 	return na;
 }
 
@@ -453,6 +454,7 @@ struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
 	CHK(a);
 	setType(a,t);
 	addCode(a->code,"%%%s = alloca %s",a->addr,strOfNametype(&t));
+	CHK(a);
 	return a;	
 }
 
@@ -479,6 +481,7 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 	}
 	
 	del_list(list);
+	CHK(ret);
 	return ret;
 }
 
