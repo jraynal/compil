@@ -49,8 +49,8 @@ struct _attribute *newAttribute(const char * id){
 	struct _attribute *a=malloc(sizeof(struct _attribute));
 	a->reg = new_reg(); // registre de la donnée
 	a->addr= NULL; // ctxtesse de la donnée (identifiants uniquement)
-	enum _type t = UNKNOWN;
-	a->type = &t;
+	a->type=malloc(sizeof(enum _type));
+	*a->type = UNKNOWN;
 	a->code = initCode();
 	a->identifier= id;
 	a->arguments = NULL;
@@ -202,6 +202,8 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
 	addCode(a->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",a->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
 	CHK(a);
+	deleteAttribute(i);
+	deleteAttribute(array);
 	return a;
 }
 
@@ -270,35 +272,9 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 	return a;
 }
 
-
-
-// struct _variable * varCreateInt(int i){
-
-// 	struct _variable* var = malloc(sizeof(struct _variable));
-// 	if(var){
-// 		var->type = INT_TYPE;
-// 		var->value.ival = i;
-// 		insertElmnt(var,garbageCollector);
-// 	}else
-// 	fprintf(stderr, "No created variable\n");
-
-// 	return var;
-// }
-
-// struct _variable * varCreateFloat(float i){
-
-// 	struct _variable* var = malloc(sizeof(struct _variable));
-// 	if(var){
-// 		var->type = FLOAT_TYPE;
-// 		var->value.fval = i;
-// 		insertElmnt(var,garbageCollector);
-// 	}else 
-// 	fprintf(stderr, "No created variable\n");
-
-// 	return var;
-// }
-
 struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp, char * floatOp){
+	CHK(a1);
+	CHK(a2);
 	if (*a1->type != *a2->type){
 		fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
@@ -325,6 +301,8 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 
 	}
 	CHK(a);
+	deleteAttribute(a1);
+	deleteAttribute(a2);
 	return	a;
 }
 
@@ -345,60 +323,29 @@ struct _attribute *sub(struct _attribute *a1 ,struct _attribute *a2){
 	return binOp(a1,a2,"sub","fsub");
 }
 
-
-// struct _variable *incr(struct _variable *a){
-// 	if (!a)
-// 		return NULL;
-// 	switch(a->type){
-// 		case INT_TYPE :
-// 		a->value.ival++;
-// 		break;
-// 		case FLOAT_TYPE : 
-// 		a->value.fval++;
-// 		break;
-// 		default: 
-// 		return NULL;
-// 	}
-// 	return a;
-// }
-// struct _variable *decr(struct _variable *a){
-// 	if (!a)
-// 		return NULL;
-// 	switch(a->type){
-// 		case INT_TYPE :
-// 		a->value.ival--;
-// 		break;
-// 		case FLOAT_TYPE : 
-// 		a->value.fval--;
-// 		break;
-// 		default: 
-// 		return NULL;
-// 	}
-// 	return a;
-// }
-
-
-struct _attribute *neg(struct _attribute *a1){
-	struct _attribute *a = newAttribute(a1->identifier);
+struct _attribute *neg(struct _attribute *a){
+	CHK(a);
+	struct _attribute *na=newAttribute(a->identifier);
+	na->type=a->type;
 	switch(*a->type){
 		case INT_TYPE : 
-		*a->type = INT_TYPE;
-		addCode(a->code,"%%%s = sub i32 0 , %%%s",a->reg,a1->reg) ;
+		addCode(a->code,"%%%s = sub i32 0 , %%%s",na->reg,a->reg) ;
 		break;
 		case FLOAT_TYPE:
-		*a->type = FLOAT_TYPE;
-		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",a->reg,a1->reg) ;
+		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",na->reg,a->reg) ;
 		break;
 		default:
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
-	CHK(a);
-	return a;
+	deleteAttribute(a);
+	return na;
 }
 
 
 struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intConditionCode,  char* floatConditionCode ){
+	CHK(a1);
+	CHK(a2);
 	if (*a1->type != *a2->type){
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
@@ -422,6 +369,8 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 		exit(1);
 	}
 	CHK(a);
+	deleteAttribute(a1);
+	deleteAttribute(a2);
 	return	a;
 }
 
@@ -454,60 +403,8 @@ struct _attribute *eq_op (struct _attribute *a1 ,struct _attribute *a2 ){
 // Ne se fait que lorqu'on a à faire à un identifiant.
 // VOID ie terminal? on peut pas faire une affectation dans une expression?
 void affectValue (struct _attribute *varName,enum _affectation how,struct _attribute *value){
-
-	// if(!toModify){
-	// 	fprintf(stderr,"Invalid argument %s:%s(%s)\n",__FILE__,__LINE__,__func__);
-	// 	return;
-	// }
-	// if(!withWhat){
-	// 	fprintf(stderr,"Invalid argument %s:%s(%s)\n",__FILE__,__LINE__,__func__);
-	// 	return;
-	// }
-	// if (toModify->type != withWhat->type && withWhat->type != UNKNOWN){
-	// 	fprintf(stderr,"(%s:%s,%s)ERROR Invalid type : %s and %s are not the same type\n",__FILE__,__LINE__,__func__,toModify->type,withWhat->type);
-	// 	return;
-	// }
-	// // LLVM(store )
-	// if (toModify->type == INT_TYPE){
-	// 	// int i = new_reg	();
-	// 	fprintf(stdout, " store i32 %s,i32 %s\n",withWhat->value.ival,toModify->name);
-	// 	switch(how){
-	// 		case 1:
-	// 		toModify->value.ival *= withWhat->value.ival;
-	// 		break;
-	// 		case 2:
-	// 		toModify->value.ival += withWhat->value.ival;
-	// 		break;
-	// 		case 3:
-	// 		toModify->value.ival -= withWhat->value.ival;
-	// 		break;
-	// 		default:
-	// 		toModify->value.ival = withWhat->value.ival;
-	// 		fprintf(stderr,"int value (%s) affected\n",toModify->value.ival );
-	// 		break;
-	// 	}
-	// }else if (toModify->type == FLOAT_TYPE){
-	// 	fprintf(stdout, " store float %f, float %s\n",withWhat->value.fval,toModify->name);
-	// 	switch(how){
-	// 		case 1:
-	// 		toModify->value.fval *= withWhat->value.fval;
-	// 		break;
-	// 		case 2:
-	// 		toModify->value.fval += withWhat->value.fval;
-	// 		break;
-	// 		case 3:
-	// 		toModify->value.fval -= withWhat->value.fval;
-	// 		break;
-	// 		default:
-	// 		toModify->value.fval = withWhat->value.fval;
-	// 		break;
-	// 	}
-	// }
-	// else
-	// 	fprintf(stderr, "unmatched type : %s\n", (int)toModify->type);
 }
 
-// ctxt = arbre de recherche
 struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	//vérification de l'existence de l'ARBRE DE RECHERCHE
 	CHK(ctxt);
@@ -568,11 +465,6 @@ void setType(struct _attribute *a, enum _type t){
 	return;
 }
 
-//?????????????????????????????????????????????????????????????????????????????????????????????????
-//?????????????????????????????????????????????????????????????????????????????????????????????????
-//?????????????????????????????????????????????????????????????????????????????????????????????????
-//?????????????????????????????????????????????????????????????????????????????????????????????????
-//?????????????????????????????????????????????????????????????????????????????????????????????????
 void setTypeList(struct _list * list, enum _type t){
 	if (is_empty(list)){
 		fprintf(stderr, "(%s:%d)ERROR No variable for this type declaration\n",__FILE__,__LINE__);
@@ -619,6 +511,7 @@ void print(struct _attribute *a) {
 	CHK(a);
 	printCode(STDOUT_FILENO,a->code);
 	deleteCode(a->code);
+	deleteAttribute(a);
 }
 
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
@@ -639,9 +532,12 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 }
 
 struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
+	CHK(a1);
+	CHK(a2);
 	struct _attribute *a=newAttribute("/");
 	a->code=fusionCode(a1->code,a2->code);
 	CHK(a);
-
+	deleteAttribute(a1);
+	deleteAttribute(a2);
 	return a;
 }
