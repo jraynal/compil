@@ -107,7 +107,7 @@ comparison_expression
 ;
 
 expression
-: unary_expression assignment_operator comparison_expression {assignment($1,$2,$3);}
+: unary_expression assignment_operator comparison_expression {$$=assignment($1,$2,$3);}
 | comparison_expression 		{$$=$1;}
 ;
 
