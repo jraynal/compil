@@ -11,7 +11,7 @@
 	int yylex ();
 	int yyerror ();
 	struct _layer *my_ctxt;
-
+	int is_first_declarator=1;
 
 %}
 
@@ -135,7 +135,14 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  									{$$=declareVar($1,my_ctxt);if(!$$)printf("No return\n");}
+: IDENTIFIER  									{
+													if(is_first_declarator) {
+														fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
+														my_ctxt=add_layer(my_ctxt);
+														is_first_declarator=0;
+													}
+													$$=declareVar($1,my_ctxt);
+												}
 | '(' declarator ')'                      		{$$=NULL;}
 | declarator '[' CONSTANTI ']'             		{$$=NULL;}
 | declarator '[' ']'                        	{$$=NULL;}
@@ -162,13 +169,16 @@ statement
 
 compound_statement
 : '{' '}'   								{}
-| '{' statement_list '}'					{$$=inception($2);}
-| '{' declaration_list statement_list '}'	{$$=inception($3);}
+| '{' statement_list '}'					{$$=$2;}
+| '{' declaration_list statement_list '}'	{$$=concat($2,$3); close_layer(my_ctxt);}
 ;
 
 declaration_list
 : declaration {$$=$1;}
-| declaration_list declaration {$$=$2;}
+| declaration_list declaration {
+								$$=$2;
+								is_first_declarator=1; //tout a été init dans le contexte
+								}
 ;
 
 statement_list
@@ -243,13 +253,12 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-	struct _layer *my_ctxt = init_layer();
-	add_layer(my_ctxt);
+	fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
+	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
 	fprintf(stdout, "%s\n",footer() );
-	add_layer(my_ctxt);
 	delete_layer(my_ctxt);
 	// fprintf(stderr,"true: %d\n", 1==1);
 	// fprintf(stderr, "size:%d\n",garbageCollector->size);

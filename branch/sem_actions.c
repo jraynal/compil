@@ -2,7 +2,7 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-#define CHK(truc) do{if(truc == NULL) perror(#truc); fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}while(0)
+#define CHK(truc) do{if(truc == NULL) fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(EXIT_FAILURE);}while(0)
 
 const char *itoa(int i) {
 	char *c=NULL;
@@ -30,7 +30,6 @@ char* strOfNametype(enum _type *t){
 		default:
 		return "";
 	}
-	perror("uncommon excecution");
 	fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 	exit(1);
 }
@@ -265,7 +264,6 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 
 struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp, char * floatOp){
 	if (*a1->type != *a2->type){
-		perror("invalid operation");
 		fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
@@ -286,7 +284,6 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		addCode(a->code,"%%%s = %s float %%%s, float %%%s; \n",a->reg,floatOp,a1->reg,a2->reg);	
 		break;
 		default: 
-		perror("invalid operation");
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 
@@ -356,7 +353,6 @@ struct _attribute *neg(struct _attribute *a1){
 		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",a->reg,a1->reg) ;
 		break;
 		default:
-		perror("invalid operation");
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
@@ -366,7 +362,6 @@ struct _attribute *neg(struct _attribute *a1){
 
 struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intConditionCode,  char* floatConditionCode ){
 	if (*a1->type != *a2->type){
-		perror("invalid operation");
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
@@ -385,7 +380,6 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a->reg,floatConditionCode,a1->reg,a2->reg);	
 		break;
 		default:
-		perror("invalid operation");
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
@@ -477,8 +471,8 @@ void affectValue (struct _attribute *varName,enum _affectation how,struct _attri
 // ctxt = arbre de recherche
 struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	//vérification de l'existence de l'ARBRE DE RECHERCHE
-	if(!ctxt)
-		fprintf(stderr, "No ctxt\n"); 
+	CHK(ctxt);
+	CHK(nom);
 	char dest[strlen(nom)+2];
 	sprintf(dest,"/%s",nom);
 	struct _attribute *a=newAttribute(nom);
@@ -533,6 +527,7 @@ void setTypeList(struct _list * list, enum _type t){
 }
 
 void print(struct _attribute *a) {
+	CHK(a);
 	printCode(STDOUT_FILENO,a->code);
 	deleteCode(a->code);
 }
@@ -554,7 +549,8 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 	return NULL;
 }
 
-struct _attribute *inception(struct _attribute *a){
-	// fail... ça marchera pas...
+struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
+	struct _attribute *a=newAttribute("/");
+	a->code=fusionCode(a1->code,a2->code);
 	return a;
 }

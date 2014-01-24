@@ -1,16 +1,16 @@
 #include "layer.h"
 
 
-#define CHK(truc) do{if(truc == NULL){printf("%s est NULL\n",#truc); exit(1);}}while(0)
+#define CHK(truc) do{if(truc == NULL){fprintf(stderr,#truc" is NULL by %s in %s line %d\n",__FUNCTION__,__FILE__,__LINE__); exit(1);}}while(0)
 
-
+static int alphonse=0;
 //create a new context
 struct _layer * init_layer(){
 	struct _layer * layer = malloc(sizeof(struct _layer));
-	if (layer == NULL)
-		exit(EXIT_FAILURE);
+	CHK(layer);
 	layer-> root = init_tree();
 	layer-> previous = NULL;
+	fprintf(stderr,"Layer %d initialized\n",++alphonse);
 	return layer;
 }
 
@@ -21,6 +21,7 @@ struct _layer * add_layer(struct _layer * layer){
 	struct _layer * son = init_layer();
 	CHK(son);
 	son-> previous = layer;
+	fprintf(stderr,"Layer %d added\n",alphonse);
 	return son;
 }
 

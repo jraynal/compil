@@ -1,7 +1,4 @@
-
-
 void f(){
-int $accel, a;
-// $accel = 8;
+int a;
 a=1;
 }
