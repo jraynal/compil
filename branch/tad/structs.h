@@ -115,5 +115,7 @@ struct _nodeList
 // struct _node* adr; 
 extern struct _layer *my_ctxt;
 struct _list * garbageCollector;
+struct _layer *my_ctxt;
+
 
 #endif //STRUCTS_H

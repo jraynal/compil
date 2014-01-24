@@ -100,10 +100,10 @@ typedef union YYSTYPE
 	struct _list * list;
 	struct _attribute*(*unaryOp)(struct _attribute*);
 	enum _affectation affect;
-
-	struct _variable * var;
 	enum _type type;
-	void * obj;
+
+	// struct _variable * var;
+	// void * obj;
 
 
 

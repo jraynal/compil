@@ -2,7 +2,7 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-#define CHK(truc) do{if(truc == NULL) perror(#truc); fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}while(0)
+#define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}}while(0)
 
 const char *itoa(int i) {
 	char *c=NULL;
@@ -50,6 +50,7 @@ struct _attribute *newAttribute(const char * id){
 	a->type = &t;
 	a->code = initCode();
 	a->identifier= id;
+	CHK(a);
 	return a;
 }
 
@@ -62,6 +63,7 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 	}
 	else
 		fprintf(stderr, "No created variable\n");
+	CHK(var);
 	return var;
 }
 
@@ -71,6 +73,8 @@ struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
 	sprintf(dest,"/%s",name);
 	/* Obtention de l'indentifiant */
 	struct _variable *var = get_var_layer(ctxt,dest);
+	if (var == NULL)
+		fprintf(stderr, "ERROR : unknown variable %s\n",name);
 	CHK (var);
 
 	/* Creation de la liste d'attributs */
@@ -80,13 +84,15 @@ struct _attribute *get_attr_from_tree(struct _layer* ctxt,const char* name){
 	char * str_type = strOfNametype(a->type);
 	addCode(a->code,"%%%s =load %s* %s ",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
-	a->type = var->type;												// partage du type
+	a->type = var->type;
+	CHK(a);
 	return a;														// ecriture
 }
 
 
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
 	struct _attribute *a = get_attr_from_tree(ctxt,name);
+	CHK(a);
 	return a;
 }
 
@@ -112,6 +118,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
 	a->reg=reg;
+	CHK(a);	
 	return a;
 }
 
@@ -139,6 +146,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 	struct _attribute *a = get_attr_from_tree(ctxt,funName);
 	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
+	CHK(a);
 	return a;
 
 }
@@ -147,6 +155,7 @@ struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * l){
 	struct _attribute *a = get_attr_from_tree(ctxt,funName);
 	//TODO
+	CHK(a);
 	return a;
 
 }
@@ -155,6 +164,7 @@ struct _attribute *newInt(int i){
 	struct _attribute *a = newAttribute("/");
 	*a->type = INT_TYPE;
 	addCode(a->code,"%%%s  = add i32 %s, 0;\n",a->reg,i);
+	CHK(a);
 	return a;
 }
 
@@ -162,6 +172,7 @@ struct _attribute *newFloat(float f){
 	struct _attribute *a = newAttribute("/");
 	*a->type = FLOAT_TYPE;
 	addCode(a->code,"%%%s  = fadd float %g, 0.0 ;\n",a->reg,f);
+	CHK(a);
 	return a;
 }
 
@@ -174,18 +185,24 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	a->type = array->type;
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
 	addCode(a->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",a->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
+	CHK(a);
 	return a;
 }
 
 
 /* TODO: gestion propre des listes d'attributs */
-struct _list * expressionList(struct _attribute *a){
-	return init_list();
+struct _list * expression_list(struct _attribute *a){
+	struct _list * list = init_list();
+	insertElmnt(a,list);
+	CHK(list);
+	return list;
 }
 
 
-struct _list * insertExpr(struct _attribute *a ,struct _list * l){
-	return init_list();
+struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
+	insertElmnt(a,list);
+	CHK(list);
+	return list;
 }
 
 
@@ -211,6 +228,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
 	a->reg=reg;
+	CHK(a);
 	return a;
 }
 
@@ -232,6 +250,7 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 			break;
 	}
 	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
+	CHK(a);
 	return a;
 }
 
@@ -291,6 +310,7 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		exit(1);
 
 	}
+	CHK(a);
 	return	a;
 }
 
@@ -360,6 +380,7 @@ struct _attribute *neg(struct _attribute *a1){
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
+	CHK(a);
 	return a;
 }
 
@@ -389,6 +410,7 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
 		exit(1);
 	}
+	CHK(a);
 	return	a;
 }
 
@@ -497,6 +519,7 @@ struct _attribute *declareVar(char* nom,struct _layer* ctxt){
 	// fprintf(stderr, "declaration de %s\n",nom);
 
 	// on remonte à la règle du dessus qui devra faire l'allocation!!
+	CHK(a);
 	return a;
 }
 
@@ -511,8 +534,6 @@ void setType(struct _attribute *a, enum _type t){
 	a->type = &t;
 	return;
 }
-
-
 //?????????????????????????????????????????????????????????????????????????????????????????????????
 //?????????????????????????????????????????????????????????????????????????????????????????????????
 //?????????????????????????????????????????????????????????????????????????????????????????????????
@@ -532,7 +553,36 @@ void setTypeList(struct _list * list, enum _type t){
 	del_list(list);
 }
 
+struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content){
+	//TODO
+	struct _attribute* ret = newAttribute("/");
+	CHK(ret);
+	return ret;
+}
+
+
+struct _attribute*  new_statement_list(struct _attribute * statement){
+	CHK(statement);
+	struct _attribute * ret= newAttribute("/");
+	//TODO
+	CHK(ret);
+	return ret;
+}
+
+
+struct _attribute * insert_statement_list(struct _attribute * statement, struct _attribute * list){
+	CHK(list);
+	CHK(statement);
+	struct _attribute * ret= newAttribute("/");
+	//TODO
+	CHK(ret);
+	return ret;
+}
+
+
+
 void print(struct _attribute *a) {
+	CHK(a);
 	printCode(STDOUT_FILENO,a->code);
 	deleteCode(a->code);
 }
@@ -556,5 +606,6 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 
 struct _attribute *inception(struct _attribute *a){
 	// fail... ça marchera pas...
+	CHK(a);
 	return a;
 }

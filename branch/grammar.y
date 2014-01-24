@@ -31,10 +31,10 @@
 	struct _list * list;
 	struct _attribute*(*unaryOp)(struct _attribute*);
 	enum _affectation affect;
-
-	struct _variable * var;
 	enum _type type;
-	void * obj;
+
+	// struct _variable * var;
+	// void * obj;
 }
 
 %type<text> IDENTIFIER 
@@ -69,8 +69,8 @@ postfix_expression
 ;
 
 argument_expression_list
-: expression 										{$$=expressionList($1);}
-| argument_expression_list ',' expression			{$$=insertExpr($3,$1);}
+: expression 										{$$=expression_list($1);}
+| argument_expression_list ',' expression			{$$=insert_expr_list($3,$1);}
 ;
 
 unary_expression
@@ -149,7 +149,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator							{setType($2,$1);}
+: type_name declarator							{ setType($2,$1);}
 ;
 
 statement
@@ -172,13 +172,13 @@ declaration_list
 ;
 
 statement_list
-: statement {$$=$1;}
-| statement_list statement {$$=$2;}
+: statement 									{$$=new_statement_list($1);}
+| statement_list statement 						{$$=insert_statement_list($2,$1);}
 ;
 
 expression_statement
-: ';' {}
-| expression ';'  {$$=$1;}
+: ';' 										{}
+| expression ';'  							{$$=$1;}
 ;
 
 selection_statement
@@ -207,7 +207,7 @@ external_declaration
 ;
 
 function_definition
-: type_name declarator compound_statement 										{setType($2,$1);}
+: type_name declarator compound_statement 										{$$ = make_function($1,$2,$3);}
 ;
 
 %%
@@ -243,7 +243,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-	struct _layer *my_ctxt = init_layer();
+	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));

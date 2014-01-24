@@ -26,8 +26,8 @@ struct _attribute *varDecr(const char * name,struct _layer* htab);
 
 struct _attribute *getValArray(struct _attribute *array, struct _attribute *i);
 
-struct _list * expressionList(struct _attribute*);
-struct _list * insertExpr(struct _attribute *a ,struct _list * l);
+struct _list * expression_list(struct _attribute*);
+struct _list * insert_expr_list(struct _attribute *a ,struct _list * l);
 
 struct _attribute *prefixedVarIncr(struct _attribute *attr);
 struct _attribute *prefixedVarDecr(struct _attribute *attr);
@@ -59,11 +59,16 @@ struct _attribute *declareVar(char* nom, struct _layer* ctxt);
 
 void setType(struct _attribute *a, enum _type t);
 void setTypeList(struct _list * list, enum _type t);
+struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content);
+
+struct _attribute *  new_statement_list(struct _attribute * statement);
+struct _attribute * insert_statement_list(struct _attribute * statement, struct _attribute * list);
+
 
 void print(struct _attribute *a);
 struct _attribute *selection(struct _attribute *, struct _attribute *, struct _attribute *);
 struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribute *, struct _attribute *);
 
-
+struct _attribute *inception(struct _attribute *a);
 
 #endif //FUNCTIONS_H

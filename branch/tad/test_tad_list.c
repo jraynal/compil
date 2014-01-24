@@ -89,7 +89,7 @@ void test_set(){
 	// print_list(l);
 	assert(l->size==2);
 
-	DB(insert : data43);
+	DB(insert : data43.2);
 	insertElmnt(data[2],l);
 	// print_list(l);
 	assert(l->size==3);
