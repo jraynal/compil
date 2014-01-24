@@ -22,11 +22,21 @@ struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 	CHK(invalid arg,c2);
 	struct _code *cmaster=initCode();
 	CHK(initCode,cmaster);
-	CHK(laststring,c1->end);
 	
-	c1->end->next = c2->begin;
-	cmaster->begin=c1->begin;
-	cmaster->end=c2->end;
+	if(!isEmpty(c1) && ! isEmpty(c2)){
+		cmaster->begin=c1->begin;
+		CHK(laststring,c1->end);
+		c1->end->next = c2->begin;
+		cmaster->end = c2->end;
+	}
+	else if (!isEmpty(c1)){
+		cmaster->begin=c1->begin;
+		cmaster->end = c1->end;
+	}
+	else{
+		cmaster->begin=c2->begin;
+		cmaster->end = c2->end;
+	}
 	free(c1);
 	free(c2);
 	return cmaster;
@@ -55,8 +65,9 @@ int printCode(int fd, struct _code *code) {
 	CHK(is NULL,code);
 	struct _string * tmp = code->begin;
 	int written=0,r=0;
-	while(tmp==NULL) {
+	while(tmp!=NULL) {
 		written=0; r=0;
+		CHK(is NULL, tmp);
 		while(written < tmp->length) {
 			if((r=write(fd,tmp->text,tmp->length-written))==-1)
 				return EXIT_FAILURE;
@@ -127,5 +138,10 @@ static int isEnd(struct _code* c, struct _string *str) {
 
 static int isEmpty(struct _code* c){
 	CHK(is NULL,c);
+	if((c->begin == NULL && c->end != NULL) || (c->begin != NULL && c->end == NULL)){
+		fprintf(stderr, "invalid situation in code value at %s in %s line %d\n",__FILE__,__func__,__LINE__);
+		exit(1);
+	}
+
 	return (c->begin == NULL && c->end == NULL);
 }

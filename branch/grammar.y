@@ -119,7 +119,7 @@ assignment_operator
 ;
 
 declaration
-: type_name declarator_list ';' 				{setTypeList($2,$1);}
+: type_name declarator_list ';' 				{$$=setTypeList($2,$1);}
 ;
 
 declarator_list
@@ -175,7 +175,7 @@ compound_statement
 declaration_list
 : declaration {$$=$1;}
 | declaration_list declaration {
-								$$=$2;
+								$$=concat($1,$2);
 								is_first_declarator=1; //tout a été init dans le contexte
 								}
 ;

@@ -304,9 +304,9 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		exit(1);
 
 	}
-	CHK(a);
 	deleteAttribute(a1);
 	deleteAttribute(a2);
+	CHK(a);
 	return	a;
 }
 
@@ -343,6 +343,7 @@ struct _attribute *neg(struct _attribute *a){
 		exit(1);
 	}
 	deleteAttribute(a);
+	CHK(na);
 	return na;
 }
 
@@ -453,6 +454,7 @@ struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
 	CHK(a);
 	setType(a,t);
 	addCode(a->code,"%%%s = alloca %s",a->addr,strOfNametype(&t));
+	CHK(a);
 	return a;	
 }
 
@@ -465,18 +467,22 @@ void setType(struct _attribute *a, enum _type t){
 	return;
 }
 
-void setTypeList(struct _list * list, enum _type t){
-	if (is_empty(list)){
-		fprintf(stderr, "(%s:%d)ERROR No variable for this type declaration\n",__FILE__,__LINE__);
-		return;
-	}else{
-		while(! is_empty(list)){
+struct _attribute * setTypeList(struct _list * list, enum _type t){
+	CHK(list);
+	struct _attribute* attr;
+	struct _attribute* ret;
+	ret = newAttribute("/");
+	while(! is_empty(list)){
+		attr = (struct _attribute *) (list->head->value);
 			/* TODO: set type a besoin d'un attribut et non pas d'une variable */
-			setType(list->head->value,t);
-			removeElmnt(list->head->value,list);
-		}
+		setType(attr,t);
+		ret= concat(ret,attr);
+		removeElmnt(attr,list);
 	}
+	
 	del_list(list);
+	CHK(ret);
+	return ret;
 }
 
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content){
