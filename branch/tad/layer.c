@@ -59,7 +59,7 @@ struct _layer * close_layer( struct _layer * layer){
 	CHK(layer->root);
 	del_tree(layer->root);
 	free(layer);
-	fprintf(stderr,"Layer %d closed, newlawer = %p\n",alphonse--,father);
+	fprintf(stderr,"Layer %d closed, newlayer = %p\n",alphonse--,father);
 	return father;
 }
 

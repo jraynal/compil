@@ -13,6 +13,7 @@
 	struct _layer *my_ctxt;
 	int is_first_declarator=1;
 
+	int authpass =3;
 %}
 
 %token IDENTIFIER CONSTANTF CONSTANTI
@@ -137,7 +138,7 @@ declarator
 : IDENTIFIER  									{
 													if(is_first_declarator) {
 														fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
-														// my_ctxt=add_layer(my_ctxt);
+														my_ctxt=add_layer(my_ctxt);
 														is_first_declarator=0;
 													}
 													$$=declareVar($1,my_ctxt);
@@ -182,7 +183,7 @@ declaration_list
 
 statement_list
 : statement 									{$$=new_statement_list($1);}
-| statement_list statement 						{$$=insert_statement_list($2,$1);}
+| statement_list statement 						{$$=concat($1,$2);}
 ;
 
 expression_statement

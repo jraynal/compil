@@ -63,16 +63,22 @@ struct _code *addCode(struct _code* code, char* str,...) {
 
 int printCode(int fd, struct _code *code) {
 	CHK(is NULL,code);
+	if(isEmpty(code))
+		return EXIT_SUCCESS;
 	struct _string * tmp = code->begin;
 	int written=0,r=0;
 	while(tmp!=NULL) {
-		written=0; r=0;
-		CHK(is NULL, tmp);
-		while(written < tmp->length) {
-			if((r=write(fd,tmp->text,tmp->length-written))==-1)
-				return EXIT_FAILURE;
-			written+=r;
-		}
+		
+		dprintf(fd,"%s",tmp->text);
+		// written=0; r=0;
+		// CHK(is NULL, tmp);
+		// while(written < tmp->length) {
+		// 	if((r=write(fd,tmp->text,(tmp->length)-written))==-1)
+		// 		return EXIT_FAILURE;
+		// 	written+=r;
+		// }
+
+
 		tmp=getNext(tmp);
 	}
 	return EXIT_SUCCESS;
@@ -86,14 +92,19 @@ struct _code *initCode() {
 }
 
 void deleteCode(struct _code* code) {
+	CHK(isNULL ,code);
 	struct _string *tmp = code->begin;
 	struct _string *tmp2;
 	while(tmp){
 		tmp2=getNext(tmp);
 		deleteString(tmp);
+		code->begin = tmp2;
 		tmp=tmp2;
 	}
+	code->end =NULL;
+	code->begin = NULL;
 	free(code);
+	code = NULL;
 }
 
 /* Private */
@@ -112,6 +123,7 @@ static int addTail(struct _code *c, struct _string *str ) {
 }
 
 static struct _string *getNext(struct _string *str) {
+	CHK(isNull,str);
 	if(str)
 		return str->next;
 	return NULL;
@@ -120,14 +132,16 @@ static struct _string *getNext(struct _string *str) {
 static struct _string *initString(char *txt) {
 	struct _string *str=malloc(sizeof(struct _string));
 	str->text=txt;
-	str->length=strlen(txt)+1;
+	str->length=strlen(txt)+2;
 	str->next=NULL;
 	return str; 
 }
 
 static void deleteString(struct _string* str) {
-	if(str)
-		free(str);
+	CHK(isNULL,str);
+	if(str->text != NULL)
+		free(str->text);
+	free(str);
 }
 
 static int isEnd(struct _code* c, struct _string *str) {
@@ -138,9 +152,5 @@ static int isEnd(struct _code* c, struct _string *str) {
 
 static int isEmpty(struct _code* c){
 	CHK(is NULL,c);
-	if((c->begin == NULL && c->end != NULL) || (c->begin != NULL && c->end == NULL)){
-		fprintf(stderr, "invalid situation in code value at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(1);
-	}
-
 	return (c->begin == NULL && c->end == NULL);
 }

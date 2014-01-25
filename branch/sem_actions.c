@@ -436,7 +436,7 @@ struct _attribute * declare_array(struct _attribute* array, int size){
 struct _attribute *simple_declare_function(struct _attribute * func){
 	CHK(func);
 	CHK(my_ctxt);
-	my_ctxt=add_layer(my_ctxt);
+	// my_ctxt=add_layer(my_ctxt);
 	*(func->type) = UNKNOWN_FUNC;
 	func->arguments = init_list();
 return NULL;
@@ -445,7 +445,7 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	CHK(func);
 	CHK(args);
 	CHK(my_ctxt);
-	my_ctxt=add_layer(my_ctxt);
+	// my_ctxt=add_layer(my_ctxt);
 	*(func->type) = UNKNOWN_FUNC;
 	func->arguments = args;
 return NULL;
