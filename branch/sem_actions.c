@@ -68,7 +68,6 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 	if(var){
 		var->type = type;
 		var->addr = addr;
-		// insertElmnt(var,garbageCollector);
 	}
 	else
 		fprintf(stderr, "No created variable\n");
@@ -83,8 +82,6 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	sprintf(dest,"/%s",name);
 	/* Obtention de l'indentifiant */
 	struct _variable *var = get_var_layer(ctxt,dest);
-	if (var == NULL)
-		fprintf(stderr, "ERROR : unknown variable %s\n",name);
 	CHK (var);
 
 	/* Creation de la liste d'attributs */
@@ -92,7 +89,7 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 
 	/* Chargement de l'identifiant */
 	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"%%%s =load %s* %s ",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	addCode(a->code,"%%%s =load %s* %s\n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
 	CHK(a);
@@ -115,18 +112,18 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	switch(*a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =add %s %%%s, i32 1",reg,str_type,a->reg);
+			addCode(a->code,"%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
 	a->reg=reg;
 	CHK(a);	
 	return a;
@@ -140,16 +137,16 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 	switch(*a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =sub %s %%%s, i32 1",reg,str_type,a->reg);
+			addCode(a->code,"%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
 	return a;
 }
 
@@ -175,7 +172,7 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);// LLVM
 			removeElmnt(argument,list);
 		}
-		addCode(a->code,")");
+		addCode(a->code,"\n)");
 		del_list(list);
 	CHK(a);
 	return a;
@@ -185,7 +182,7 @@ struct _attribute *newInt(int i){
 	struct _attribute *a = newAttribute("/");
 	*a->type = INT_TYPE;
 	
-	addCode(a->code,"%%%s  = add i32 %d, 0;\n",a->reg,i);
+	addCode(a->code,"%%%s  = add i32 %d, 0\n",a->reg,i);
 	CHK(a);
 	return a;
 }
@@ -193,7 +190,7 @@ struct _attribute *newInt(int i){
 struct _attribute *newFloat(float f){
 	struct _attribute *a = newAttribute("/");
 	*a->type = FLOAT_TYPE;
-	addCode(a->code,"%%%s  = fadd float %g, 0.0 ;\n",a->reg,f);
+	addCode(a->code,"%%%s  = fadd float %g, 0.0\n",a->reg,f);
 	CHK(a);
 	return a;
 }
@@ -239,18 +236,18 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	switch(*a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =add %s %%%s, i32 1",reg,str_type,a->reg);
+			addCode(a->code,"%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
 	a->reg=reg;
 	CHK(a);
 	return a;
@@ -264,11 +261,11 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 	switch(*a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =sub %s %%%s, i32 1",reg,str_type,a->reg);
+			addCode(a->code,"%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
@@ -294,11 +291,11 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 	switch(*a1->type){
 		case INT_TYPE : 
 		*a->type = INT_TYPE;
-		addCode(a->code,"%%%s = %s i32 %%%s, i32 %%%s; \n",a->reg,intOp,a1->reg,a2->reg);	
+		addCode(a->code,"%%%s = %s i32 %%%s, i32 %%%s\n",a->reg,intOp,a1->reg,a2->reg);	
 		break;
 		case FLOAT_TYPE:
 		*a->type = FLOAT_TYPE;
-		addCode(a->code,"%%%s = %s float %%%s, float %%%s; \n",a->reg,floatOp,a1->reg,a2->reg);	
+		addCode(a->code,"%%%s = %s float %%%s, float %%%s\n",a->reg,floatOp,a1->reg,a2->reg);	
 		break;
 		default: 
 		INVALID_OP;
@@ -333,10 +330,10 @@ struct _attribute *neg(struct _attribute *a){
 	na->type=a->type;
 	switch(*a->type){
 		case INT_TYPE : 
-		addCode(a->code,"%%%s = sub i32 0 , %%%s",na->reg,a->reg) ;
+		addCode(a->code,"%%%s = sub i32 0 , %%%s\n",na->reg,a->reg) ;
 		break;
 		case FLOAT_TYPE:
-		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",na->reg,a->reg) ;
+		addCode(a->code , "%%%s = fsub float 0.0 , %%%s\n",na->reg,a->reg) ;
 		break;
 		default:
 		INVALID_OP;
@@ -358,14 +355,15 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 	struct _attribute *a = newAttribute("/");
 	// Encore une fois, y a du code qui remonte, on le stocke:
 	a->code=fusionCode(a1->code,a2->code);
+	// les affectation de TYPE sont commentées car la comparaison renvoie un i1 et que ça doit rester transparent....
 	switch(*a1->type){
 		case INT_TYPE : 
-		*a->type = INT_TYPE;
-		addCode(a->code,"%%%s = icmp %s i32 %%%s, i32 %%%s; \n",a->reg,intConditionCode, a1->reg, a2->reg);	
+	//	*a->type = INT_TYPE;
+		addCode(a->code,"%%%s = icmp %s i32 %%%s, i32 %%%s\n",a->reg,intConditionCode, a1->reg, a2->reg);	
 		break;
 		case FLOAT_TYPE:
-		*a->type = FLOAT_TYPE;
-		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a->reg,floatConditionCode,a1->reg,a2->reg);	
+	//	*a->type = FLOAT_TYPE;
+		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s\n",a->reg,floatConditionCode,a1->reg,a2->reg);	
 		break;
 		default:
 		INVALID_OP;
