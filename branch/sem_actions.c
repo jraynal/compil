@@ -2,12 +2,10 @@
 
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
-#define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}}while(0)
-#define INVALID_OP  do{fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);	exit(1);}while(0)
+#define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"FATAL ERROR in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}}while(0)
+#define INVALID_OP  do{fprintf(stderr,"FATAL ERROR : uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}while(0)
 
 #define T_TYPE(name,type) fprintf(stderr,"[VERIF] %s is an %s\n",name,strOfNametype(type));
-
-
 
 const char *itoa(int i) {
 //	LOG();
@@ -33,9 +31,13 @@ const char *new_label(){
 char* strOfNametype(enum _type t){
 //	LOG();
 	switch(t){
+		case INT_ARRAY:
+		case INT_FUNC:
 		case INT_TYPE :
 		return "i32";
 		break;
+		case FLOAT_FUNC:
+		case FLOAT_ARRAY:
 		case FLOAT_TYPE:
 		return "float";
 		break;
@@ -51,6 +53,20 @@ const char* officialName(const char* name){
 	if (strcmp(name, "$accel")== 0)
 		return "%accel";
 	else return name;
+}
+
+int match_type(struct _attribute * a1 , struct _attribute * a2){
+	CHK(a1);
+	CHK(a2);
+	ret = (a1->type == a2->type);
+	ret = ret || (a1->type == UNKNOWN && (a2->type == UNKNOWN || a2->type == INT_TYPE ||  a2->type == FLOAT_TYPE ||  a2->type == VOID_TYPE));
+	ret = ret || (a1->type == UNKNOWN_FUNC && (a2->type == UNKNOWN_FUNC || a2->type == INT_FUNC ||  a2->type == FLOAT_FUNC ||  a2->type == VOID_FUNC));
+	ret = ret || (a1->type == UNKNOWN_ARRAY && (a2->type == UNKNOWN_ARRAY || a2->type == INT_ARRAY ||  a2->type == FLOAT_ARRAY ));
+	ret = ret || (a2->type == UNKNOWN && (a1->type == UNKNOWN || a1->type == INT_TYPE ||  a1->type == FLOAT_TYPE ||  a1->type == VOID_TYPE));
+	ret = ret || (a2->type == UNKNOWN_FUNC && (a1->type == UNKNOWN_FUNC || a1->type == INT_FUNC ||  a1->type == FLOAT_FUNC ||  a1->type == VOID_FUNC));
+	ret = ret || (a2->type == UNKNOWN_ARRAY && (a1->type == UNKNOWN_ARRAY || a1->type == INT_ARRAY ||  a1->type == FLOAT_ARRAY ));
+	
+	return ret;
 }
 
 void deleteAttribute(struct _attribute* a) {
@@ -229,8 +245,6 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	return a;
 }
 
-
-/* TODO: gestion propre des listes d'attributs */
 struct _list * expression_list(struct _attribute *a){
 	LOG();
 	struct _list * list = init_list();
@@ -528,7 +542,6 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	// 	INVALID_OP;
 	// }
 	// Modification dans l'arbre par effet de bord
-	// TODO : code llvm  //LLVM
 	return a;	
 }
 
@@ -644,7 +657,10 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	struct _attribute *ret=newAttribute("/");
 	CHK(tgt);
 	CHK(ori);
-	/*TODO: Si types différents, -> message d'erreurs*/
+	if(match_type(tgt,ori)==0){
+		fprintf(stderr, "FATAL ERROR : Unmatched types at %s in %s line %d\n",__FUNCTION__,__FILE__,__LINE__);
+		return NULL;
+	}
 	switch(eg){
 		case ADD:
 			a=add(tgt,ori);
