@@ -459,10 +459,46 @@ struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
 
 void setType(struct _attribute *a, enum _type t){
 	CHK(a);
+	CHK(a->type);
+	//selon le type d'objet remonte : variable, fonction ou tableau
+	switch(*a->type){
+		case UNKNOWN:
+		*a->type = t;
+		break;
+		case UNKNOWN_FUNC:
+		switch(t){
+			//selon le type a affecter (int float void...)
+			case INT_TYPE :
+			*a->type = INT_FUNC;		
+			break;
+			case FLOAT_TYPE: 
+			*a->type = FLOAT_FUNC;
+			break;
+			case VOID_TYPE: 
+			*a->type = VOID_FUNC;
+			break;
+			default : 
+			INVALID_OP;
+		}
+		break;
+			//selon le type a affecter (int float ...)
+		case UNKNOWN_ARRAY: 
+		switch(t){
+			case INT_TYPE :
+			*a->type = INT_ARRAY;		
+			break;
+			case FLOAT_TYPE: 
+			*a->type = FLOAT_ARRAY;
+			break;
+			default : 
+			INVALID_OP;
+		}
+		break;
+		default:
+		INVALID_OP;
+	}
 	// Modification dans l'arbre par effet de bord
-	//modifier le type selon si c'est une fonction ou non TODO
 	// TODO : code llvm  //LLVM
-	a->type = &t;
 	return;
 }
 
@@ -473,7 +509,6 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 	ret = newAttribute("/");
 	while(! is_empty(list)){
 		attr = (struct _attribute *) (list->head->value);
-			/* TODO: set type a besoin d'un attribut et non pas d'une variable */
 		setType(attr,t);
 		ret= concat(ret,attr);
 		removeElmnt(attr,list);
@@ -485,8 +520,20 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 }
 
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content){
-	//TODO
-	struct _attribute* ret = content;
+	CHK(name);
+	CHK(content);
+	//TODO checker le type si existe deja  
+	//sinon
+	struct _attribute* attr_funct = name;
+	setType(attr_funct,t);
+	char * str_type =  strOfNametype(attr_funct->type);
+	addCode(ret,"define %s @%s(",str_type,attr_funct->identifier,)
+	//TODO inserer le nom des arguments
+		//TODO inserer les arguments au context de la fonction
+	//TODO supprimer la list
+	addCode(ret,"){");
+	ret2 = fusionCode(ret,content);
+	addCode(ret2,"ret %s}",str_type_ret);
 	CHK(ret);
 	return ret;
 }
@@ -499,8 +546,15 @@ void print(struct _attribute *a) {
 	deleteAttribute(a);
 }
 
+struct _attribute * emptyExpr(){
+	struct _attribute * ret = newAttribute("/");
+	CHK(ret);
+	return ret;
+}
+
+
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
-	CHK(cond); CHK(then); CHK(other);
+	CHK(cond); CHK(then); 
 	struct _attribute *a= newAttribute("/");
 	const char *label1=new_label();
 	const char *label2=new_label();
@@ -571,7 +625,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 			break;
 	}
 	char *type = strOfNametype(a->type);
-	addCode(a->code,"store %s %%%s, %s* %%%s",type,a->reg,type,tgt->addr);
+	addCode(a->code,"store %s %%%s, %s* %%%s\n",type,a->reg,type,tgt->addr);
 	deleteAttribute(tgt);
 	deleteAttribute(ori);
 	return a;
