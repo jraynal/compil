@@ -56,7 +56,8 @@ const char* officialName(const char* name){
 void deleteAttribute(struct _attribute* a) {
 //	LOG();
 	//free_int(heap,atoi(a->reg));
-	free(a);
+	if(a)
+		free(a);
 }
 
 struct _attribute *newAttribute(const char * id){
@@ -659,10 +660,15 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	}
 	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
-	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,"store %s %%%s, %s* %%%s\n",type,(a)?a->reg:ori->reg,type,tgt->addr);
-	deleteAttribute(tgt);
+	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,
+				"store %s %%%s, %s* %%%s\n",
+						type,
+						(a)?a->reg:ori->reg,
+						type,
+						tgt->addr);
+	//deleteAttribute(tgt);
 	deleteAttribute(a);
-	deleteAttribute(ori);
+	//deleteAttribute(ori);
 	return ret;
 }
 
