@@ -182,7 +182,7 @@ declaration_list
 ;
 
 statement_list
-: statement 									{$$=new_statement_list($1);}
+: statement 									{$$=$1;}
 | statement_list statement 						{$$=concat($1,$2);}
 ;
 
@@ -254,7 +254,7 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 
-	fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
+	// fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);

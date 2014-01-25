@@ -88,10 +88,10 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	struct _attribute *a = newAttribute(name);
 
 	/* Chargement de l'identifiant */
-	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"%%%s =load %s* %s\n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
+	char * str_type = strOfNametype(a->type);
+	addCode(a->code,"%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
 	CHK(a);
 	return a;														// ecriture
 }
@@ -490,26 +490,6 @@ struct _attribute *make_function(enum _type t , struct _attribute * name, struct
 	CHK(ret);
 	return ret;
 }
-
-
-struct _attribute*  new_statement_list(struct _attribute * statement){
-	CHK(statement);
-	struct _attribute * ret= newAttribute("/");
-	//TODO
-	CHK(ret);
-	return ret;
-}
-
-
-struct _attribute * insert_statement_list(struct _attribute * statement, struct _attribute * list){
-	CHK(list);
-	CHK(statement);
-	struct _attribute * ret= newAttribute("/");
-	//TODO
-	CHK(ret);
-	return ret;
-}
-
 
 
 void print(struct _attribute *a) {
