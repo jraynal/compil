@@ -46,9 +46,6 @@ int main() {
 	deleteCode(my_code3);
 	//ne pas delete les autres deja fusionnés
 
-	DB(impression...)
-	printCode(STDOUT_FILENO,my_code3);
-
 
 	DB(##################################################);
 	return EXIT_SUCCESS;

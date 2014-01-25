@@ -43,17 +43,17 @@ struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 }
 
 struct _code *addCode(struct _code* code, char* str,...) {
+	
 	char *tmp=NULL;
 	int len=0;
 	/* formatage de la chaine */
 	va_list argp;
 	va_start(argp, str);
-	len = snprintf(NULL, 0, str, argp);
-	// fprintf(stderr,"(%d octets)\n",len);
-	CHK(bad alloc,(tmp = malloc((len+2) * sizeof(char))));
-	
-	len = vsnprintf(tmp, len+2, str, argp);
-	printf("%s\n",tmp );
+	char buffer[10000];
+	vsprintf(buffer,str,argp);
+	CHK(bad alloc,(tmp = malloc((strlen(buffer)+1) * sizeof(char))));
+	strcpy(tmp,buffer);
+// printf("%s\n",tmp );
 	va_end(argp);
 
 	/* Ajout dans le code */
