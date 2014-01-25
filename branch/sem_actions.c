@@ -69,6 +69,7 @@ struct _attribute *newAttribute(const char * id){
 	a->code = initCode();
 	a->identifier= id;
 	a->arguments = NULL;
+	a->size=0;
 	CHK(a);
 	return a;
 }
@@ -110,7 +111,7 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	return a;														// ecriture
 }
 
-
+/* TODO: utiliser getVar pour faire un load en llvm et son père pour les manipulation simples*/
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
 	return get_attr_from_context(ctxt,name);
 }
@@ -447,7 +448,9 @@ struct _attribute *declareVar(char* nom){
 struct _attribute * declare_array(struct _attribute* array, int size){
 	LOG();
 	CHK(array);
-	addCode(array->code,"%%%s = alloca %s,%s %d",array->addr,strOfNametype(array->type),strOfNametype(array->type),size);
+	// On la rajoute
+	array->type=UNKNOWN_ARRAY;
+	array->size=size;
 	return array;
 }
 
@@ -483,52 +486,53 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	CHK(ctxt);
 	char dest[strlen(a->identifier)+2];
 	sprintf(dest,"/%s",a->identifier);
-	struct _variable * var = varCreate(t,a->identifier);
-	set_var_layer(ctxt,dest,var);
+
 
 	// Maintenant on s'occupe du type et tout...
-	addCode(a->code,"%%%s = alloca %s\n",a->addr,strOfNametype(t));
-	a->type=t; // au cas ou...
-	CHK(a);
-	//selon le type d'objet remonte : variable, fonction ou tableau
-	// switch(a->type){
-	// 	case UNKNOWN:
-	// 	a->type = t;
-	// 	break;
-	// 	case UNKNOWN_FUNC:
-	// 	switch(t){
-	// 		//selon le type a affecter (int float void...)
-	// 		case INT_TYPE :
-	// 		a->type = INT_FUNC;		
-	// 		break;
-	// 		case FLOAT_TYPE: 
-	// 		a->type = FLOAT_FUNC;
-	// 		break;
-	// 		case VOID_TYPE: 
-	// 		a->type = VOID_FUNC;
-	// 		break;
-	// 		default : 
-	// 		INVALID_OP;
-	// 	}
-	// 	break;
-	// 		//selon le type a affecter (int float ...)
-	// 	case UNKNOWN_ARRAY: 
-	// 	switch(t){
-	// 		case INT_TYPE :
-	// 		a->type = INT_ARRAY;		
-	// 		break;
-	// 		case FLOAT_TYPE: 
-	// 		a->type = FLOAT_ARRAY;
-	// 		break;
-	// 		default : 
-	// 		INVALID_OP;
-	// 	}
-	// 	break;
-	// 	default:
-	// 	INVALID_OP;
-	// }
-	// Modification dans l'arbre par effet de bord
-	// TODO : code llvm  //LLVM
+		//selon le type d'objet remonte : variable, fonction ou tableau
+	switch(a->type){
+		case UNKNOWN:
+		a->type = t;
+		addCode(a->code,"%%%s = alloca %s\n",a->addr,strOfNametype(t));
+		break;
+		case UNKNOWN_FUNC:
+		switch(t){
+			//selon le type a affecter (int float void...)
+			case INT_TYPE :
+			a->type = INT_FUNC;		
+			break;
+			case FLOAT_TYPE: 
+			a->type = FLOAT_FUNC;
+			break;
+			case VOID_TYPE: 
+			a->type = VOID_FUNC;
+			break;
+			default : 
+			INVALID_OP;
+		}
+		break;
+		//selon le type a affecter (int float ...)
+		case UNKNOWN_ARRAY: 
+		switch(t){
+			case INT_TYPE :
+			a->type = INT_ARRAY;		
+			break;
+			case FLOAT_TYPE: 
+			a->type = FLOAT_ARRAY;
+			break;
+			default : 
+			INVALID_OP;
+		}
+		addCode(a->code,
+			"%%%s = alloca %s,%s %d\n",
+			a->addr,strOfNametype(t),strOfNametype(t),a->size);
+		break;
+		default:
+		INVALID_OP;
+	}
+	// Ajout de a variable avec le bon type dans l'arbre
+	struct _variable * var = varCreate(a->type,a->identifier);
+	set_var_layer(ctxt,dest,var);
 	return a;	
 }
 

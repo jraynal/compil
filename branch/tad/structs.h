@@ -14,6 +14,7 @@ enum _type {
 	UNKNOWN_FUNC,
 	INT_ARRAY,
 	FLOAT_ARRAY,
+	VOID_ARRAY,
 	UNKNOWN_ARRAY
 };
 
@@ -32,6 +33,7 @@ struct _attribute {
 	struct _code *code;
 	const char * identifier;
 	struct _list * arguments;
+	int size;
 };
 
 /****************** tad code ***********************/
