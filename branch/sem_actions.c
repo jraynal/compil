@@ -58,6 +58,7 @@ const char* officialName(const char* name){
 int match_type(struct _attribute * a1 , struct _attribute * a2){
 	CHK(a1);
 	CHK(a2);
+	int ret;
 	ret = (a1->type == a2->type);
 	ret = ret || (a1->type == UNKNOWN && (a2->type == UNKNOWN || a2->type == INT_TYPE ||  a2->type == FLOAT_TYPE ||  a2->type == VOID_TYPE));
 	ret = ret || (a1->type == UNKNOWN_FUNC && (a2->type == UNKNOWN_FUNC || a2->type == INT_FUNC ||  a2->type == FLOAT_FUNC ||  a2->type == VOID_FUNC));
