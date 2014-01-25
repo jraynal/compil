@@ -1,9 +1,4 @@
 %{
-	#include "tad/structs.h"
-	#include "tad/tree.h"
-	#include "tad/list.h"
-	
-	#include <stdio.h>
 	#include "sem_actions.h"
 	char *footer();
 	char *header();
@@ -12,6 +7,7 @@
 	int yyerror ();
 	struct _layer *my_ctxt;
 	int is_first_declarator=1;
+	struct _int_heap *heap;
 
 	int authpass =3;
 %}
@@ -256,6 +252,7 @@ int main (int argc, char *argv[]) {
 
 	// fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	my_ctxt = init_layer();
+	heap= init_int_heap();
 	//fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
@@ -266,7 +263,7 @@ int main (int argc, char *argv[]) {
 	// fprintf(stderr, "size:%d\n",garbageCollector->size);
 	// fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	// del_list_and_content(garbageCollector);
-
+	delete_int_heap(heap);
 	free (file_name);
 	fclose(input);
 	return 0;

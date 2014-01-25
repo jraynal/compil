@@ -7,8 +7,9 @@
 #include "tad/tree.h"
 #include "tad/list.h"
 #include "tad/structs.h"
-#include "tad/code.h"
 #include "tad/layer.h"
+#include "tad/code.h"
+#include "tad/int_heap.h"
 
 #define LOG(message) do{fprintf(stderr,"[LOG][%s]: "#message" at\t%s\tin %s\t\t\tline\t\t%d\n",__TIME__,__FILE__,__func__,__LINE__);}while(0);
  //for dynamic allocation

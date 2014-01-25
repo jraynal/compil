@@ -2,7 +2,7 @@ LEX=lex
 YACC=yacc
 CFLAGS=-W -Wall -Wextra -g -O0
 CC=gcc
-SRC=y.tab.c lex.yy.c sem_actions.c tad/tree.c tad/list.c tad/code.c tad/layer.c
+SRC=y.tab.c lex.yy.c sem_actions.c tad/tree.c tad/list.c tad/code.c tad/layer.c tad/int_heap.c
 OBJ=$(SRC:.c=.o)
 EXEC=parse
 OTHER= structs.h

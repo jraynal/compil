@@ -124,6 +124,7 @@ struct _nodeList
 // FAUX, il est spécifique à un contexte.
 // struct _node* adr; 
 extern struct _layer *my_ctxt;
+extern struct _int_heap *heap;
 struct _list * garbageCollector;
 struct _layer *my_ctxt;
 

@@ -18,9 +18,7 @@ const char *itoa(int i) {
 
 const char *new_reg(){
 //	LOG();
-	static int i =0;
-	i++;
-	return itoa(i);
+	return itoa(get_free_int(heap));
 }
 
 const char *new_label(){
@@ -53,6 +51,7 @@ const char* officialName(const char* name){
 
 void deleteAttribute(struct _attribute* a) {
 //	LOG();
+	free_int(heap,atoi(a->reg));
 	free(a);
 }
 
@@ -107,10 +106,7 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 
 
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
-	LOG();
-	struct _attribute *a = get_attr_from_context(ctxt,name);
-	CHK(a);
-	return a;
+	return get_attr_from_context(ctxt,name);
 }
 
 struct _attribute *varIncr(const char * name,struct _layer* ctxt){
@@ -588,17 +584,20 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 	struct _attribute *a= newAttribute("/");
 	const char *label1=new_label();
 	const char *label2=new_label();
+	const char *out_label=new_label();
 	// On ajoute le code de la condition et on teste
 	a->code=cond->code;
 	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s\n",cond->reg,label1,label2);
 	// On ajoute le label et le then
 	a->code=fusionCode(addCode(a->code,"label %%%s\n",label1),then->code);
+	addCode(a->code,"br label %%%s\n",out_label);
 	// On ajoute le label de other et si il y en a le code de
 	addCode(a->code,"label %%%s\n",label2);
 	if(other) {
 		a->code=fusionCode(a->code,other->code);
 		deleteAttribute(other);
 	}
+	addCode(a->code,"label %%%s\n",out_label);
 	deleteAttribute(then);
 	deleteAttribute(cond);
 	return a;
