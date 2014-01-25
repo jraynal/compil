@@ -10,6 +10,7 @@
 #include "tad/code.h"
 #include "tad/layer.h"
 
+#define LOG(message) do{fprintf(stderr,"[LOG][%s]: "#message" at\t%s\tin %s\t\t\tline\t\t%d\n",__TIME__,__FILE__,__func__,__LINE__);}while(0);
  //for dynamic allocation
 
 struct _variable * varCreate(enum _type *type, const char * addr);
@@ -51,14 +52,14 @@ struct _attribute *ge_op (struct _attribute *,struct _attribute *);
 struct _attribute *ne_op (struct _attribute *,struct _attribute *);
 struct _attribute *eq_op (struct _attribute *,struct _attribute *);
 
-struct _attribute *declareVar(char* nom, struct _layer* ctxt);
+struct _attribute *declareVar(char* nom);
 
 struct _attribute *declare_array(struct _attribute* array, int size);
 
 struct _attribute *simple_declare_function(struct _attribute * func);
 struct _attribute *multiple_declare_function(struct _attribute * func , struct _list * args);
 
-struct _attribute *allocate_id(struct _attribute *,enum _type);
+struct _attribute *allocate_id(struct _layer *,struct _attribute *,enum _type);
 void setType(struct _attribute *a, enum _type t);
 struct _attribute * setTypeList(struct _list * list, enum _type t);
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content);
