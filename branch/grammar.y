@@ -167,9 +167,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   								{}
-| '{' statement_list '}'					{$$=$2;}
-| '{' declaration_list statement_list '}'	{$$=concat($2,$3); /*close_layer(my_ctxt);*/}
+: '{' '}'   								{my_ctxt=close_layer(my_ctxt);}
+| '{' statement_list '}'					{$$=$2;my_ctxt=close_layer(my_ctxt);}
+| '{' declaration_list statement_list '}'	{$$=concat($2,$3); my_ctxt=close_layer(my_ctxt);}
 ;
 
 declaration_list

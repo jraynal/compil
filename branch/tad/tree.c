@@ -1,6 +1,8 @@
 #include "tree.h"
 #include <stdio.h>
 
+#define CHK(truc) do{if(truc == NULL){fprintf(stderr,#truc" is NULL by %s in %s line %d\n",__FUNCTION__,__FILE__,__LINE__); exit(1);}}while(0)
+
 static int is_leaf(struct _node* node);
 static int is_last_son(struct _node* node);
 static int add_node(struct _node* father, char c);
@@ -15,6 +17,7 @@ struct _node *init_tree(){
 	return root;	
 }
 int del_bro(struct _node *node) {
+	CHK(node);
 	if(node==NULL)
 		return EXIT_FAILURE;
 	fprintf(stderr,"%c",node->c);
@@ -26,6 +29,7 @@ int del_bro(struct _node *node) {
 	return EXIT_SUCCESS;
 }
 int del_tree(struct _node *root){
+	CHK(root);
 	/* Deja free ou blague... */
 	if(root==NULL)
 		return EXIT_FAILURE;
@@ -131,6 +135,7 @@ static int is_leaf(struct _node *node){
 }
 
 static int is_last_son(struct _node *node){
+	CHK(node);
 	if(node==NULL)
 		return EXIT_FAILURE;
 	else if(node->brother==NULL)

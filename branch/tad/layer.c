@@ -10,7 +10,7 @@ struct _layer * init_layer(){
 	CHK(layer);
 	layer-> root = init_tree();
 	layer-> previous = NULL;
-	// fprintf(stderr,"Layer %d initialized\n",++alphonse);
+	fprintf(stderr,"Layer %d initialized\n",++alphonse);
 	return layer;
 }
 
@@ -21,7 +21,7 @@ struct _layer * add_layer(struct _layer * layer){
 	struct _layer * son = init_layer();
 	CHK(son);
 	son-> previous = layer;
-	// fprintf(stderr,"Layer %d added\n",alphonse);
+	fprintf(stderr,"Layer %d (%p)added\n",alphonse,son);
 	return son;
 }
 
@@ -54,21 +54,24 @@ int set_var_layer(struct _layer * layer, char* name, struct _variable * var){
 // to exit a local context
 struct _layer * close_layer( struct _layer * layer){
 	CHK(layer);
+	fprintf(stderr,"Layer %d (%p) closing\n",alphonse,layer);
 	struct _layer * father = layer->previous;
+	CHK(layer->root);
 	del_tree(layer->root);
 	free(layer);
-	layer= father;
-	CHK(layer);
-	return layer;
+	fprintf(stderr,"Layer %d closed, newlawer = %p\n",alphonse--,father);
+	return father;
 }
 
 
 //free all layers
 int delete_layer( struct _layer * layer ){
+	fprintf(stderr,"Deleting from layer %d\n",alphonse);
 	CHK(layer);
 	struct _layer * l = close_layer(layer);
 	if (l == NULL)
 		return EXIT_SUCCESS;
+	fprintf(stderr,"Deleted from layer %d\n",alphonse);
 	return delete_layer(l);
 }
 
