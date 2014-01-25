@@ -527,7 +527,7 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 	struct _attribute *a= newAttribute("/");
 	const char *label1=new_label(),label2=new_label();
 	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s",cond->reg,label1,label2);
-	a->code=fusionCode(a->code,addCode());
+	//a->code=fusionCode(a->code,addCode());
 	return NULL;
 }
 
