@@ -7,6 +7,7 @@
 
 
 const char *itoa(int i) {
+//	LOG();
 	char *c=NULL;
 	int len=0;
 	len=snprintf(c,len,"%d",i);
@@ -16,16 +17,19 @@ const char *itoa(int i) {
 }
 
 const char *new_reg(){
+//	LOG();
 	static int i =0;
 	i++;
 	return itoa(i);
 }
 
 const char *new_label(){
+//	LOG();
 	static int i =0;
 	return itoa(i++);
 }
 char* strOfNametype(enum _type *t){
+//	LOG();
 	switch(*t){
 		case INT_TYPE :
 		return "i32";
@@ -40,6 +44,7 @@ char* strOfNametype(enum _type *t){
 }
 
 const char* officialName(const char* name){
+//	LOG();
 	CHK(name);
 	if (strcmp(name, "$accel")== 0)
 		return "%accel";
@@ -47,10 +52,12 @@ const char* officialName(const char* name){
 }
 
 void deleteAttribute(struct _attribute* a) {
+//	LOG();
 	free(a);
 }
 
 struct _attribute *newAttribute(const char * id){
+//	LOG();
 	struct _attribute *a=malloc(sizeof(struct _attribute));
 	a->reg = new_reg(); // registre de la donnée
 	a->addr= NULL; // ctxtesse de la donnée (identifiants uniquement)
@@ -64,6 +71,7 @@ struct _attribute *newAttribute(const char * id){
 }
 
 struct _variable * varCreate(enum _type *type, const char *addr){
+	LOG();
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
 		var->type = type;
@@ -76,6 +84,7 @@ struct _variable * varCreate(enum _type *type, const char *addr){
 }
 
 struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
+	LOG();
 	CHK(ctxt);
 	CHK(name);
 	char dest [100];
@@ -98,12 +107,14 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 
 
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
+	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,name);
 	CHK(a);
 	return a;
 }
 
 struct _attribute *varIncr(const char * name,struct _layer* ctxt){
+	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	
@@ -130,6 +141,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 }
 
 struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
+	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
@@ -151,6 +163,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 }
 
 struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
+	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
 	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
 	CHK(a);
@@ -160,6 +173,7 @@ struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 
 
 struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,struct _list * list){
+	LOG();
 	CHK(ctxt);
 	CHK(funName);
 	CHK(list);
@@ -179,6 +193,7 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 }
 
 struct _attribute *newInt(int i){
+	LOG();
 	struct _attribute *a = newAttribute("/");
 	*a->type = INT_TYPE;
 	
@@ -188,6 +203,7 @@ struct _attribute *newInt(int i){
 }
 
 struct _attribute *newFloat(float f){
+	LOG();
 	struct _attribute *a = newAttribute("/");
 	*a->type = FLOAT_TYPE;
 	addCode(a->code,"%%%s  = fadd float %g, 0.0\n",a->reg,f);
@@ -198,6 +214,7 @@ struct _attribute *newFloat(float f){
 
 
 struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
+	LOG();
 	struct _attribute *a = newAttribute("/");
 	// Ne pas oublier le code des autres...
 	a->code=fusionCode(array->code,i->code);
@@ -213,6 +230,7 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 
 /* TODO: gestion propre des listes d'attributs */
 struct _list * expression_list(struct _attribute *a){
+	LOG();
 	struct _list * list = init_list();
 	insertElmnt(a,list);
 	CHK(list);
@@ -221,6 +239,7 @@ struct _list * expression_list(struct _attribute *a){
 
 
 struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
+	LOG();
 	insertElmnt(a,list);
 	CHK(list);
 	return list;
@@ -229,6 +248,7 @@ struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
 
 /* Je pense que la grammaire gère le cas où l'incrémentation doit se faire avant... */
 struct _attribute *prefixedVarIncr(struct _attribute *a){
+	LOG();
 	char * str_type = strOfNametype(a->type);
 	
 	/* Creation du registre de sortie du calcul */
@@ -255,6 +275,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 
 
 struct _attribute *prefixedVarDecr(struct _attribute *a){
+	LOG();
 	char * str_type = strOfNametype(a->type);
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
@@ -270,12 +291,13 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s ",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s \n",str_type,reg,str_type,a->addr);
 	CHK(a);
 	return a;
 }
 
 struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp, char * floatOp){
+	LOG();
 	CHK(a1);
 	CHK(a2);
 	if (*a1->type != *a2->type){
@@ -309,22 +331,27 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 
 /* ça c'est super malin, de vrai de vrai !! */
 struct _attribute *multiply(struct _attribute *a1,struct _attribute *a2){
+	LOG();
 	return binOp(a1,a2,"mul","fmul");
 }
 
 struct _attribute *divide(struct _attribute *a1,struct _attribute *a2){
+	LOG();
 	return binOp(a1,a2,"sdiv","fdiv");
 }
 
 struct _attribute *add(struct _attribute *a1,struct _attribute *a2){
+	LOG();
 	return binOp(a1,a2,"add","fadd");
 }
 
 struct _attribute *sub(struct _attribute *a1 ,struct _attribute *a2){
+	LOG();
 	return binOp(a1,a2,"sub","fsub");
 }
 
 struct _attribute *neg(struct _attribute *a){
+	LOG();
 	CHK(a);
 	struct _attribute *na=newAttribute(a->identifier);
 	na->type=a->type;
@@ -345,6 +372,7 @@ struct _attribute *neg(struct _attribute *a){
 
 
 struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intConditionCode,  char* floatConditionCode ){
+	LOG();
 	CHK(a1);
 	CHK(a2);
 	if (*a1->type != *a2->type){
@@ -375,141 +403,142 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 }
 
 struct _attribute *l_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"slt","ult");
 }
 
 struct _attribute *g_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"sgt","ugt");
 }
 
 struct _attribute *le_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"sle","ule");
 }
 
 struct _attribute *ge_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"sge","uge");
 }
 
 struct _attribute *ne_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"ne","une");
 
 }
 
 struct _attribute *eq_op (struct _attribute *a1 ,struct _attribute *a2 ){
+	LOG();
 	return cmp (a1,a2,"eq","ueq");
 }
 
-struct _attribute *declareVar(char* nom,struct _layer* ctxt){
-	//vérification de l'existence de l'ARBRE DE RECHERCHE
-	CHK(ctxt);
-	CHK(nom);
-	char dest[strlen(nom)+2];
-	sprintf(dest,"/%s",nom);
+struct _attribute *declareVar(char* nom){
+	LOG();
 	struct _attribute *a=newAttribute(nom);
-	// Modification du type de la variable et de l'ctxtese du pointeur par effet de bord.
-	// On ne pourra alour la mémoire qu'en connaisant le type!
-	struct _variable * var = varCreate(a->type,a->addr);
-
-	// Ajout de la clef dans l'arbre
-	set_var_layer(ctxt,dest,var);
-
-	/* DEBUG SPOTTED */
-	// Vérifiction de la présence de la clef
-	// var = get_layer(ctxt,dest);
-	// if(var==NULL)
-	// 	fprintf(stderr, "Variable non set : %s\n",dest);
-	// fprintf(stderr, "declaration de %s\n",nom);
-
-	// on remonte à la règle du dessus qui devra faire l'allocation!!
+	a->addr=a->identifier=nom;
 	CHK(a);
 	return a;
 }
 
 struct _attribute * declare_array(struct _attribute* array, int size){
+	LOG();
 	CHK(array);
 	addCode(array->code,"%%%s = alloca %s,%s %d",array->addr,strOfNametype(array->type),strOfNametype(array->type),size);
 	return array;
 }
 
 struct _attribute *simple_declare_function(struct _attribute * func){
+	LOG();
 	CHK(func);
 	CHK(my_ctxt);
 	// my_ctxt=add_layer(my_ctxt);
+	// On modifie le type mit par défaut par la déclaration de variables
 	*(func->type) = UNKNOWN_FUNC;
-	func->arguments = init_list();
-return NULL;
+	// Liste d'arguments vide
+	func->arguments = init_list();	
+	// bout de code de déclaration:
+	addCode(func->code,"@%s()",func->identifier);
+	return func;
 }
 struct _attribute *multiple_declare_function(struct _attribute * func , struct _list * args){
+	LOG();
 	CHK(func);
 	CHK(args);
 	CHK(my_ctxt);
 	// my_ctxt=add_layer(my_ctxt);
 	*(func->type) = UNKNOWN_FUNC;
 	func->arguments = args;
-return NULL;
+	return func;
 }
 
-struct _attribute *allocate_id(struct _attribute *a, enum _type t) {
-	CHK(a);
-	setType(a,t);
-	addCode(a->code,"%%%s = alloca %s",a->addr,strOfNametype(&t));
-	CHK(a);
-	return a;	
-}
 
-void setType(struct _attribute *a, enum _type t){
+struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _type t) {
+	LOG();
+	CHK(a);
+	// Mise de la variable dans l'arbre
+	CHK(ctxt);
+	char dest[strlen(a->identifier)+2];
+	sprintf(dest,"/%s",a->identifier);
+	struct _variable * var = varCreate(&t,a->identifier);
+	set_var_layer(ctxt,dest,var);
+
+	// Maintenant on s'occupe du type et tout...
+	addCode(a->code,"%%%s = alloca %s\n",a->addr,strOfNametype(&t));
+	a->type=&t; // au cas ou...
 	CHK(a);
 	CHK(a->type);
 	//selon le type d'objet remonte : variable, fonction ou tableau
-	switch(*a->type){
-		case UNKNOWN:
-		*a->type = t;
-		break;
-		case UNKNOWN_FUNC:
-		switch(t){
-			//selon le type a affecter (int float void...)
-			case INT_TYPE :
-			*a->type = INT_FUNC;		
-			break;
-			case FLOAT_TYPE: 
-			*a->type = FLOAT_FUNC;
-			break;
-			case VOID_TYPE: 
-			*a->type = VOID_FUNC;
-			break;
-			default : 
-			INVALID_OP;
-		}
-		break;
-			//selon le type a affecter (int float ...)
-		case UNKNOWN_ARRAY: 
-		switch(t){
-			case INT_TYPE :
-			*a->type = INT_ARRAY;		
-			break;
-			case FLOAT_TYPE: 
-			*a->type = FLOAT_ARRAY;
-			break;
-			default : 
-			INVALID_OP;
-		}
-		break;
-		default:
-		INVALID_OP;
-	}
+	// switch(*a->type){
+	// 	case UNKNOWN:
+	// 	*a->type = t;
+	// 	break;
+	// 	case UNKNOWN_FUNC:
+	// 	switch(t){
+	// 		//selon le type a affecter (int float void...)
+	// 		case INT_TYPE :
+	// 		*a->type = INT_FUNC;		
+	// 		break;
+	// 		case FLOAT_TYPE: 
+	// 		*a->type = FLOAT_FUNC;
+	// 		break;
+	// 		case VOID_TYPE: 
+	// 		*a->type = VOID_FUNC;
+	// 		break;
+	// 		default : 
+	// 		INVALID_OP;
+	// 	}
+	// 	break;
+	// 		//selon le type a affecter (int float ...)
+	// 	case UNKNOWN_ARRAY: 
+	// 	switch(t){
+	// 		case INT_TYPE :
+	// 		*a->type = INT_ARRAY;		
+	// 		break;
+	// 		case FLOAT_TYPE: 
+	// 		*a->type = FLOAT_ARRAY;
+	// 		break;
+	// 		default : 
+	// 		INVALID_OP;
+	// 	}
+	// 	break;
+	// 	default:
+	// 	INVALID_OP;
+	// }
 	// Modification dans l'arbre par effet de bord
 	// TODO : code llvm  //LLVM
-	return;
+	return a;	
 }
 
 struct _attribute * setTypeList(struct _list * list, enum _type t){
+	LOG();
 	CHK(list);
 	struct _attribute* attr;
 	struct _attribute* ret;
 	ret = newAttribute("/");
 	while(! is_empty(list)){
 		attr = (struct _attribute *) (list->head->value);
-		setType(attr,t);
+		attr = allocate_id(my_ctxt,attr,t);
 		ret= concat(ret,attr);
 		removeElmnt(attr,list);
 	}
@@ -519,27 +548,26 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 	return ret;
 }
 
-struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content){
-	CHK(name);
-	CHK(content);
-	//TODO checker le type si existe deja  
-	//sinon
-	struct _attribute* attr_funct = name;
-	setType(attr_funct,t);
-	char * str_type =  strOfNametype(attr_funct->type);
-	addCode(ret,"define %s @%s(",str_type,attr_funct->identifier,)
-	//TODO inserer le nom des arguments
-		//TODO inserer les arguments au context de la fonction
-	//TODO supprimer la list
-	addCode(ret,"){");
-	ret2 = fusionCode(ret,content);
-	addCode(ret2,"ret %s}",str_type_ret);
-	CHK(ret);
-	return ret;
+
+struct _attribute *make_function(enum _type t , struct _attribute * declaration, struct _attribute * content){
+	LOG();
+	CHK(declaration);CHK(content);
+	struct _attribute* a= newAttribute("/");
+	// Assemblage d'une définition de fonstion:
+	if(t!=VOID_TYPE)
+		addCode(a->code,"define %%%s ",strOfNametype(&t));
+	else
+		addCode(a->code,"define ");
+	a->code=fusionCode(a->code,declaration->code);
+	addCode(a->code,"{\n");
+	a->code=fusionCode(a->code,content->code);
+	addCode(a->code,"}\n");
+	CHK(a);
+	return a;
 }
 
-
 void print(struct _attribute *a) {
+	LOG();
 	CHK(a);
 	printCode(STDOUT_FILENO,a->code);
 	deleteCode(a->code);
@@ -554,6 +582,7 @@ struct _attribute * emptyExpr(){
 
 
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
+	LOG();
 	CHK(cond); CHK(then); 
 	struct _attribute *a= newAttribute("/");
 	const char *label1=new_label();
@@ -575,6 +604,7 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 }
 
 struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct _attribute *ite, struct _attribute *body) {
+	LOG();
 	struct _attribute *a=newAttribute("/");
 	const char *loop_label=new_label();
 	if(init)
@@ -592,6 +622,7 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 }
 
 struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
+	LOG();
 	CHK(a1);
 	CHK(a2);
 	struct _attribute *a=newAttribute("/");
@@ -603,7 +634,9 @@ struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 }
 
 struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,struct _attribute *ori){
-	struct _attribute *a;
+	LOG();
+	struct _attribute *a=NULL;
+	struct _attribute *ret=newAttribute("/");
 	CHK(tgt);
 	CHK(ori);
 	switch(eg){
@@ -625,9 +658,13 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 			break;
 	}
 	char *type = strOfNametype(a->type);
-	addCode(a->code,"store %s %%%s, %s* %%%s\n",type,a->reg,type,tgt->addr);
+	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
+	ret->code=fusionCode(fusionCode(tgt->code,ori->code),
+				addCode((a)?a->code:initCode(),
+					"store %s %%%s, %s* %%%s\n",type,a->reg,type,tgt->addr));
 	deleteAttribute(tgt);
+	deleteAttribute(a);
 	deleteAttribute(ori);
-	return a;
+	return ret;
 }
 

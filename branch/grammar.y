@@ -141,7 +141,7 @@ declarator
 														my_ctxt=add_layer(my_ctxt);
 														is_first_declarator=0;
 													}
-													$$=declareVar($1,my_ctxt);
+													$$=declareVar($1);
 												}
 | '(' declarator ')'                      		{$$=$2;}
 | declarator '[' CONSTANTI ']'             		{$$=declare_array($1,$3);}
@@ -156,7 +156,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator							{ $$=allocate_id($2,$1); }
+: type_name declarator							{ $$=allocate_id(my_ctxt,$2,$1); }
 ;
 
 statement
@@ -256,11 +256,11 @@ int main (int argc, char *argv[]) {
 
 	// fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	my_ctxt = init_layer();
-	fprintf(stdout, "%s\n",header() );
+	//fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
-	fprintf(stdout, "%s\n",footer() );
+	//fprintf(stdout, "%s\n",footer() );
 	delete_layer(my_ctxt);
 	// fprintf(stderr,"true: %d\n", 1==1);
 	// fprintf(stderr, "size:%d\n",garbageCollector->size);
