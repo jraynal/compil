@@ -486,7 +486,7 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content){
 	//TODO
-	struct _attribute* ret = newAttribute("/");
+	struct _attribute* ret = content;
 	CHK(ret);
 	return ret;
 }
@@ -565,6 +565,9 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 		default:
 			a=newAttribute("/");
 			a->reg=ori->reg;
+			a->code= ori->code;
+			a->type = ori->type;
+			a->identifier = ori->identifier;
 			break;
 	}
 	char *type = strOfNametype(a->type);
