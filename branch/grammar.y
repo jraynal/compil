@@ -187,7 +187,7 @@ statement_list
 ;
 
 expression_statement
-: ';' 										{}
+: ';' 										{$$ = emptyExpr();}
 | expression ';'  							{$$=$1;}
 ;
 

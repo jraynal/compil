@@ -473,6 +473,7 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	return func;
 }
 
+
 struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _type t) {
 	LOG();
 	CHK(a);
@@ -487,6 +488,46 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	addCode(a->code,"%%%s = alloca %s\n",a->addr,strOfNametype(&t));
 	a->type=&t; // au cas ou...
 	CHK(a);
+	CHK(a->type);
+	//selon le type d'objet remonte : variable, fonction ou tableau
+	// switch(*a->type){
+	// 	case UNKNOWN:
+	// 	*a->type = t;
+	// 	break;
+	// 	case UNKNOWN_FUNC:
+	// 	switch(t){
+	// 		//selon le type a affecter (int float void...)
+	// 		case INT_TYPE :
+	// 		*a->type = INT_FUNC;		
+	// 		break;
+	// 		case FLOAT_TYPE: 
+	// 		*a->type = FLOAT_FUNC;
+	// 		break;
+	// 		case VOID_TYPE: 
+	// 		*a->type = VOID_FUNC;
+	// 		break;
+	// 		default : 
+	// 		INVALID_OP;
+	// 	}
+	// 	break;
+	// 		//selon le type a affecter (int float ...)
+	// 	case UNKNOWN_ARRAY: 
+	// 	switch(t){
+	// 		case INT_TYPE :
+	// 		*a->type = INT_ARRAY;		
+	// 		break;
+	// 		case FLOAT_TYPE: 
+	// 		*a->type = FLOAT_ARRAY;
+	// 		break;
+	// 		default : 
+	// 		INVALID_OP;
+	// 	}
+	// 	break;
+	// 	default:
+	// 	INVALID_OP;
+	// }
+	// Modification dans l'arbre par effet de bord
+	// TODO : code llvm  //LLVM
 	return a;	
 }
 
@@ -507,6 +548,7 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 	CHK(ret);
 	return ret;
 }
+
 
 struct _attribute *make_function(enum _type t , struct _attribute * declaration, struct _attribute * content){
 	LOG();
@@ -533,9 +575,16 @@ void print(struct _attribute *a) {
 	deleteAttribute(a);
 }
 
+struct _attribute * emptyExpr(){
+	struct _attribute * ret = newAttribute("/");
+	CHK(ret);
+	return ret;
+}
+
+
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
 	LOG();
-	CHK(cond); CHK(then); CHK(other);
+	CHK(cond); CHK(then); 
 	struct _attribute *a= newAttribute("/");
 	const char *label1=new_label();
 	const char *label2=new_label();

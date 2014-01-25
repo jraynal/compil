@@ -64,6 +64,8 @@ void setType(struct _attribute *a, enum _type t);
 struct _attribute * setTypeList(struct _list * list, enum _type t);
 struct _attribute *make_function(enum _type t , struct _attribute * name, struct _attribute * content);
 
+struct _attribute * emptyExpr();
+
 void print(struct _attribute *a);
 struct _attribute *selection(struct _attribute *, struct _attribute *, struct _attribute *);
 struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribute *, struct _attribute *);
