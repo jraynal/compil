@@ -1,5 +1,4 @@
 void f(){
-int accel; 
-// accel=1;
-;;;;
+int accel,a; 
+accel=1+5*8;
 }

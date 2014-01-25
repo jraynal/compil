@@ -10,7 +10,7 @@ struct _layer * init_layer(){
 	CHK(layer);
 	layer-> root = init_tree();
 	layer-> previous = NULL;
-	fprintf(stderr,"Layer %d initialized\n",++alphonse);
+	// fprintf(stderr,"Layer %d initialized\n",++alphonse);
 	return layer;
 }
 
@@ -21,7 +21,7 @@ struct _layer * add_layer(struct _layer * layer){
 	struct _layer * son = init_layer();
 	CHK(son);
 	son-> previous = layer;
-	fprintf(stderr,"Layer %d added\n",alphonse);
+	// fprintf(stderr,"Layer %d added\n",alphonse);
 	return son;
 }
 
@@ -57,7 +57,10 @@ struct _layer * close_layer( struct _layer * layer){
 	struct _layer * father = layer->previous;
 	del_tree(layer->root);
 	free(layer);
-	return father;
+	layer= father;
+	CHK(layer);
+	exit(1);
+	return layer;
 }
 
 
