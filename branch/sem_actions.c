@@ -301,6 +301,7 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 	CHK(a1);
 	CHK(a2);
 	if (*a1->type != *a2->type){
+		fprintf(stderr,"Different types: %s and %s\n",strOfNametype(a1->type),strOfNametype(a2->type));
 		INVALID_OP;
 	}
 	// struct _attribute *a = newAttribute(a1->identifier);
