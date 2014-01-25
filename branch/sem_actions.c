@@ -524,7 +524,6 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 	return a;
 }
 
-
 void print(struct _attribute *a) {
 	LOG();
 	CHK(a);
@@ -604,6 +603,9 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 		default:
 			a=newAttribute("/");
 			a->reg=ori->reg;
+			a->code= ori->code;
+			a->type = ori->type;
+			a->identifier = ori->identifier;
 			break;
 	}
 	char *type = strOfNametype(a->type);
