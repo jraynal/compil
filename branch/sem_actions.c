@@ -643,6 +643,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	struct _attribute *ret=newAttribute("/");
 	CHK(tgt);
 	CHK(ori);
+	/*TODO: Si types différents, -> message d'erreurs*/
 	switch(eg){
 		case ADD:
 			a=add(tgt,ori);
@@ -656,9 +657,9 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 		default:
 			break;
 	}
-	char *type = strOfNametype(a->type);
+	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
-	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,"store %s %%%s, %s* %%%s\n",type,a->reg,type,tgt->addr);
+	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,"store %s %%%s, %s* %%%s\n",type,(a)?a->reg:ori->reg,type,tgt->addr);
 	deleteAttribute(tgt);
 	deleteAttribute(a);
 	deleteAttribute(ori);
