@@ -522,6 +522,11 @@ void print(struct _attribute *a) {
 
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
 	/* TODO: cond avec cas sans else si other est à NULL*/
+	CHK(cond); CHK(then); CHK(other);
+	struct _attribute *a= newAttribute("/");
+	const char *label1=new_label(),label2=new_label();
+	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s",cond->reg,label1,label2);
+	a->code=fusionCode(a->code,addCode());
 	return NULL;
 }
 
