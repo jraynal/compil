@@ -502,25 +502,41 @@ void print(struct _attribute *a) {
 }
 
 struct _attribute *selection(struct _attribute *cond, struct _attribute *then, struct _attribute *other) {
-	/* TODO: cond avec cas sans else si other est à NULL*/
 	CHK(cond); CHK(then); CHK(other);
 	struct _attribute *a= newAttribute("/");
-	const char *label1=new_label(),label2=new_label();
-	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s",cond->reg,label1,label2);
-	//a->code=fusionCode(a->code,addCode());
-	return NULL;
+	const char *label1=new_label();
+	const char *label2=new_label();
+	// On ajoute le code de la condition et on teste
+	a->code=cond->code;
+	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s\n",cond->reg,label1,label2);
+	// On ajoute le label et le then
+	a->code=fusionCode(addCode(a->code,"label %%%s\n",label1),then->code);
+	// On ajoute le label de other et si il y en a le code de
+	addCode(a->code,"label %%%s\n",label2);
+	if(other) {
+		a->code=fusionCode(a->code,other->code);
+		deleteAttribute(other);
+	}
+	deleteAttribute(then);
+	deleteAttribute(cond);
+	return a;
 }
 
 struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct _attribute *ite, struct _attribute *body) {
 	struct _attribute *a=newAttribute("/");
-	a->code=init->code;
-	/* TODO: effacer certaines parties pour un while quand init et ite sont à
-	 * NULL */
-	/* TODO: label  */
+	const char *loop_label=new_label();
+	if(init)
+		a->code=init->code;
+	a->code=fusionCode(addCode((init)?a->code:initCode(),"label %%%s\n",loop_label),cond->code);
+	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"br label %%%s",loop_label);
 	selection(cond,body,NULL); // On teste et on fait au besoin
-	a->code=fusionCode(a->code,ite->code);
-	/* TODO: renvoie au label */
-	return NULL;
+	if(init)
+		deleteAttribute(init);
+	deleteAttribute(cond);
+	if(ite)
+		deleteAttribute(ite);
+	deleteAttribute(body);
+	return a;
 }
 
 struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
