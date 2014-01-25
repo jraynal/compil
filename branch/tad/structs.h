@@ -28,7 +28,7 @@ enum _affectation {
 struct _attribute {
 	const char *reg;    // Valeurs
 	const char *addr;   // Adresses
-	enum _type *type;
+	enum _type type;
 	struct _code *code;
 	const char * identifier;
 	struct _list * arguments;
@@ -61,7 +61,7 @@ union _value {
 /* TODO: différencier variables R_ONLY ou RW */
 /* TODO: champs de type d'objet: variable, tableau ou foction */
 struct _variable {
-	enum _type *type;
+	enum _type type;
 	const char *addr;
 	//TODO : inserer la listes des arguments des fonctions
 	//union _value value;
