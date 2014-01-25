@@ -137,7 +137,7 @@ declarator
 : IDENTIFIER  									{
 													if(is_first_declarator) {
 														fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
-														my_ctxt=add_layer(my_ctxt);
+														// my_ctxt=add_layer(my_ctxt);
 														is_first_declarator=0;
 													}
 													$$=declareVar($1,my_ctxt);
@@ -169,7 +169,7 @@ statement
 compound_statement
 : '{' '}'   								{}
 | '{' statement_list '}'					{$$=$2;}
-| '{' declaration_list statement_list '}'	{$$=concat($2,$3); close_layer(my_ctxt);}
+| '{' declaration_list statement_list '}'	{$$=concat($2,$3); /*close_layer(my_ctxt);*/}
 ;
 
 declaration_list
@@ -256,10 +256,9 @@ int main (int argc, char *argv[]) {
 	fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	my_ctxt = init_layer();
 	fprintf(stdout, "%s\n",header() );
-	my_ctxt= add_layer(my_ctxt);
+	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
-	
 	fprintf(stdout, "%s\n",footer() );
 	delete_layer(my_ctxt);
 	// fprintf(stderr,"true: %d\n", 1==1);

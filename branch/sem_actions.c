@@ -3,6 +3,8 @@
 #define LLVM( string ) fprintf(stdout,##string); fprintf(stdout,"\n");
 
 #define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"error in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);exit(EXIT_FAILURE);}}while(0)
+#define INVALID_OP  do{fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);	exit(1);}while(0)
+
 
 const char *itoa(int i) {
 	char *c=NULL;
@@ -34,8 +36,7 @@ char* strOfNametype(enum _type *t){
 		default:
 		return "";
 	}
-	fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-	exit(1);
+	INVALID_OP;
 }
 
 const char* officialName(const char* name){
@@ -281,8 +282,7 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 	CHK(a1);
 	CHK(a2);
 	if (*a1->type != *a2->type){
-		fprintf(stderr,"uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-		exit(1);
+		INVALID_OP;
 	}
 	// struct _attribute *a = newAttribute(a1->identifier);
 	// Je qu'il faut un nouvel identifiant...
@@ -301,8 +301,7 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 		addCode(a->code,"%%%s = %s float %%%s, float %%%s; \n",a->reg,floatOp,a1->reg,a2->reg);	
 		break;
 		default: 
-		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-		exit(1);
+		INVALID_OP;
 
 	}
 	deleteAttribute(a1);
@@ -340,8 +339,7 @@ struct _attribute *neg(struct _attribute *a){
 		addCode(a->code , "%%%s = fsub float 0.0 , %%%s",na->reg,a->reg) ;
 		break;
 		default:
-		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-		exit(1);
+		INVALID_OP;
 	}
 	deleteAttribute(a);
 	CHK(na);
@@ -353,8 +351,7 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 	CHK(a1);
 	CHK(a2);
 	if (*a1->type != *a2->type){
-		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-		exit(1);
+		INVALID_OP;
 	}
 	// struct _attribute *a = newAttribute(a1->identifier);
 	// Idem binOp...
@@ -371,8 +368,7 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s; \n",a->reg,floatConditionCode,a1->reg,a2->reg);	
 		break;
 		default:
-		fprintf(stderr,"invalid operation at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);
-		exit(1);
+		INVALID_OP;
 	}
 	CHK(a);
 	deleteAttribute(a1);

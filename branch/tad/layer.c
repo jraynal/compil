@@ -59,7 +59,6 @@ struct _layer * close_layer( struct _layer * layer){
 	free(layer);
 	layer= father;
 	CHK(layer);
-	exit(1);
 	return layer;
 }
 

@@ -1,7 +1,7 @@
 #include "list.h"
 
 #define CHK(truc) do{if(truc == NULL){printf("%s est NULL\n",#truc); exit(1);}}while(0)
-
+#define CHK_VALID(truc) do{if(!is_valid(truc)){printf("%s is not valid at %s line %d\n",#truc,__FILE__,__LINE__ );exit(1);}}while(0)
 
 int is_valid(struct _list* l){
 	//l is not null and head and tail are both affected or not)
@@ -11,8 +11,7 @@ int is_valid(struct _list* l){
 }
 
 int is_empty(struct _list * l){
-	if (! is_valid(l))
-		exit(1);
+	CHK_VALID(l);
 	return l->head == NULL || l->tail==NULL || l->size<=0;
 }
 
@@ -36,8 +35,7 @@ struct _list * init_list(){
 
 int del_list(struct _list * list){
 	CHK(list);
-	if(!is_valid(list))
-		exit(1);
+	CHK_VALID(list);
 	while(! is_empty (list)){
 		removeElmnt(list->head->value,list);
 	}
@@ -63,9 +61,7 @@ int del_list_and_content(struct _list * l){
 struct _nodeList * find(void* val,struct _list * list){
 	CHK(list);
 	CHK(val);
-	if(! is_valid(list))
-		exit(1);
-
+	CHK_VALID(list);
 	if (is_empty(list))
 		return NULL;
 
@@ -80,8 +76,7 @@ struct _nodeList * find(void* val,struct _list * list){
 
 int insertElmnt(void* val,struct _list * list){
 	CHK(list);
-	if(! is_valid(list))
-		exit(1);
+	CHK_VALID(list);
 	if(find(val,list) != NULL)
 		return EXIT_SUCCESS;
 

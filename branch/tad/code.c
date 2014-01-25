@@ -139,8 +139,7 @@ static int isEnd(struct _code* c, struct _string *str) {
 static int isEmpty(struct _code* c){
 	CHK(is NULL,c);
 	if((c->begin == NULL && c->end != NULL) || (c->begin != NULL && c->end == NULL)){
-		fprintf(stderr, "invalid situation in code value at %s in %s line %d\n",__FILE__,__func__,__LINE__);
-		exit(1);
+		fprintf(stderr, "invalid situation in code value at %s in %s line %d\n",__FILE__,__func__,__LINE__);exit(1);
 	}
 
 	return (c->begin == NULL && c->end == NULL);
