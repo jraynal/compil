@@ -75,4 +75,7 @@ struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
 struct _attribute *assignment(struct _attribute *tgt, enum _affectation ,struct _attribute *ori);
 
 struct _attribute *return_jump(struct _attribute *);
+
+
+void my_add_layer();
 #endif //FUNCTIONS_H

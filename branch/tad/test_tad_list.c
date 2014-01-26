@@ -112,7 +112,6 @@ void test_set(){
 
 int main(){
 	DB(Debut des tests)
-	
 	DB(Test initialisation)
 	test_init_list();
 	DB(Test seter && getter)

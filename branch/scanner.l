@@ -37,7 +37,7 @@ L[a-zA-Z_]
 "=="		{ count(); return(EQ_OP); }
 "!="		{ count(); return(NE_OP); }
 ";"		{ count(); return(';'); }
-"{"      	{ count(); my_ctxt=add_layer(my_ctxt); return('{'); }
+"{"      	{ count(); my_add_layer(); return('{'); }
 "}"      	{ count(); my_ctxt=close_layer(my_ctxt); return('}'); }
 ","		{ count(); return(','); }
 "/"		{ count(); return('/'); }

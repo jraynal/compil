@@ -129,6 +129,6 @@ extern struct _layer *my_ctxt;
 extern struct _int_heap *heap;
 struct _list * garbageCollector;
 struct _layer *my_ctxt;
-
+struct _list * arg_to_add_in_contxt;
 
 #endif //STRUCTS_H
