@@ -269,8 +269,12 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	/* Chargement de l'identifiant */
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
-	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"\t%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	if(a->type<4){
+		char * str_type = strOfNametype(a->type);
+		addCode(a->code,"\t%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	}
+	else
+		a->type%=4;
 	CHK(a);
 	T_TYPE(name,a->type);
 	return a;														// ecriture
@@ -646,7 +650,7 @@ struct _attribute *simple_declare_function(struct _attribute * func){
 	LOG();
 	CHK(func);
 	CHK(my_ctxt);
-	if(strcmp("drive",officialName(func->identifier))) {
+	if(strcmp("drive",officialName(func->identifier))==0) {
 	struct _attribute *a1= newAttribute("index");
 	struct _attribute *a2= newAttribute("car");
 	struct _attribute *a3= newAttribute("s");
@@ -696,7 +700,7 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	addCode(func->code,"@%s(",func->identifier);
 		while(!is_empty(args)){
 			attr = (struct _attribute *)args->head->value;
-			if(strcmp("drive",officialName(func->identifier))) {
+			if(strcmp("drive",officialName(func->identifier))==0) {
 				if(virgule)
 					addCode(func->code,"i32 %%index, %%struct.CarElt* %%car, %%struct.Situation* %%s");
 			}
@@ -817,29 +821,30 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 		struct _attribute* a= newAttribute(officialName(declaration->identifier));
 	// Assemblage d'une définition de fonstion:
 	// TODO check le type de declaration : doit etre une fonction
-		if(t!=VOID_TYPE)
-			addCode(a->code,"define %%%s ",strOfNametype(t));
-		else
-			addCode(a->code,"define ");
-		a->code=fusionCode(a->code,declaration->code);
-		addCode(a->code,"{\n");
-		if(strcmp(declaration->identifier,"drive")==0)
-			addCode(a->code,"%s",code_to_add_to_drive);
-		a->code=fusionCode(a->code,content->code);
-		addCode(a->code,"}\n");
-		a->type=t;
-		CHK(a);
-		set_fct_layer(a);
-		return a;
-	}
 
-	void print(struct _attribute *a) {
-		LOG();
-		CHK(a);
-		printCode(STDOUT_FILENO,a->code);
-		deleteCode(a->code);
-		deleteAttribute(a);
-	}
+	if(t!=VOID_TYPE)
+		addCode(a->code,"define %%%s ",strOfNametype(t));
+	else
+		addCode(a->code,"define ");
+	a->code=fusionCode(a->code,declaration->code);
+	addCode(a->code,"{\n");
+	if(strcmp(declaration->identifier,"drive")==0)
+		addCode(a->code,"%s",code_to_add_to_drive);
+	a->code=fusionCode(a->code,content->code);
+	addCode(a->code,"}\n");
+	a->type=t+4;
+	CHK(a);
+	set_fct_layer(a);
+	return a;
+}
+
+void print(struct _attribute *a) {
+	LOG();
+	CHK(a);
+	printCode(output_file,a->code);
+	deleteCode(a->code);
+	deleteAttribute(a);
+}
 
 	struct _attribute * emptyExpr(){
 		struct _attribute * ret = newAttribute("/");
