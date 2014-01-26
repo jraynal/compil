@@ -108,6 +108,15 @@ int match_type(struct _attribute * a1 , struct _attribute * a2){
 	return ret;
 }
 
+void set_fnct_id(struct _attribute *a){
+	char dest[strlen(a->identifier)+2];
+	sprintf(dest,"/%s",a->identifier);
+	/* TODO: ajouter la liste des arguments pour tester*/
+	struct _variable * var = varCreate(a->type,a->identifier);
+	set_var_layer(my_ctxt,dest,var);
+	return;
+}
+
 void deleteAttribute(struct _attribute* a) {
 //	LOG();
 	//free_int(heap,atoi(a->reg));
@@ -665,6 +674,7 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 	a->code=fusionCode(a->code,content->code);
 	addCode(a->code,"}\n");
 	CHK(a);
+	set_fnct_id(a);
 	return a;
 }
 
@@ -797,3 +807,4 @@ struct _attribute *return_jump(struct _attribute *a) {
 	CHK(a);
 	return a;
 }
+
