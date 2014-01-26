@@ -619,6 +619,7 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 	CHK(declaration);CHK(content);
 	struct _attribute* a= newAttribute("/");
 	// Assemblage d'une définition de fonstion:
+	// TODO check le type de declaration : doit etre une fonction
 	if(t!=VOID_TYPE)
 		addCode(a->code,"define %%%s ",strOfNametype(t));
 	else

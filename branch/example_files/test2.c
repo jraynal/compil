@@ -1,7 +1,6 @@
 // int tab[4];
 void f(){
 float c;
-float c;
 float d;
 c= 1.2;
 d= c++;
