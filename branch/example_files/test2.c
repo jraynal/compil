@@ -2,10 +2,9 @@
 void f(){
 float c;
 float c;
-float c;
-float c;
+float d;
 c= 1.2;
-c++;
+d= c++;
 // int b,a; 
 // float d;
 // a=1+5*8;

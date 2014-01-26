@@ -193,7 +193,8 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	}
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
-	a->reg=reg;
+	// a->reg=reg;
+	a->identifier="/";
 	CHK(a);	
 	return a;
 }
@@ -325,6 +326,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
 	a->reg=reg;
+	a->identifier="/";
 	CHK(a);
 	return a;
 }
@@ -540,6 +542,10 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	char dest[strlen(a->identifier)+2];
 	sprintf(dest,"/%s",a->identifier);
 
+	if(get_var_layer(ctxt,dest)!=NULL){
+		fprintf(stderr, "FATAL ERROR %s already declared\n", a->identifier);
+		return NULL;
+	}
 
 	// Maintenant on s'occupe du type et tout...
 		//selon le type d'objet remonte : variable, fonction ou tableau
@@ -726,7 +732,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
 	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,
-				"store %s %%%s, %s* %%%s\n",
+				"store %s %%%s, %s* %s\n",
 						type,
 						(a)?a->reg:ori->reg,
 						type,
