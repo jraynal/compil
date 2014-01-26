@@ -198,8 +198,8 @@ iteration_statement
 ;
 
 jump_statement
-: RETURN ';' {}//TODO
-| RETURN expression ';' {$$=$2;}
+: RETURN ';' {$$=return_jump(NULL);}
+| RETURN expression ';' {$$=return_jump($2);}
 ;
 
 program
