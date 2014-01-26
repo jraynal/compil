@@ -2,6 +2,8 @@
 void f(int a ){
 float c;
 float d;
+// float _posx;
+c= _posx + 1.0;
 c= 1.2;
 d= c++;
 a=1;
