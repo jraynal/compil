@@ -265,7 +265,7 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
 	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	addCode(a->code,"\t%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
 	CHK(a);
 	T_TYPE(name,a->type);
 	return a;														// ecriture
@@ -288,18 +288,18 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	switch(a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fadd %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
+			addCode(a->code,"\t%%%s = fadd %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
 			break; 
 		default:
 			break;
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
+	addCode(a->code,"\tstore %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	// a->reg=reg;
 	a->identifier="/";
 	CHK(a);	
@@ -319,23 +319,27 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 	switch(a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fsub %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
+			addCode(a->code,"\t%%%s = fsub %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
 			break; 
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
+	addCode(a->code,"\tstore %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	return a;
 }
 
 struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 	LOG();
+	if(strcmp(funName,"drive")==0){
+		fprintf(stderr, "FATAL ERROR drive must not be called\n" );
+		return NULL;
+	}
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
-	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
+	addCode(a->code,"\tcall  %s @%s ()\n",strOfNametype(a->type), a->identifier);
 	CHK(a);
 	return a;
 
@@ -350,7 +354,12 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
 	CHK(a);
 	struct _attribute *  argument;
-	addCode(a->code,"call  %s @%s (",strOfNametype(a->type), a->identifier);
+
+	if(strcmp(funName,"drive")==0){
+		fprintf(stderr, "FATAL ERROR drive must not be called\n" );
+		return NULL;
+	}
+	addCode(a->code,"\tcall  %s @%s (",strOfNametype(a->type), a->identifier);
 		while(!is_empty(list)){
 			argument = (struct _attribute *) list->tail->value;
 			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);// LLVM
@@ -367,7 +376,7 @@ struct _attribute *newInt(int i){
 	struct _attribute *a = newAttribute("/");
 	a->type = INT_TYPE;
 	
-	addCode(a->code,"%%%s  = add i32 %d, 0\n",a->reg,i);
+	addCode(a->code,"\t%%%s  = add i32 %d, 0\n",a->reg,i);
 	CHK(a);
 	return a;
 }
@@ -376,7 +385,7 @@ struct _attribute *newFloat(float f){
 	LOG();
 	struct _attribute *a = newAttribute("/");
 	a->type = FLOAT_TYPE;
-	addCode(a->code,"%%%s  = fadd float %e, %e \n",a->reg,f,0.0);
+	addCode(a->code,"\t%%%s  = fadd float %e, %e \n",a->reg,f,0.0);
 	CHK(a);
 	return a;
 }
@@ -389,7 +398,7 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 		CHK(NULL);
 	array->code=fusionCode(array->code,i->code);
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
-	addCode(array->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",array->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
+	addCode(array->code,"\t%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",array->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
 	array->type%=4; // Le type de la case pointée est le type d'un élément du tableau 
 	array->addr=array->reg; // L'adresse de cet élément est stockée dans le registre chargé par le llvm
 	deleteAttribute(i);
@@ -425,18 +434,18 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	switch(a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s = fadd %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
+	addCode(a->code,"\tstore %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	a->reg=reg;
 	a->identifier="/";
 	CHK(a);
@@ -456,16 +465,16 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 	switch(a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0\n",reg,str_type,a->reg);
+			addCode(a->code,"\t%%%s = fsub %s %%%s, float 1.0\n",reg,str_type,a->reg);
 			break; 
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s \n",str_type,reg,str_type,officialName(a->addr));
+	addCode(a->code,"\tstore %s %%%s, %s %s \n",str_type,reg,str_type,officialName(a->addr));
 	CHK(a);
 	return a;
 }
@@ -488,11 +497,11 @@ struct _attribute *binOp(struct _attribute *a1,struct _attribute *a2,char* intOp
 	switch(a1->type){
 		case INT_TYPE : 
 		a->type = INT_TYPE;
-		addCode(a->code,"%%%s = %s i32 %%%s, i32 %%%s\n",a->reg,intOp,a1->reg,a2->reg);	
+		addCode(a->code,"\t%%%s = %s i32 %%%s, i32 %%%s\n",a->reg,intOp,a1->reg,a2->reg);	
 		break;
 		case FLOAT_TYPE:
 		a->type = FLOAT_TYPE;
-		addCode(a->code,"%%%s = %s float %%%s, float %%%s\n",a->reg,floatOp,a1->reg,a2->reg);	
+		addCode(a->code,"\t%%%s = %s float %%%s, float %%%s\n",a->reg,floatOp,a1->reg,a2->reg);	
 		break;
 		default: 
 		INVALID_OP;
@@ -532,10 +541,10 @@ struct _attribute *neg(struct _attribute *a){
 	na->type=a->type;
 	switch(a->type){
 		case INT_TYPE : 
-		addCode(a->code,"%%%s = sub i32 0 , %%%s\n",na->reg,a->reg) ;
+		addCode(a->code,"\t%%%s = sub i32 0 , %%%s\n",na->reg,a->reg) ;
 		break;
 		case FLOAT_TYPE:
-		addCode(a->code , "%%%s = fsub float %e , %%%s\n",na->reg,0.0,a->reg) ;
+		addCode(a->code , "\t%%%s = fsub float %e , %%%s\n",na->reg,0.0,a->reg) ;
 		break;
 		default:
 		INVALID_OP;
@@ -562,11 +571,11 @@ struct _attribute *cmp(struct _attribute *a1 ,struct _attribute *a2 , char* intC
 	switch(a1->type){
 		case INT_TYPE : 
 	//	a->type = INT_TYPE;
-		addCode(a->code,"%%%s = icmp %s i32 %%%s, i32 %%%s\n",a->reg,intConditionCode, a1->reg, a2->reg);	
+		addCode(a->code,"\t%%%s = icmp %s i32 %%%s, i32 %%%s\n",a->reg,intConditionCode, a1->reg, a2->reg);	
 		break;
 		case FLOAT_TYPE:
 	//	a->type = FLOAT_TYPE;
-		addCode (a->code,"%%%s = fcmp %s float %%%s, float %%%s\n",a->reg,floatConditionCode,a1->reg,a2->reg);	
+		addCode (a->code,"\t%%%s = fcmp %s float %%%s, float %%%s\n",a->reg,floatConditionCode,a1->reg,a2->reg);	
 		break;
 		default:
 		INVALID_OP;
@@ -708,7 +717,7 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	switch(a->type){
 		case UNKNOWN:
 		a->type = t;
-		addCode(a->code,"%%%s = alloca %s\n",a->addr,strOfNametype(t));
+		addCode(a->code,"\t%%%s = alloca %s\n",a->addr,strOfNametype(t));
 		break;
 		case UNKNOWN_FUNC:
 		switch(t){
@@ -739,7 +748,7 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 			INVALID_OP;
 		}
 		addCode(a->code,
-			"%%%s = alloca %s,%s %d\n",
+			"\t%%%s = alloca %s,%s %d\n",
 			a->addr,strOfNametype(t),strOfNametype(t),a->size);
 		break;
 		default:
@@ -782,6 +791,8 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 		addCode(a->code,"define ");
 	a->code=fusionCode(a->code,declaration->code);
 	addCode(a->code,"{\n");
+	if(strcmp(declaration->identifier,"drive")==0)
+		addCode(a->code,"%s",code_to_add_to_drive);
 	a->code=fusionCode(a->code,content->code);
 	addCode(a->code,"}\n");
 	CHK(a);
@@ -812,18 +823,18 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 	const char *out_label=new_label();
 	// On ajoute le code de la condition et on teste
 	a->code=cond->code;
-	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s\n",cond->reg,label1,label2);
+	a->code=addCode(cond->code,"\tbr i1 %%%s, label %%%s label %%%s\n",cond->reg,label1,label2);
 	// On ajoute le label et le then
-	a->code=fusionCode(addCode(a->code,"label %%%s\n",label1),
+	a->code=fusionCode(addCode(a->code,"\tlabel %%%s\n",label1),
 				then->code);
-	addCode(a->code,"br label %%%s\n",out_label);
+	addCode(a->code,"\tbr label %%%s\n",out_label);
 	// On ajoute le label de other et si il y en a le code de
-	addCode(a->code,"label %%%s\n",label2);
+	addCode(a->code,"\tlabel %%%s\n",label2);
 	if(other) {
 		a->code=fusionCode(a->code,other->code);
 		deleteAttribute(other);
 	}
-	addCode(a->code,"label %%%s\n",out_label);
+	addCode(a->code,"\tlabel %%%s\n",out_label);
 	deleteAttribute(then);
 	deleteAttribute(cond);
 	CHK(a);
@@ -837,8 +848,8 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 	const char *loop_label=new_label();
 	if(init)
 		a->code=init->code;
-	a->code=fusionCode(addCode((init)?a->code:initCode(),"label %%%s\n",loop_label),cond->code);
-	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"br label %%%s\n",loop_label);
+	a->code=fusionCode(addCode((init)?a->code:initCode(),"\tlabel %%%s\n",loop_label),cond->code);
+	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"\tbr label %%%s\n",loop_label);
 	// Il faut conserver le registre du test pour la fonction selection
 	a->reg=cond->reg;
 	a=selection(a,body,NULL); // On teste et on fait au besoin
@@ -895,7 +906,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
 	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,
-				"store %s %%%s, %s* %%%s\n",
+				"\tstore %s %%%s, %s* %%%s\n",
 						type,
 						(a)?a->reg:ori->reg,
 						type,
@@ -908,11 +919,11 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 
 struct _attribute *return_jump(struct _attribute *a) {
 	if(a) {
-		addCode(a->code,"ret %s %%%s\n",strOfNametype(a->type),a->reg);
+		addCode(a->code,"\tret %s %%%s\n",strOfNametype(a->type),a->reg);
 	}
 	else {
 		a=newAttribute("/");
-		addCode(a->code,"ret void\n");
+		addCode(a->code,"\tret void\n");
 	}
 	CHK(a);
 	return a;

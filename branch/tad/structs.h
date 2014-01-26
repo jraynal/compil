@@ -127,5 +127,6 @@ extern struct _int_heap *heap;
 struct _list * garbageCollector;
 struct _layer *my_ctxt;
 struct _list * arg_to_add_in_contxt;
+const char * code_to_add_to_drive;
 
 #endif //STRUCTS_H
