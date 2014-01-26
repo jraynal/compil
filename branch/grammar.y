@@ -233,7 +233,7 @@ int main (int argc, char *argv[]) {
 	char *out_name="out.ll";
 	if(argc==3)
 		out_name=argv[2];
-	output_file=open(out_name,O_WRONLY);
+	output_file=open(out_name,O_CREAT|O_WRONLY,0755);
 	if (input) {
 		yyin = input;
 	}
@@ -266,7 +266,7 @@ int main (int argc, char *argv[]) {
 
 
 char *footer(){
-	return "ret void\n}\n\ndeclare float @norm_pi_pi(float %a)\ndeclare float @get_track_angle(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_right(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_middle(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_left(%struct.tTrkLocPos*)\n	declare float @get_pos_to_start(%struct.tTrkLocPos*)\ndeclare float @get_track_seg_length(%struct.trackSeg*)\ndeclare float @get_track_seg_width(%struct.trackSeg*)\ndeclare float @get_track_seg_start_width(%struct.trackSeg*)\ndeclare float @get_track_seg_end_width(%struct.trackSeg*)\ndeclare float @get_track_seg_radius(%struct.trackSeg*)\ndeclare float @get_track_seg_right_radius(%struct.trackSeg*)\n	declare float @get_track_seg_left_radius(%struct.trackSeg*)\ndeclare float @get_track_seg_arc(%struct.trackSeg*)\ndeclare %struct.trackSeg* @get_track_seg_next(%struct.trackSeg*)\ndeclare float @get_car_yaw(%struct.CarElt*)\n";
+	return "\ndeclare float @norm_pi_pi(float %a)\ndeclare float @get_track_angle(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_right(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_middle(%struct.tTrkLocPos*)\ndeclare float @get_pos_to_left(%struct.tTrkLocPos*)\n	declare float @get_pos_to_start(%struct.tTrkLocPos*)\ndeclare float @get_track_seg_length(%struct.trackSeg*)\ndeclare float @get_track_seg_width(%struct.trackSeg*)\ndeclare float @get_track_seg_start_width(%struct.trackSeg*)\ndeclare float @get_track_seg_end_width(%struct.trackSeg*)\ndeclare float @get_track_seg_radius(%struct.trackSeg*)\ndeclare float @get_track_seg_right_radius(%struct.trackSeg*)\n	declare float @get_track_seg_left_radius(%struct.trackSeg*)\ndeclare float @get_track_seg_arc(%struct.trackSeg*)\ndeclare %struct.trackSeg* @get_track_seg_next(%struct.trackSeg*)\ndeclare float @get_car_yaw(%struct.CarElt*)\n";
 }
 char *header(){
 	return

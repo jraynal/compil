@@ -831,9 +831,9 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 	// Assemblage d'une définition de fonstion:
 	// TODO check le type de declaration : doit etre une fonction
 	if(t!=VOID_TYPE)
-		addCode(a->code,"define %%%s ",strOfNametype(t));
+		addCode(a->code,"define %s ",strOfNametype(t));
 	else
-		addCode(a->code,"define ");
+		addCode(a->code,"define void ");
 	a->code=fusionCode(a->code,declaration->code);
 	addCode(a->code,"{\n");
 	if(strcmp(declaration->identifier,"drive")==0)
