@@ -302,7 +302,6 @@ struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
 	return list;
 }
 
-
 /* Je pense que la grammaire gère le cas où l'incrémentation doit se faire avant... */
 struct _attribute *prefixedVarIncr(struct _attribute *a){
 	LOG();
@@ -522,12 +521,37 @@ struct _attribute *simple_declare_function(struct _attribute * func){
 	addCode(func->code,"@%s()",func->identifier);
 	return func;
 }
+
+
+void my_add_layer(){
+	my_ctxt=add_layer(my_ctxt);
+	if(!is_empty(arg_to_add_in_contxt)){
+		struct _attribute * head_attr = (struct _attribute *)arg_to_add_in_contxt->head->value;
+		while(!is_empty(arg_to_add_in_contxt)){
+			CHK(head_attr);
+			//ctxt-formated name
+			char dest[strlen(head_attr->identifier)+2];
+			sprintf(dest,"/%s",head_attr->identifier);
+			//insertion in new context
+			struct _variable * var = varCreate(head_attr->type,head_attr->identifier);
+			set_var_layer(my_ctxt,dest,var);
+			removeElmnt(head_attr,arg_to_add_in_contxt);
+		}
+	}
+}
+
 struct _attribute *multiple_declare_function(struct _attribute * func , struct _list * args){
 	LOG();
 	CHK(func);
 	CHK(args);
 	CHK(my_ctxt);
-	// my_ctxt=add_layer(my_ctxt);
+	struct _attribute * attr;
+	while(!is_empty(args)){
+		attr = (struct _attribute *)args->head->value;
+		insertElmnt(attr,arg_to_add_in_contxt);
+		removeElmnt(attr,args);
+	}
+	del_list(args);
 	func->type = UNKNOWN_FUNC;
 	func->arguments = args;
 	return func;

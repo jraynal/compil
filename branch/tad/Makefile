@@ -5,7 +5,7 @@ DBFLAGS= -g -O0 -DDEBUG
 SRC=test_tad.c tree.c
 SRC_LIST = test_tad_list.c list.c
 SRC_CODE = test_code.c code.c
-SRC_LAYER = test_layer.c layer.c tree.c
+SRC_LAYER = test_layer.c layer.c tree.c list.c
 SRC_INT_HEAP = test_int_heap.c int_heap.c
 
 OBJ=$(SRC:.c=.o)
