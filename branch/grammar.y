@@ -134,7 +134,7 @@ declarator
 : IDENTIFIER  									{
 													if(is_first_declarator) {
 														fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
-														my_ctxt=add_layer(my_ctxt);
+														// my_ctxt=add_layer(my_ctxt);
 														is_first_declarator=0;
 													}
 													$$=declareVar($1);
@@ -142,8 +142,8 @@ declarator
 | '(' declarator ')'                      		{$$=$2;}
 | declarator '[' CONSTANTI ']'             		{$$=declare_array($1,$3);}
 | declarator '[' ']'                        	{$$=declare_array($1,0);}
-| declarator '(' parameter_list ')'				{$$=multiple_declare_function($1,$3);}
-| declarator '(' ')'							{$$=simple_declare_function($1);}
+| declarator '(' parameter_list ')'				{$$=multiple_declare_function($1,$3);}//add_layer
+| declarator '(' ')'							{$$=simple_declare_function($1);}//add_layer
 ;
 
 parameter_list
@@ -155,7 +155,7 @@ parameter_declaration
 : type_name declarator							{ $$=allocate_id(my_ctxt,$2,$1); }
 ;
 
-statement
+statement //ouvrir layer avant tout statement le fermer avant les expr et apres les autres
 : compound_statement   {$$=$1;}
 | expression_statement {$$=$1;}
 | selection_statement  {$$=$1;}
@@ -164,9 +164,9 @@ statement
 ;
 
 compound_statement
-: '{' '}'   								{my_ctxt=close_layer(my_ctxt);}
-| '{' statement_list '}'					{$$=$2;my_ctxt=close_layer(my_ctxt);}
-| '{' declaration_list statement_list '}'	{$$=concat($2,$3); my_ctxt=close_layer(my_ctxt);}
+: '{' '}'   								{}
+| '{' statement_list '}'					{$$=$2;}
+| '{' declaration_list statement_list '}'	{$$=concat($2,$3); }
 ;
 
 declaration_list
@@ -212,7 +212,7 @@ external_declaration
 | declaration 																	{$$=$1;}
 ;
 
-function_definition
+function_definition  //addlayer in declarator
 : type_name declarator compound_statement 										{$$ = make_function($1,$2,$3);}
 ;
 

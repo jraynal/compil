@@ -1,11 +1,14 @@
 %{
 #include <stdio.h>
 #include <string.h>
+	#include "sem_actions.h"
+	
 #include "tad/structs.h"
 #include "y.tab.h"
 void count();
 int comment ();
 int check_type ();
+extern struct _layer *my_ctxt;
 %}
 D[0-9]
 L[a-zA-Z_]
@@ -34,8 +37,8 @@ L[a-zA-Z_]
 "=="		{ count(); return(EQ_OP); }
 "!="		{ count(); return(NE_OP); }
 ";"		{ count(); return(';'); }
-"{"      	{ count(); return('{'); }
-"}"      	{ count(); return('}'); }
+"{"      	{ count(); my_ctxt=add_layer(my_ctxt); return('{'); }
+"}"      	{ count(); my_ctxt=close_layer(my_ctxt); return('}'); }
 ","		{ count(); return(','); }
 "/"		{ count(); return('/'); }
 "="		{ count(); return('='); }
