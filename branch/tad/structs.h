@@ -128,5 +128,6 @@ struct _list * garbageCollector;
 struct _layer *my_ctxt;
 struct _list * arg_to_add_in_contxt;
 const char * code_to_add_to_drive;
+extern int output_file;
 
 #endif //STRUCTS_H

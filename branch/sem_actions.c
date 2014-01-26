@@ -267,8 +267,12 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	/* Chargement de l'identifiant */
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
-	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"\t%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	if(a->type<4){
+		char * str_type = strOfNametype(a->type);
+		addCode(a->code,"\t%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	}
+	else
+		a->type%=4;
 	CHK(a);
 	T_TYPE(name,a->type);
 	return a;														// ecriture
@@ -648,7 +652,7 @@ struct _attribute *simple_declare_function(struct _attribute * func){
 	LOG();
 	CHK(func);
 	CHK(my_ctxt);
-	if(strcmp("drive",officialName(func->identifier))) {
+	if(strcmp("drive",officialName(func->identifier))==0) {
 	struct _attribute *a1= newAttribute("index");//{new_reg(),"index",INT_TYPE,NULL,"index",NULL,0};
 	struct _attribute *a2= newAttribute("car");//{new_reg(),"car",UNKNOWN,NULL,"car",NULL,0};
 	struct _attribute *a3= newAttribute("s");//{new_reg(),"s",UNKNOWN,NULL,"s",NULL,0};
@@ -698,7 +702,7 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	addCode(func->code,"@%s(",func->identifier);
 	while(!is_empty(args)){
 		attr = (struct _attribute *)args->head->value;
-		if(strcmp("drive",officialName(func->identifier))) {
+		if(strcmp("drive",officialName(func->identifier))==0) {
 			if(virgule)
 				addCode(func->code,"i32 %%index, %%struct.CarElt* %%car, %%struct.Situation* %%s");
 		}
@@ -827,7 +831,7 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 		addCode(a->code,"%s",code_to_add_to_drive);
 	a->code=fusionCode(a->code,content->code);
 	addCode(a->code,"}\n");
-	a->type=t;
+	a->type=t+4;
 	CHK(a);
 	set_fct_layer(a);
 	return a;
@@ -836,7 +840,7 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 void print(struct _attribute *a) {
 	LOG();
 	CHK(a);
-	printCode(STDOUT_FILENO,a->code);
+	printCode(output_file,a->code);
 	deleteCode(a->code);
 	deleteAttribute(a);
 }
