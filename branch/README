@@ -1,0 +1,27 @@
+******************************************************************
+
+COMPILATEUR DE PSEUDO C VERS LLVM POUR TORCS
+
+Realise par : 
+	BRELLE Emmanuel
+	RAYNAL Jean-Raymond
+
+Dans le cadre du cours de compilation durant le semestre 7 a l'Enseirb-matmeca
+
+******************************************************************
+
+Pour assembler le compilateur : 
+	lancer la commande make dans la racine
+
+
+Utiliser le compilateur : 
+	depuis la racine executer
+	parse <fichier a compiler> [<fichier de sortie>]
+
+
+Pré-requi du code : 
+	Le code doit contenir une fonction "void drive ()" sans argument.
+	Les variables index , car et s ne sont pas autorisées dans le lanage d'origine.
+
+
+

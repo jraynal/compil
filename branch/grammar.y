@@ -30,9 +30,6 @@
 	struct _attribute*(*unaryOp)(struct _attribute*);
 	enum _affectation affect;
 	enum _type type;
-
-	// struct _variable * var;
-	// void * obj;
 }
 
 %type<text> IDENTIFIER 
@@ -85,7 +82,7 @@ unary_operator
 multiplicative_expression
 : unary_expression                               	{$$=$1;}
 | multiplicative_expression '*' unary_expression 	{$$=multiply($1,$3);}
-| multiplicative_expression '/' unary_expression 	{$$=divide($1,$3);}//div is already in lib std
+| multiplicative_expression '/' unary_expression 	{$$=divide($1,$3);}
 ;
 
 additive_expression
@@ -149,7 +146,7 @@ parameter_declaration
 : type_name declarator							{ $$=arg_id($2,$1); }
 ;
 
-statement //ouvrir layer avant tout statement le fermer avant les expr et apres les autres
+statement 
 : compound_statement   {$$=$1;}
 | expression_statement {$$=$1;}
 | selection_statement  {$$=$1;}
@@ -205,7 +202,7 @@ external_declaration
 | declaration 																	{$$=$1;}
 ;
 
-function_definition  //addlayer in declarator
+function_definition 
 : type_name declarator compound_statement 										{$$ = make_function($1,$2,$3);}
 ;
 

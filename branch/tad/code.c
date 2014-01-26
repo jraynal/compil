@@ -10,12 +10,12 @@
 
 
 /* Private */
-static int isEnd(struct _code* c, struct _string *str);
 static int addTail(struct _code *c, struct _string *str );
 static struct _string *getNext(struct _string *str);
 static struct _string *initString(char *txt);
 static void deleteString(struct _string *str);
 static int isEmpty(struct _code* c);
+// static int isEnd(struct _code* c, struct _string *str);
 /* Public */
 struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 	CHK(invalid arg,c1);
@@ -45,7 +45,6 @@ struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 struct _code *addCode(struct _code* code, char* str,...) {
 	
 	char *tmp=NULL;
-	// int len=0;
 	/* formatage de la chaine */
 	va_list argp;
 	va_start(argp, str);
@@ -53,7 +52,6 @@ struct _code *addCode(struct _code* code, char* str,...) {
 	vsprintf(buffer,str,argp);
 	CHK(bad alloc,(tmp = malloc((strlen(buffer)+1) * sizeof(char))));
 	strcpy(tmp,buffer);
-// printf("%s\n",tmp );
 	va_end(argp);
 
 	/* Ajout dans le code */
@@ -66,18 +64,9 @@ int printCode(int fd, struct _code *code) {
 	if(isEmpty(code))
 		return EXIT_SUCCESS;
 	struct _string * tmp = code->begin;
-	// int written=0,r=0;
 	while(tmp!=NULL) {
 		
 		dprintf(fd,"%s",tmp->text);
-		// written=0; r=0;
-		// CHK(is NULL, tmp);
-		// while(written < tmp->length) {
-		// 	if((r=write(fd,tmp->text,(tmp->length)-written))==-1)
-		// 		return EXIT_FAILURE;
-		// 	written+=r;
-		// }
-
 
 		tmp=getNext(tmp);
 	}
@@ -144,11 +133,11 @@ static void deleteString(struct _string* str) {
 	free(str);
 }
 
-static int isEnd(struct _code* c, struct _string *str) {
-	CHK(is NULL,c);
-	CHK(is NULL,str);
-	return (c->end == str && str->next == NULL);
-}
+// static int isEnd(struct _code* c, struct _string *str) {
+// 	CHK(is NULL,c);
+// 	CHK(is NULL,str);
+// 	return (c->end == str && str->next == NULL);
+// }
 
 static int isEmpty(struct _code* c){
 	CHK(is NULL,c);
