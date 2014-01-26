@@ -60,13 +60,10 @@ union _value {
 
 
 // Structure manipulée par les actions sémantiques
-/* TODO: différencier variables R_ONLY ou RW */
-/* TODO: champs de type d'objet: variable, tableau ou foction */
 struct _variable {
 	enum _type type;
 	const char *addr;
 	//TODO : inserer la listes des arguments des fonctions
-	//union _value value;
 };
 
 

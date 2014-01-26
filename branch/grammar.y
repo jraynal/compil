@@ -151,7 +151,7 @@ parameter_list
 ;
 
 parameter_declaration
-: type_name declarator							{ $$=allocate_id(my_ctxt,$2,$1); }
+: type_name declarator							{ $$=arg_id($2,$1); }
 ;
 
 statement //ouvrir layer avant tout statement le fermer avant les expr et apres les autres

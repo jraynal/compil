@@ -166,7 +166,6 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	return a;														// ecriture
 }
 
-/* TODO: utiliser getVar pour faire un load en llvm et son père pour les manipulation simples*/
 struct _attribute *getVar(const char* name,struct _layer *ctxt) {
 	return get_attr_from_context(ctxt,name);
 }
@@ -271,7 +270,6 @@ struct _attribute *newFloat(float f){
 }
 
 
-/* TODO: on ne peut pas affecter de valeurs dans un tableau à l'heure actuelle, juste les lire :S */
 struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	LOG();
 	// Ne pas oublier le code des autres...
@@ -526,8 +524,9 @@ struct _attribute *simple_declare_function(struct _attribute * func){
 void my_add_layer(){
 	my_ctxt=add_layer(my_ctxt);
 	if(!is_empty(arg_to_add_in_contxt)){
-		struct _attribute * head_attr = (struct _attribute *)arg_to_add_in_contxt->head->value;
-		while(!is_empty(arg_to_add_in_contxt)){
+		struct _attribute * head_attr;
+		do{
+			head_attr=(struct _attribute *)arg_to_add_in_contxt->head->value;
 			CHK(head_attr);
 			//ctxt-formated name
 			char dest[strlen(head_attr->identifier)+2];
@@ -536,7 +535,7 @@ void my_add_layer(){
 			struct _variable * var = varCreate(head_attr->type,head_attr->identifier);
 			set_var_layer(my_ctxt,dest,var);
 			removeElmnt(head_attr,arg_to_add_in_contxt);
-		}
+		}while(!is_empty(arg_to_add_in_contxt));
 	}
 }
 
@@ -545,19 +544,32 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	CHK(func);
 	CHK(args);
 	CHK(my_ctxt);
+	int virgule=1;
 	struct _attribute * attr;
+	addCode(func->code,"@%s(",func->identifier);
 	while(!is_empty(args)){
 		attr = (struct _attribute *)args->head->value;
+		addCode(func->code,
+			(virgule)?" %s %%%s":", %s %%%s",
+			strOfNametype(attr->type),attr->identifier);
+		virgule=0;
 		insertElmnt(attr,arg_to_add_in_contxt);
 		removeElmnt(attr,args);
 	}
 	del_list(args);
 	func->type = UNKNOWN_FUNC;
 	func->arguments = args;
+	addCode(func->code,")");
 	return func;
 }
 
 
+struct _attribute *arg_id(struct _attribute *a, enum _type t) {
+	CHK(a);
+	a->type=t;
+	fprintf(stderr,"Transmision de l'argument %s ayant pour type %s\n",a->identifier,strOfNametype(t));
+	return a;
+}
 struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _type t) {
 	LOG();
 	CHK(a);
@@ -776,7 +788,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 
 struct _attribute *return_jump(struct _attribute *a) {
 	if(a) {
-		addCode(a->code,"ret %s %%%s\n",a->type,a->reg);
+		addCode(a->code,"ret %s %%%s\n",strOfNametype(a->type),a->reg);
 	}
 	else {
 		a=newAttribute("/");
