@@ -131,7 +131,7 @@ type_name
 declarator
 : IDENTIFIER  									{
 													if(is_first_declarator) {
-														fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
+														//fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 														// my_ctxt=add_layer(my_ctxt);
 														is_first_declarator=0;
 													}

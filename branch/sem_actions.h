@@ -11,7 +11,14 @@
 #include "tad/code.h"
 #include "tad/int_heap.h"
 
+
+#ifndef DEBUG
+#define LOG(message)
+#else
 #define LOG(message) do{fprintf(stderr,"[LOG][%s]: "#message" at\t%s\tin %s\t\t\tline\t\t%d\n",__TIME__,__FILE__,__func__,__LINE__);}while(0);
+#endif
+
+
  //for dynamic allocation
 
 struct _variable * varCreate(enum _type type, const char * addr);

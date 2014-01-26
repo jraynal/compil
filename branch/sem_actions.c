@@ -5,7 +5,13 @@
 #define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"FATAL ERROR in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}}while(0)
 #define INVALID_OP  do{fprintf(stderr,"FATAL ERROR : uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}while(0)
 
+
+#ifndef DEBUG
+#define T_TYPE(name,type)
+#else
 #define T_TYPE(name,type) fprintf(stderr,"[VERIF] %s is an %s\n",name,strOfNametype(type));
+#endif
+
 
 const char *itoa(int i) {
 //	LOG();
@@ -549,6 +555,7 @@ struct _attribute *neg(struct _attribute *a){
 		default:
 		INVALID_OP;
 	}
+	na->code = a -> code;
 	deleteAttribute(a);
 	CHK(na);
 	return na;
@@ -696,7 +703,9 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 struct _attribute *arg_id(struct _attribute *a, enum _type t) {
 	CHK(a);
 	a->type=t;
+	#ifdef DEBUG
 	fprintf(stderr,"Transmision de l'argument %s ayant pour type %s\n",a->identifier,strOfNametype(t));
+	#endif
 	return a;
 }
 struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _type t) {

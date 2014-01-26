@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS= -W -Wall -Wextra
-DBFLAGS= -g -O0 -DDEBUG
+CFLAGS= -W -Wall -Wextra 
+DBFLAGS= -g -O0 
 
 SRC=test_tad.c tree.c
 SRC_LIST = test_tad_list.c list.c
