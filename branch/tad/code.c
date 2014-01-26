@@ -45,7 +45,7 @@ struct _code *fusionCode(struct _code* c1, struct _code* c2) {
 struct _code *addCode(struct _code* code, char* str,...) {
 	
 	char *tmp=NULL;
-	int len=0;
+	// int len=0;
 	/* formatage de la chaine */
 	va_list argp;
 	va_start(argp, str);
@@ -66,7 +66,7 @@ int printCode(int fd, struct _code *code) {
 	if(isEmpty(code))
 		return EXIT_SUCCESS;
 	struct _string * tmp = code->begin;
-	int written=0,r=0;
+	// int written=0,r=0;
 	while(tmp!=NULL) {
 		
 		dprintf(fd,"%s",tmp->text);

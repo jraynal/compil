@@ -20,7 +20,9 @@ int del_bro(struct _node *node) {
 	CHK(node);
 	if(node==NULL)
 		return EXIT_FAILURE;
+	#ifdef DEBUG
 	fprintf(stderr,"%c",node->c);
+	#endif
 	if(!is_last_son(node))
 		del_tree(node->brother);
 	if(node->variable!=NULL)

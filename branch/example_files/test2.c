@@ -25,8 +25,10 @@ for(a=1;a<20;a++)
 
 void drive(){
 	int a ;
+	a = 1;
 	// f(a);
 	a=2;
+	a= -a;
 }
 
 // int g(int b , float c){
