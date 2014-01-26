@@ -77,6 +77,6 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation ,struct 
 
 struct _attribute *return_jump(struct _attribute *);
 
-
+void insert_TORCS_variables();
 void my_add_layer();
 #endif //FUNCTIONS_H
