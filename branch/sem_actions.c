@@ -47,6 +47,9 @@ char* strOfNametype(enum _type t){
 		case FLOAT_TYPE:
 		return "float";
 		break;
+		case VOID_FUNC:
+		return "void";
+		break;
 		default:
 		return "";
 	}
@@ -241,7 +244,7 @@ struct _attribute *newAttribute(const char * id){
 }
 
 struct _variable * varCreate(enum _type type, const char *addr){
-	LOG();
+	//LOG();
 	T_TYPE(addr,type);
 	struct _variable* var = malloc(sizeof(struct _variable));
 	if(var){
@@ -357,21 +360,27 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 	CHK(ctxt);
 	CHK(funName);
 	CHK(list);
+	int virgule=1;
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
 	CHK(a);
 	struct _attribute *  argument;
-
 	if(strcmp(funName,"drive")==0){
 		fprintf(stderr, "FATAL ERROR drive must not be called\n" );
 		return NULL;
 	}
-	addCode(a->code,"\tcall  %s @%s (",strOfNametype(a->type), a->identifier);
+	addCode(a->code,"\t%%%s = call %s @%s (", a->reg,strOfNametype(a->type), a->identifier);
+	struct _code *tmp=initCode();
 		while(!is_empty(list)){
 			argument = (struct _attribute *) list->tail->value;
-			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);// LLVM
+			addCode(a->code,(virgule)?"%s %%%s":", %s %%%s",
+				strOfNametype(argument->type),
+				argument->reg);
+			tmp=fusionCode(tmp,argument->code);
+			virgule=0;
 			removeElmnt(argument,list);
 		}
-		addCode(a->code,"\n)");
+		addCode(a->code,")\n");
+		a->code=fusionCode(tmp,a->code);
 		del_list(list);
 	CHK(a);
 	return a;
@@ -646,13 +655,24 @@ struct _attribute *simple_declare_function(struct _attribute * func){
 	LOG();
 	CHK(func);
 	CHK(my_ctxt);
-	// my_ctxt=add_layer(my_ctxt);
+	if(strcmp("drive",officialName(func->identifier))) {
+	struct _attribute *a1= newAttribute("index");//{new_reg(),"index",INT_TYPE,NULL,"index",NULL,0};
+	struct _attribute *a2= newAttribute("car");//{new_reg(),"car",UNKNOWN,NULL,"car",NULL,0};
+	struct _attribute *a3= newAttribute("s");//{new_reg(),"s",UNKNOWN,NULL,"s",NULL,0};
+	struct _list *l=init_list();
+	insertElmnt(a3,l);
+	insertElmnt(a2,l);
+	insertElmnt(a1,l);
+	func=multiple_declare_function(func,l);
+	}
+	else {
 	// On modifie le type mit par défaut par la déclaration de variables
 	func->type = UNKNOWN_FUNC;
 	// Liste d'arguments vide
 	func->arguments = init_list();	
 	// bout de code de déclaration:
 	addCode(func->code,"@%s()",func->identifier);
+	}
 	return func;
 }
 
@@ -685,9 +705,14 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 	addCode(func->code,"@%s(",func->identifier);
 	while(!is_empty(args)){
 		attr = (struct _attribute *)args->head->value;
-		addCode(func->code,
-			(virgule)?" %s %%%s":", %s %%%s",
-			strOfNametype(attr->type),attr->identifier);
+		if(strcmp("drive",officialName(func->identifier))) {
+			if(virgule)
+				addCode(func->code,"i32 %%index, %%struct.CarElt* %%car, %%struct.Situation* %%s");
+		}
+		else
+			addCode(func->code,
+				(virgule)?" %s %%%s":", %s %%%s",
+				strOfNametype(attr->type),attr->identifier);
 		virgule=0;
 		insertElmnt(attr,arg_to_add_in_contxt);
 		removeElmnt(attr,args);
@@ -701,6 +726,7 @@ struct _attribute *multiple_declare_function(struct _attribute * func , struct _
 
 
 struct _attribute *arg_id(struct _attribute *a, enum _type t) {
+	LOG();
 	CHK(a);
 	a->type=t;
 	#ifdef DEBUG
@@ -787,11 +813,17 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 	return ret;
 }
 
+void set_fct_layer(struct _attribute * a) {
+	char dest[strlen(a->identifier)+2];
+	sprintf(dest,"/%s",a->identifier);
+	struct _variable * var = varCreate(a->type,a->identifier);
+	set_var_layer(my_ctxt,dest,var);
+}
 
 struct _attribute *make_function(enum _type t , struct _attribute * declaration, struct _attribute * content){
 	LOG();
 	CHK(declaration);CHK(content);
-	struct _attribute* a= newAttribute("/");
+	struct _attribute* a= newAttribute(officialName(declaration->identifier));
 	// Assemblage d'une définition de fonstion:
 	// TODO check le type de declaration : doit etre une fonction
 	if(t!=VOID_TYPE)
@@ -804,7 +836,9 @@ struct _attribute *make_function(enum _type t , struct _attribute * declaration,
 		addCode(a->code,"%s",code_to_add_to_drive);
 	a->code=fusionCode(a->code,content->code);
 	addCode(a->code,"}\n");
+	a->type=t;
 	CHK(a);
+	set_fct_layer(a);
 	return a;
 }
 

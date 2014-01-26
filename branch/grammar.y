@@ -6,7 +6,6 @@
 	int yylex ();
 	int yyerror ();
 	struct _layer *my_ctxt;
-	int is_first_declarator=1;
 	struct _int_heap *heap;
 %}
 
@@ -129,19 +128,12 @@ type_name
 ;
 
 declarator
-: IDENTIFIER  									{
-													if(is_first_declarator) {
-														//fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
-														// my_ctxt=add_layer(my_ctxt);
-														is_first_declarator=0;
-													}
-													$$=declareVar($1);
-												}
-| '(' declarator ')'                      		{$$=$2;}
-| declarator '[' CONSTANTI ']'             		{$$=declare_array($1,$3);}
+: IDENTIFIER  					{$$=declareVar($1);}
+| '(' declarator ')'                      	{$$=$2;}
+| declarator '[' CONSTANTI ']'             	{$$=declare_array($1,$3);}
 | declarator '[' ']'                        	{$$=declare_array($1,0);}
-| declarator '(' parameter_list ')'				{$$=multiple_declare_function($1,$3);}//add_layer
-| declarator '(' ')'							{$$=simple_declare_function($1);}//add_layer
+| declarator '(' parameter_list ')'		{$$=multiple_declare_function($1,$3);}
+| declarator '(' ')'				{$$=simple_declare_function($1);}
 ;
 
 parameter_list
@@ -171,7 +163,6 @@ declaration_list
 : declaration {$$=$1;}
 | declaration_list declaration {
 								$$=concat($1,$2);
-								is_first_declarator=1; //tout a été init dans le contexte
 								}
 ;
 
@@ -248,22 +239,15 @@ int main (int argc, char *argv[]) {
 	return 1;
 	}
 	code_to_add_to_drive ="	%ctrl		= getelementptr %struct.CarElt* %car, i32 0, i32 5\n	%public_car	= getelementptr %struct.CarElt* %car, i32 0, i32 2\n	%pos		= getelementptr %struct.tPublicCar* %public_car, i32 0, i32 3\n	%seg.addr	= getelementptr %struct.tTrkLocPos* %pos, i32 0, i32 0\n	%seg		= load %struct.trackSeg** %seg.addr\n\n	%steer		= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 0\n	%accelCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 1\n	%brakeCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 2\n	%clutchCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 3\n	%gear		= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 4\n\n";
-	// fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
 	arg_to_add_in_contxt=init_list();
 
 	my_ctxt = init_layer();
 	insert_TORCS_variables();
 	heap= init_int_heap();
 	//fprintf(stdout, "%s\n",header() );
-	// my_ctxt= add_layer(my_ctxt);
-	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
 	yyparse ();
 	//fprintf(stdout, "%s\n",footer() );
 	delete_layer(my_ctxt);
-	// fprintf(stderr,"true: %d\n", 1==1);
-	// fprintf(stderr, "size:%d\n",garbageCollector->size);
-	// fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
-	// del_list_and_content(garbageCollector);
 	delete_int_heap(heap);
 	del_list(arg_to_add_in_contxt);
 	free (file_name);
