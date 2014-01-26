@@ -613,7 +613,8 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 	a->code=cond->code;
 	a->code=addCode(cond->code,"br i1 %%%s, label %%%s label %%%s\n",cond->reg,label1,label2);
 	// On ajoute le label et le then
-	a->code=fusionCode(addCode(a->code,"label %%%s\n",label1),then->code);
+	a->code=fusionCode(addCode(a->code,"label %%%s\n",label1),
+				then->code);
 	addCode(a->code,"br label %%%s\n",out_label);
 	// On ajoute le label de other et si il y en a le code de
 	addCode(a->code,"label %%%s\n",label2);
@@ -694,3 +695,13 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	return ret;
 }
 
+struct _attribute *return_jump(struct _attribute *a) {
+	if(!a) {
+		struct _attribute * a=newAttribute("/");
+		addCode(a->code,"ret void\n");
+	}
+	else {
+		addCode(a->code,"ret %s %%%s\n",a->type,a->reg);
+	}
+	return a;
+}

@@ -74,4 +74,5 @@ struct _attribute *loop(struct _attribute *,struct _attribute *,struct _attribut
 struct _attribute *concat(struct _attribute *a1, struct _attribute *a2);
 struct _attribute *assignment(struct _attribute *tgt, enum _affectation ,struct _attribute *ori);
 
+struct _attribute *return_jump(struct _attribute *);
 #endif //FUNCTIONS_H
