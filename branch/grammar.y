@@ -7,7 +7,6 @@
 	int yyerror ();
 	struct _layer *my_ctxt;
 	struct _int_heap *heap;
-	int authpass =3;
 %}
 
 %token IDENTIFIER CONSTANTF CONSTANTI
@@ -239,7 +238,7 @@ int main (int argc, char *argv[]) {
 	fprintf (stderr, "%s: error: no input file\n", *argv);
 	return 1;
 	}
-
+	code_to_add_to_drive ="	%ctrl		= getelementptr %struct.CarElt* %car, i32 0, i32 5\n	%public_car	= getelementptr %struct.CarElt* %car, i32 0, i32 2\n	%pos		= getelementptr %struct.tPublicCar* %public_car, i32 0, i32 3\n	%seg.addr	= getelementptr %struct.tTrkLocPos* %pos, i32 0, i32 0\n	%seg		= load %struct.trackSeg** %seg.addr\n\n	%steer		= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 0\n	%accelCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 1\n	%brakeCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 2\n	%clutchCmd	= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 3\n	%gear		= getelementptr %struct.tCarCtrl* %ctrl, i32 0, i32 4\n\n";
 	arg_to_add_in_contxt=init_list();
 
 	my_ctxt = init_layer();
