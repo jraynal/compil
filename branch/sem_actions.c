@@ -280,7 +280,8 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	array->code=fusionCode(array->code,i->code);
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
 	addCode(array->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",array->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
-	array->type%=4;
+	array->type%=4; // Le type de la case pointée est le type d'un élément du tableau 
+	array->addr=array->reg; // L'adresse de cet élément est stockée dans le registre chargé par le llvm
 	deleteAttribute(i);
 	return array;
 }
@@ -738,7 +739,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
 	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,
-				"store %s %%%s, %s* %s\n",
+				"store %s %%%s, %s* %%%s\n",
 						type,
 						(a)?a->reg:ori->reg,
 						type,
