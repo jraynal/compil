@@ -681,8 +681,9 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 	if(init)
 		a->code=init->code;
 	a->code=fusionCode(addCode((init)?a->code:initCode(),"label %%%s\n",loop_label),cond->code);
-	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"br label %%%s",loop_label);
-	CHK(cond);CHK(body);CHK(cond->code);CHK(body->code);
+	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"br label %%%s\n",loop_label);
+	// Il faut conserver le registre du test pour la fonction selection
+	a->reg=cond->reg;
 	a=selection(a,body,NULL); // On teste et on fait au besoin
 	if(init)
 		deleteAttribute(init);
