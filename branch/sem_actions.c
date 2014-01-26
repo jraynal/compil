@@ -50,10 +50,48 @@ char* strOfNametype(enum _type t){
 const char* officialName(const char* name){
 //	LOG();
 	CHK(name);
+	if (strcmp(name, "_posx")== 0)
+		return "$x";	
+	if (strcmp(name, "_posy")== 0)
+		return "$y";	
+	if (strcmp(name, "_posz")== 0)
+		return "$z";	
+	if (strcmp(name, "_speed_x")== 0)
+		return "$speedx";	
+	if (strcmp(name, "_speed_y")== 0)
+		return "$speedy";	
+	if (strcmp(name, "_speed_z")== 0)
+		return "$speedz";	
+	if (strcmp(name, "_accel_x")== 0)
+		return "$accelx";	
+	if (strcmp(name, "_accel_y")== 0)
+		return "$accely";	
+	if (strcmp(name, "_accel_z")== 0)
+		return "$accelz";	
+	if (strcmp(name, "_enginerpm")== 0)
+		return "$rpm";	
+	if (strcmp(name, "_gear")== 0)
+		return "$gear";	
+	if (strcmp(name, "_steerCmd")== 0)
+		return "$steer";
 	if (strcmp(name, "$accel")== 0)
 		return "%accel";
+
 	else return name;
 }
+
+int is_ronly_var(const char* varname){
+	if(strcmp(varname,"_posx")==0 || strcmp(varname,"_posy")==0 || strcmp(varname,"_posz")==0)
+		return 1;
+	if(strcmp(varname,"_speed_x")==0 || strcmp(varname,"_speed_z")==0 || strcmp(varname,"_speed_z")==0)
+		return 1;
+	if(strcmp(varname,"_accel_x")==0 || strcmp(varname,"_accel_y")==0 || strcmp(varname,"_accel_z")==0)
+		return 1;
+	if(strcmp(varname,"_enginerpm")==0 || strcmp(varname,"_gear")==0 || strcmp(varname,"/")==0)
+		return 1;
+	return 0;
+}
+
 
 int match_type(struct _attribute * a1 , struct _attribute * a2){
 	CHK(a1);
@@ -147,7 +185,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fadd %s %%%s, float 1.0\n",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fadd %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
 			break; 
 		default:
 			break;
@@ -155,7 +193,8 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	}
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
-	a->reg=reg;
+	// a->reg=reg;
+	a->identifier="/";
 	CHK(a);	
 	return a;
 }
@@ -173,7 +212,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
-			addCode(a->code,"%%%s = fsub %s %%%s, float 1.0\n",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = fsub %s %%%s, float %e\n",reg,str_type,a->reg,1.0);
 			break; 
 		default:
 			break;
@@ -226,7 +265,7 @@ struct _attribute *newFloat(float f){
 	LOG();
 	struct _attribute *a = newAttribute("/");
 	a->type = FLOAT_TYPE;
-	addCode(a->code,"%%%s  = fadd float %g, 0.0\n",a->reg,f);
+	addCode(a->code,"%%%s  = fadd float %e, %e \n",a->reg,f,0.0);
 	CHK(a);
 	return a;
 }
@@ -287,6 +326,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 	/* Sauvegarde dans l'identifiant */
 	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
 	a->reg=reg;
+	a->identifier="/";
 	CHK(a);
 	return a;
 }
@@ -379,7 +419,7 @@ struct _attribute *neg(struct _attribute *a){
 		addCode(a->code,"%%%s = sub i32 0 , %%%s\n",na->reg,a->reg) ;
 		break;
 		case FLOAT_TYPE:
-		addCode(a->code , "%%%s = fsub float 0.0 , %%%s\n",na->reg,a->reg) ;
+		addCode(a->code , "%%%s = fsub float %e , %%%s\n",na->reg,0.0,a->reg) ;
 		break;
 		default:
 		INVALID_OP;
@@ -502,6 +542,10 @@ struct _attribute *allocate_id(struct _layer* ctxt, struct _attribute *a, enum _
 	char dest[strlen(a->identifier)+2];
 	sprintf(dest,"/%s",a->identifier);
 
+	if(get_var_layer(ctxt,dest)!=NULL){
+		fprintf(stderr, "FATAL ERROR %s already declared\n", a->identifier);
+		return NULL;
+	}
 
 	// Maintenant on s'occupe du type et tout...
 		//selon le type d'objet remonte : variable, fonction ou tableau
@@ -663,6 +707,11 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	struct _attribute *a=NULL;
 	struct _attribute *ret=newAttribute("/");
 	CHK(tgt);
+	if(is_ronly_var(tgt->identifier)){
+		fprintf(stderr,"FATAL ERROR : This variable (%s) cannot be assigned",tgt->identifier);
+		return NULL;
+	}
+
 	CHK(ori);
 	if(match_type(tgt,ori)==0){
 		fprintf(stderr, "FATAL ERROR : Unmatched types at %s in %s line %d\n",__FUNCTION__,__FILE__,__LINE__);
@@ -684,7 +733,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 	char *type = strOfNametype(ori->type);
 	// TRICKY: Là c'est la ligne ou on concatène tout le code reçut jusque là (et on croise les doigts que ça se fasse comme il faut :p)
 	ret->code=addCode((a)?a->code:concat(tgt,ori)->code,
-				"store %s %%%s, %s* %%%s\n",
+				"store %s %%%s, %s* %s\n",
 						type,
 						(a)?a->reg:ori->reg,
 						type,
