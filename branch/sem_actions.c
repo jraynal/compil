@@ -271,19 +271,18 @@ struct _attribute *newFloat(float f){
 }
 
 
-
+/* TODO: on ne peut pas affecter de valeurs dans un tableau à l'heure actuelle, juste les lire :S */
 struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 	LOG();
-	struct _attribute *a = newAttribute("/");
 	// Ne pas oublier le code des autres...
-	a->code=fusionCode(array->code,i->code);
-	a->type = array->type;
+	if(i->type!=INT_TYPE)
+		CHK(NULL);
+	array->code=fusionCode(array->code,i->code);
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
-	addCode(a->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",a->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
-	CHK(a);
+	addCode(array->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",array->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
+	array->type%=4;
 	deleteAttribute(i);
-	deleteAttribute(array);
-	return a;
+	return array;
 }
 
 struct _list * expression_list(struct _attribute *a){
@@ -669,6 +668,8 @@ struct _attribute *selection(struct _attribute *cond, struct _attribute *then, s
 	addCode(a->code,"label %%%s\n",out_label);
 	deleteAttribute(then);
 	deleteAttribute(cond);
+	CHK(a);
+	CHK(a->code);
 	return a;
 }
 
@@ -680,13 +681,13 @@ struct _attribute *loop(struct _attribute *init, struct _attribute *cond, struct
 		a->code=init->code;
 	a->code=fusionCode(addCode((init)?a->code:initCode(),"label %%%s\n",loop_label),cond->code);
 	body->code=addCode(fusionCode(body->code,(ite)?ite->code:initCode()),"br label %%%s",loop_label);
-	selection(cond,body,NULL); // On teste et on fait au besoin
+	CHK(cond);CHK(body);CHK(cond->code);CHK(body->code);
+	a=selection(a,body,NULL); // On teste et on fait au besoin
 	if(init)
 		deleteAttribute(init);
 	deleteAttribute(cond);
 	if(ite)
 		deleteAttribute(ite);
-	deleteAttribute(body);
 	return a;
 }
 
@@ -694,6 +695,8 @@ struct _attribute *concat(struct _attribute *a1,struct _attribute *a2) {
 	LOG();
 	CHK(a1);
 	CHK(a2);
+	CHK(a1->code);
+	CHK(a2->code);
 	struct _attribute *a=newAttribute("/");
 	a->code=fusionCode(a1->code,a2->code);
 	CHK(a);
@@ -745,12 +748,13 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 }
 
 struct _attribute *return_jump(struct _attribute *a) {
-	if(!a) {
-		struct _attribute * a=newAttribute("/");
-		addCode(a->code,"ret void\n");
-	}
-	else {
+	if(a) {
 		addCode(a->code,"ret %s %%%s\n",a->type,a->reg);
 	}
+	else {
+		a=newAttribute("/");
+		addCode(a->code,"ret void\n");
+	}
+	CHK(a);
 	return a;
 }
