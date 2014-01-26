@@ -83,15 +83,120 @@ const char* officialName(const char* name){
 int is_ronly_var(const char* varname){
 	if(strcmp(varname,"_posx")==0 || strcmp(varname,"_posy")==0 || strcmp(varname,"_posz")==0)
 		return 1;
-	if(strcmp(varname,"_speed_x")==0 || strcmp(varname,"_speed_z")==0 || strcmp(varname,"_speed_z")==0)
+	if(strcmp(varname,"_speed_x")==0 || strcmp(varname,"_speed_y")==0 || strcmp(varname,"_speed_z")==0)
 		return 1;
 	if(strcmp(varname,"_accel_x")==0 || strcmp(varname,"_accel_y")==0 || strcmp(varname,"_accel_z")==0)
 		return 1;
-	if(strcmp(varname,"_enginerpm")==0 || strcmp(varname,"_gear")==0 || strcmp(varname,"/")==0)
+	if(strcmp(varname,"_enginerpm")==0 || strcmp(varname,"/")==0)
+		return 1;
+	if(strcmp(varname,"$x")==0 || strcmp(varname,"$y")==0 || strcmp(varname,"$z")==0)
+		return 1;
+	if(strcmp(varname,"$speedx")==0 || strcmp(varname,"$speedy")==0 || strcmp(varname,"$speedz")==0)
+		return 1;
+	if(strcmp(varname,"$accelx")==0 || strcmp(varname,"$accely")==0 || strcmp(varname,"$accelz")==0)
+		return 1;
+	if(strcmp(varname,"$rpm")==0)
 		return 1;
 	return 0;
 }
 
+
+void insert_TORCS_variables(){
+	struct _variable * var_tmp;
+	var_tmp =varCreate(FLOAT_TYPE,"$x");
+	CHK(var_tmp);
+	char _posx[strlen(var_tmp->addr)+2];
+	sprintf(_posx,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_posx,var_tmp);
+	
+	var_tmp =varCreate(FLOAT_TYPE,"$y");
+	CHK(var_tmp);
+	char _posy[strlen(var_tmp->addr)+2];
+	sprintf(_posy,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_posy,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$z");
+	CHK(var_tmp);
+	char _posz[strlen(var_tmp->addr)+2];
+	sprintf(_posz,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_posz,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$speedx");
+	CHK(var_tmp);
+	char _speed_x[strlen(var_tmp->addr)+2];
+	sprintf(_speed_x,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_speed_x,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$speedy");
+	CHK(var_tmp);
+	char _speed_y[strlen(var_tmp->addr)+2];
+	sprintf(_speed_y,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_speed_y,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$speedz");
+	CHK(var_tmp);
+	char _speed_z[strlen(var_tmp->addr)+2];
+	sprintf(_speed_z,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_speed_z,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$accelx");
+	CHK(var_tmp);
+	char _accel_x[strlen(var_tmp->addr)+2];
+	sprintf(_accel_x,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_accel_x,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$accely");
+	CHK(var_tmp);
+	char _accel_y[strlen(var_tmp->addr)+2];
+	sprintf(_accel_y,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_accel_y,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$accelz");
+	CHK(var_tmp);
+	char _accel_z[strlen(var_tmp->addr)+2];
+	sprintf(_accel_z,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,_accel_z,var_tmp);
+
+	var_tmp =varCreate(INT_TYPE,"$rpm");
+	CHK(var_tmp);
+	char rpm[strlen(var_tmp->addr)+2];
+	sprintf(rpm,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,rpm,var_tmp);
+
+	var_tmp =varCreate(INT_TYPE,"$gear");
+	CHK(var_tmp);
+	char gear[strlen(var_tmp->addr)+2];
+	sprintf(gear,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,gear,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$steer");
+	CHK(var_tmp);
+	char steer[strlen(var_tmp->addr)+2];
+	sprintf(steer,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,steer,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$accel");
+	CHK(var_tmp);
+	char accel[strlen(var_tmp->addr)+2];
+	sprintf(accel,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,accel,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$brake");
+	CHK(var_tmp);
+	char brake[strlen(var_tmp->addr)+2];
+	sprintf(brake,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,brake,var_tmp);
+
+	var_tmp =varCreate(FLOAT_TYPE,"$clutch");
+	CHK(var_tmp);
+	char clutch[strlen(var_tmp->addr)+2];
+	sprintf(clutch,"/%s",var_tmp->addr);
+	set_var_layer(my_ctxt,clutch,var_tmp);
+
+
+
+
+}
 
 int match_type(struct _attribute * a1 , struct _attribute * a2){
 	CHK(a1);
@@ -188,7 +293,10 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
-	
+	if(is_ronly_var(name)){
+		fprintf(stderr,"FATAL ERROR : This variable (%s) cannot be assigned",name);
+		return NULL;
+	}
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
 	switch(a->type){
@@ -205,7 +313,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	// a->reg=reg;
 	a->identifier="/";
 	CHK(a);	
@@ -216,6 +324,10 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,name);
 	char * str_type = strOfNametype(a->type);
+	if(is_ronly_var(name)){
+		fprintf(stderr,"FATAL ERROR : This variable (%s) cannot be assigned",name);
+		return NULL;
+	}
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
 	switch(a->type){
@@ -230,7 +342,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	return a;
 }
 
@@ -323,7 +435,10 @@ struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
 struct _attribute *prefixedVarIncr(struct _attribute *a){
 	LOG();
 	char * str_type = strOfNametype(a->type);
-	
+	if(is_ronly_var(a->identifier)){
+		fprintf(stderr,"FATAL ERROR : This variable (%s) cannot be assigned",a->identifier);
+		return NULL;
+	}
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
 	switch(a->type){
@@ -340,7 +455,7 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 
 	}
 	/* Sauvegarde dans l'identifiant */
-	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s\n",str_type,reg,str_type,officialName(a->addr));
 	a->reg=reg;
 	a->identifier="/";
 	CHK(a);
@@ -351,6 +466,10 @@ struct _attribute *prefixedVarIncr(struct _attribute *a){
 struct _attribute *prefixedVarDecr(struct _attribute *a){
 	LOG();
 	char * str_type = strOfNametype(a->type);
+	if(is_ronly_var(a->identifier)){
+		fprintf(stderr,"FATAL ERROR : This variable (%s) cannot be assigned",a->identifier);
+		return NULL;
+	}
 	/* Creation du registre de sortie du calcul */
 	const char *reg = new_reg();
 	switch(a->type){
@@ -365,7 +484,7 @@ struct _attribute *prefixedVarDecr(struct _attribute *a){
 		default:
 			break;
 	}
-	addCode(a->code,"store %s %%%s, %s %s \n",str_type,reg,str_type,a->addr);
+	addCode(a->code,"store %s %%%s, %s %s \n",str_type,reg,str_type,officialName(a->addr));
 	CHK(a);
 	return a;
 }
@@ -799,7 +918,7 @@ struct _attribute *assignment(struct _attribute *tgt, enum _affectation eg ,stru
 						type,
 						(a)?a->reg:ori->reg,
 						type,
-						tgt->addr);
+						officialName(tgt->addr));
 	//deleteAttribute(tgt);
 	deleteAttribute(a);
 	//deleteAttribute(ori);

@@ -250,9 +250,11 @@ int main (int argc, char *argv[]) {
 	}
 
 	// fprintf(stderr,"at %s line %d\n",__func__,__LINE__);
-	my_ctxt = init_layer();
-	heap= init_int_heap();
 	arg_to_add_in_contxt=init_list();
+
+	my_ctxt = init_layer();
+	insert_TORCS_variables();
+	heap= init_int_heap();
 	//fprintf(stdout, "%s\n",header() );
 	// my_ctxt= add_layer(my_ctxt);
 	//fprintf(stderr,"empty: %d\n", is_empty(garbageCollector));
