@@ -5,7 +5,7 @@
 #define CHK(truc) do{if(truc == NULL) {fprintf(stderr,"FATAL ERROR in "#truc" at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}}while(0)
 #define INVALID_OP  do{fprintf(stderr,"FATAL ERROR : uncommon execution at %s in %s line %d\n",__FILE__,__FUNCTION__,__LINE__);}while(0)
 
-#define T_TYPE(name,type) fprintf(stderr,"[VERIF] %s is an %s\n",name,strOfNametype(type));
+#define T_TYPE(name,type) fprintf(stderr,"[VERIF] %s is a %s\n",name,strOfNametype(type));
 
 const char *itoa(int i) {
 //	LOG();
@@ -112,7 +112,7 @@ void set_fnct_id(struct _attribute *a){
 	char dest[strlen(a->identifier)+2];
 	sprintf(dest,"/%s",a->identifier);
 	/* TODO: ajouter la liste des arguments pour tester*/
-	struct _variable * var = varCreate(a->type,a->identifier);
+	struct _variable * var = varCreate(a->type+4,a->identifier);
 	set_var_layer(my_ctxt,dest,var);
 	return;
 }
@@ -168,10 +168,15 @@ struct _attribute *get_attr_from_context(struct _layer* ctxt,const char* name){
 	/* Chargement de l'identifiant */
 	a->addr = var->addr;												// sauvegarde de l'ctxtresse pour tableaux par exemple
 	a->type = var->type;
-	char * str_type = strOfNametype(a->type);
-	addCode(a->code,"%%%s =load %s* %s \n",a->reg,str_type,var->addr);	// chargement en mémoire pour identifiant de variable
+	if(var->type<4) {
+		T_TYPE(name,a->type);
+		char * str_type = strOfNametype(a->type);
+		// chargement en mémoire pour identifiant de variable
+		addCode(a->code,"%%%s = load %s* %s \n",a->reg,str_type,var->addr);
+	}
+	else
+		a->type%=4;
 	CHK(a);
-	T_TYPE(name,a->type);
 	return a;														// ecriture
 }
 
@@ -189,7 +194,7 @@ struct _attribute *varIncr(const char * name,struct _layer* ctxt){
 	switch(a->type){
 		/* Addition d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =add %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = add %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* Addition de flottants */
 		case FLOAT_TYPE :
@@ -216,7 +221,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 	switch(a->type){
 		/* decrementation d'entiers */
 		case INT_TYPE :
-			addCode(a->code,"%%%s =sub %s %%%s, i32 1\n",reg,str_type,a->reg);
+			addCode(a->code,"%%%s = sub %s %%%s, i32 1\n",reg,str_type,a->reg);
 			break;
 		/* decrementation de flottants */
 		case FLOAT_TYPE :
@@ -232,7 +237,7 @@ struct _attribute *varDecr(const char * name,struct _layer* ctxt) {
 struct _attribute *simpleFuncall(struct _layer* ctxt,const char * funName){
 	LOG();
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
-	addCode(a->code,"call  %s @%s ()\n",strOfNametype(a->type), a->identifier);
+	addCode(a->code,"%%%s = call %s @%s ()\n",a->reg,strOfNametype(a->type), a->identifier);
 	CHK(a);
 	return a;
 
@@ -244,16 +249,20 @@ struct _attribute *multipleFuncall(struct _layer* ctxt,const char * funName,stru
 	CHK(ctxt);
 	CHK(funName);
 	CHK(list);
+	int virgule =1;
 	struct _attribute *a = get_attr_from_context(ctxt,funName);
 	CHK(a);
 	struct _attribute *  argument;
-	addCode(a->code,"call  %s @%s (",strOfNametype(a->type), a->identifier);
+	addCode(a->code,"%%%s = call %s @%s (", a->reg, strOfNametype(a->type), a->identifier);
 		while(!is_empty(list)){
 			argument = (struct _attribute *) list->tail->value;
-			addCode(a->code,", %s %%%d",strOfNametype(argument->type),argument->reg);// LLVM
+			addCode(a->code,(virgule)?"%s %%%s":", %s %%%s",
+				strOfNametype(argument->type),
+				argument->reg);
+			virgule=0;
 			removeElmnt(argument,list);
 		}
-		addCode(a->code,"\n)");
+		addCode(a->code,")\n");
 		del_list(list);
 	CHK(a);
 	return a;
@@ -286,7 +295,9 @@ struct _attribute *getValArray(struct _attribute *array, struct _attribute *i){
 		CHK(NULL);
 	array->code=fusionCode(array->code,i->code);
 	/* retourne l'élément situé à i.reg * array.type de l'ctxtesse de base, donc le ième */
-	addCode(array->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",array->reg,strOfNametype(array->type),array->addr,strOfNametype(array->type),i->reg);
+	addCode(array->code,"%%%s = getelementptr %%%s* %%%s, %%%s %%%s\n",
+				array->reg,strOfNametype(array->type),
+				array->addr,strOfNametype(array->type),i->reg);
 	array->type%=4; // Le type de la case pointée est le type d'un élément du tableau 
 	array->addr=array->reg; // L'adresse de cet élément est stockée dans le registre chargé par le llvm
 	deleteAttribute(i);
@@ -309,7 +320,6 @@ struct _list * insert_expr_list(struct _attribute *a ,struct _list * list){
 	return list;
 }
 
-/* Je pense que la grammaire gère le cas où l'incrémentation doit se faire avant... */
 struct _attribute *prefixedVarIncr(struct _attribute *a){
 	LOG();
 	char * str_type = strOfNametype(a->type);
@@ -662,7 +672,7 @@ struct _attribute * setTypeList(struct _list * list, enum _type t){
 struct _attribute *make_function(enum _type t , struct _attribute * declaration, struct _attribute * content){
 	LOG();
 	CHK(declaration);CHK(content);
-	struct _attribute* a= newAttribute("/");
+	struct _attribute* a= newAttribute(declaration->addr);
 	// Assemblage d'une définition de fonstion:
 	// TODO check le type de declaration : doit etre une fonction
 	if(t!=VOID_TYPE)
